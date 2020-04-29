@@ -14,6 +14,15 @@ Devices continually request the keys submitted by diagnosed people from the back
 
 This is a cross platform API wrapper around the native Android and iOS API's.
 
+### Xamarin.ExposureNotification
+
+This project contains the cross platform wrapper API.
+
+Currently it also contains stubs for what we think each C# binding to the actual native API's will look like:
+
+- `Xamarin.ExposureNotification/NativeApi.android.cs`
+- `Xamarin.ExposureNotification/NativeApi.ios.cs`
+
 ## Sample
 
 A sample Mobile app and Back end server to use the API.
