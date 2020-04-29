@@ -11,25 +11,25 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <EmbeddedResource Include="Resources\Fonts\fa-brands-400.ttf" />
+	  <EmbeddedResource Include="Resources\Fonts\fa-regular-400.ttf" />
+	  <EmbeddedResource Include="Resources\Fonts\fa-solid-900.ttf" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <Resource Include="..\..\Certificates\sample.exposurenotification.xamarin.com.cert" Link="sample.exposurenotification.xamarin.com.cert" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Acr.UserDialogs" Version="7.1.0.442" />
 		<PackageReference Include="System.Text.Json" Version="4.7.1" />
-		<PackageReference Include="Xamarin.Forms" Version="4.5.0.657" />
+		<PackageReference Include="Xamarin.Forms" Version="4.6.0.726" />
 		<PackageReference Include="Xamarin.Essentials" Version="1.5.3.1" />
-		<PackageReference Include="Xamarin.Forms.Visual.Material" Version="4.5.0.657" />
+		<PackageReference Include="Xamarin.Forms.Visual.Material" Version="4.6.0.726" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\ExposureNotification.Core\ExposureNotification.Core.csproj" />
 	  <ProjectReference Include="..\..\Xamarin.ExposureNotification\Xamarin.ExposureNotification.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <EmbeddedResource Update="PossibleContactPage.xaml">
-	    <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-	  </EmbeddedResource>
 	</ItemGroup>
 </Project>
