@@ -1,4 +1,24 @@
 
+# Xamarin Exposure Notification
+
+[Paper Doc with more details](https://paper.dropbox.com/doc/Xamarin-XPlat-Exposure-Notification-API--AzBqj9iHowyA04l865o2nKxeAQ-Ix1589Ce0r04i3DjvK2sa)
+
+Apple and Google are both creating API’s for a compatible BLE based Contact Tracing implementation which relies heavily on generating and storing rolling unique identifiers on a device, which are broadcast to nearby devices.  Devices which detect nearby identifiers then store these identifiers as they come into range (or contact) with for up to 14 days.
+
+When a person has confirmed a diagnosis, they tell their device which then submits the locally stored, self-generated rolling unique identifiers from the last 14 days to a back end service provided by the app implementing the API.
+
+Devices continually request the keys submitted by diagnosed people from the backend server.  The device then compares these keys to the unique identifiers of other devices it has been near in the last 14 days.
+
+
+## Xamarin.ExposureNotification
+
+This is a cross platform API wrapper around the native Android and iOS API's.
+
+## Sample
+
+A sample Mobile app and Back end server to use the API.
+
+
 # Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
