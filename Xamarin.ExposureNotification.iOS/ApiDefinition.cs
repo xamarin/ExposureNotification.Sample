@@ -14,7 +14,7 @@ using Foundation;
 using CoreFoundation;
 using UIKit;
 
-namespace Xamarin.ExposureNotifications.iOS
+namespace ExposureNotifications
 {
     [Introduced(PlatformName.iOS, 13, 5)]
     [Native]
