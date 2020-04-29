@@ -7,10 +7,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <None Include="..\Certificates\sample.ExposureNotification.xamarin.com.cert" Link="sample.ExposureNotification.xamarin.com.cert">
+	  <None Include="..\Certificates\sample.exposurenotification.xamarin.com.cert" Link="sample.exposurenotification.xamarin.com.cert">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
-	  <None Include="..\Certificates\sample.ExposureNotification.xamarin.com.pfx" Link="sample.ExposureNotification.xamarin.com.pfx">
+	  <None Include="..\Certificates\sample.exposurenotification.xamarin.com.pfx" Link="sample.exposurenotification.xamarin.com.pfx">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
 	</ItemGroup>
