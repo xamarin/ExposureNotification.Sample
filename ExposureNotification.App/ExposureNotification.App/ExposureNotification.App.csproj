@@ -16,7 +16,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Acr.UserDialogs" Version="7.1.0.442" />
-		<PackageReference Include="System.Text.Json" Version="4.7.1" />
+		<PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
 		<PackageReference Include="Xamarin.Forms" Version="4.5.0.657" />
 		<PackageReference Include="Xamarin.Essentials" Version="1.5.3.1" />
 		<PackageReference Include="Xamarin.Forms.Visual.Material" Version="4.5.0.657" />

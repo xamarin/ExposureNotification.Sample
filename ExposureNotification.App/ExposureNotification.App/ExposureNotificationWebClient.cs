@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
 
@@ -39,7 +39,7 @@ namespace ExposureNotification.App
 
 			var json = await response.Content.ReadAsStringAsync();
 
-			var keys = JsonSerializer.Deserialize<IEnumerable<TemporaryExposureKey>>(json);
+			var keys = JsonConvert.DeserializeObject<IEnumerable<TemporaryExposureKey>>(json);
 
 			// Find newest key timestamp 
 			var newestTimestamp = keys?.OrderByDescending(k => k.Timestamp).FirstOrDefault()?.Timestamp;
@@ -67,7 +67,7 @@ namespace ExposureNotification.App
 				Timestamp = k.Timestamp
 			});
 
-			var json = JsonSerializer.Serialize(new DiagnosisSubmission
+			var json = JsonConvert.SerializeObject(new DiagnosisSubmission
 			{
 				DiagnosisUid = diagnosisUid,
 				TemporaryExposureKeys = encodedKeys.ToList()
