@@ -25,9 +25,9 @@ namespace ExposureNotification.Backend.Functions
 			if (!DateTime.TryParse(req.Query?["since"], out var since))
 				since = DateTime.UtcNow.AddDays(-14);
 
-			var keys = await storage.GetKeysAsync(since);
+			var keysResponse = await storage.GetKeysAsync(since);
 
-			return new OkObjectResult(keys);
+			return new OkObjectResult(keysResponse);
 		}
 	}
 }

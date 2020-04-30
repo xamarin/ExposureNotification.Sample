@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using ExposureNotification.Core;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,7 +24,7 @@ namespace ExposureNotification.App
 
 		public ITemporaryExposureKeyEncoding Encoder { get; }
 
-		public async Task GetKeysAsync()
+		public async Task<List<TemporaryExposureKey>> GetKeysAsync()
 		{
 			const string prefsSinceKey = "keys_since";
 
@@ -39,14 +40,12 @@ namespace ExposureNotification.App
 
 			var json = await response.Content.ReadAsStringAsync();
 
-			var keys = JsonConvert.DeserializeObject<IEnumerable<TemporaryExposureKey>>(json);
-
-			// Find newest key timestamp 
-			var newestTimestamp = keys?.OrderByDescending(k => k.Timestamp).FirstOrDefault()?.Timestamp;
+			var keys = JsonConvert.DeserializeObject<KeysResponse>(json);
 
 			// Save newest timestamp for next request
-			if (newestTimestamp.HasValue)
-				Preferences.Set(prefsSinceKey, newestTimestamp.Value.ToUniversalTime());
+			Preferences.Set(prefsSinceKey, keys.Timestamp.ToUniversalTime());
+
+			return keys.Keys;
 		}
 
 		const string prefsDiagnosisUidKey = "diagnosis_uid";
@@ -64,7 +63,9 @@ namespace ExposureNotification.App
 			var encodedKeys = keys.Select(k => new TemporaryExposureKey
 			{
 				KeyData = Encoder.Encode(k.KeyData),
-				Timestamp = k.Timestamp
+				RollingStart = k.RollingStart,
+				RollingDuration = (int)k.RollingDuration.TotalMinutes,
+				TransmissionRiskLevel = (int)k.TransmissionRiskLevel
 			});
 
 			var json = JsonConvert.SerializeObject(new DiagnosisSubmission

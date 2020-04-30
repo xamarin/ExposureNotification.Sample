@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ExposureNotification.Core;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,6 +7,7 @@ using System.Reflection;
 using System.Resources;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Xamarin.ExposureNotifications;
 
@@ -13,15 +15,29 @@ namespace ExposureNotification.App
 {
 	public class ExposureNotificationHandler : IExposureNotificationHandler
 	{
-		public void OnContactsDetected(IEnumerable<ContactInfo> contacts)
-		{
-			// Save contacts so the user can view them later
+		public Configuration Configuration
+			=> new Configuration();
 
-			// Send notification
+		public async Task ExposureStateUpdated()
+		{
+			// Fetch details
+			var summary = await Xamarin.ExposureNotifications.ExposureNotification.GetExposureSummary();
+
+			if (summary != null && summary.MatchedKeyCount > 0)
+			{
+				// Some detected, get the details
+				var details = await Xamarin.ExposureNotifications.ExposureNotification.GetExposureInformation();
+
+				// TODO: Save
+			}
+
+			// TODO: Send notification alerting the user
 		}
 
-		public async void ShouldSubmitTemporaryExposureKeys(List<Xamarin.ExposureNotifications.TemporaryExposureKey> keys)
+		public async Task RequestDiagnosisKeys()
 		{
+			var keys = await Xamarin.ExposureNotifications.ExposureNotification.GetTemporaryExposureKeys();
+
 			X509Certificate2 cert = null;
 
 			using (var s = Assembly.GetCallingAssembly().GetManifestResourceStream(Config.CertificateResourceFilename))
@@ -39,5 +55,6 @@ namespace ExposureNotification.App
 
 			await client.SubmitPositiveDiagnosisAsync(keys);
 		}
+
 	}
 }

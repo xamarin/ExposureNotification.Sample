@@ -1,4 +1,4 @@
-﻿namespace ExposureNotification
+﻿namespace ExposureNotification.Core
 {
 	public interface ITemporaryExposureKeyEncoding
 	{

@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ExposureNotification.App
+namespace ExposureNotification.Core
 {
 	public class DiagnosisSubmission
 	{

@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Collections.Generic;
-using ExposureNotification.App;
+using ExposureNotification.Core;
 
 namespace ExposureNotification.Backend.Functions
 {

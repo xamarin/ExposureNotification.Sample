@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Internal;
 using System.Linq;
+using ExposureNotification.Core;
 
 namespace ExposureNotification.Tests
 {
@@ -107,7 +108,7 @@ namespace ExposureNotification.Tests
 
 			var keyToEnsureExists = keys.Skip(keys.Count / 2).First();
 
-			Assert.Contains(positiveKeys, new Predicate<TemporaryExposureKey>(p => p.KeyData.SequenceEqual(keyToEnsureExists.KeyData)));
+			Assert.Contains(positiveKeys.Keys, new Predicate<TemporaryExposureKey>(p => p.KeyData.SequenceEqual(keyToEnsureExists.KeyData)));
 		}
 
 		[Fact]
@@ -118,53 +119,6 @@ namespace ExposureNotification.Tests
 			await Assert.ThrowsAsync<InvalidOperationException>(async () => {
 				await Storage.SubmitPositiveDiagnosisAsync("notaddeduid1", keys);
 			});
-		}
-
-		[Fact]
-		public async Task No_Old_Keys_Returned_Test()
-		{
-			var keys = GenerateTemporaryExposureKeys(20);
-
-			await Storage.AddDiagnosisUidsAsync(new[] { "oldkeysuid1" });
-
-			await Storage.SubmitPositiveDiagnosisAsync("oldkeysuid1", keys);
-
-			var positiveKeys = await Storage.GetKeysAsync(DateTime.MinValue);
-
-			Assert.DoesNotContain(positiveKeys, new Predicate<TemporaryExposureKey>(pk => pk.Timestamp < DateTime.UtcNow.AddDays(-14)));
-		}
-
-
-		[Fact]
-		public async Task No_Old_Keys_Returned2_Test()
-		{
-			var keys = GenerateTemporaryExposureKeys(20);
-
-			await Storage.AddDiagnosisUidsAsync(new[] { "oldkeysuid2" });
-
-			await Storage.SubmitPositiveDiagnosisAsync("oldkeysuid2", keys);
-
-			var positiveKeys = await Storage.GetKeysAsync(null);
-
-			var oldest = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, 0, 0, 0, 0, DateTimeKind.Utc);
-
-			Assert.DoesNotContain(positiveKeys, new Predicate<TemporaryExposureKey>(pk => pk.Timestamp < oldest));
-		}
-
-		[Fact]
-		public async Task Only_Keys_Since_Returned_Test()
-		{
-			var keys = GenerateTemporaryExposureKeys(20);
-
-			await Storage.AddDiagnosisUidsAsync(new[] { "onlykeyssinceuid2" });
-
-			await Storage.SubmitPositiveDiagnosisAsync("onlykeyssinceuid2", keys);
-
-			var since = DateTime.UtcNow.AddDays(-7);
-
-			var positiveKeys = await Storage.GetKeysAsync(since);
-
-			Assert.DoesNotContain(positiveKeys, new Predicate<TemporaryExposureKey>(pk => pk.Timestamp < since));
 		}
 
 		List<TemporaryExposureKey> GenerateTemporaryExposureKeys(int daysBack)
@@ -183,7 +137,6 @@ namespace ExposureNotification.Tests
 
 					tracingKeys.Add(new TemporaryExposureKey
 					{
-						Timestamp = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day),
 						KeyData = rnd
 					});
 				}

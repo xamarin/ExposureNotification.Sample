@@ -14,5 +14,11 @@ namespace ExposureNotification.Backend
 		public string Base64KeyData { get; set; }
 
 		public DateTime Timestamp { get; set; }
+
+		public ulong RollingStart { get; set; }
+
+		public int RollingDuration { get; set; }
+
+		public int TransmissionRiskLevel { get; set; }
 	}
 }

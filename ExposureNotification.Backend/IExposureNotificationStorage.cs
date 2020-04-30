@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ExposureNotification.Core;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -6,7 +7,7 @@ namespace ExposureNotification.Backend
 {
 	public interface IExposureNotificationStorage
 	{
-		Task<IEnumerable<TemporaryExposureKey>> GetKeysAsync(DateTime? since);
+		Task<KeysResponse> GetKeysAsync(DateTime? since);
 
 		Task AddDiagnosisUidsAsync(IEnumerable<string> diagnosisUids);
 

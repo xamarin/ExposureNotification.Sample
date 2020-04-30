@@ -56,7 +56,12 @@ namespace Xamarin.ExposureNotifications
 		}
 
 		// Gets the contact info of anyone the user had contact with who was diagnosed
-		static async Task<IEnumerable<ContactInfo>> PlatformGetContacts()
+		static async Task<IEnumerable<ExposureInfo>> PlatformGetExposureInformation()
+		{
+			return null;
+		}
+
+		static async Task<ExposureDetectionSummary> PlatformGetExposureSummary()
 		{
 			return null;
 		}

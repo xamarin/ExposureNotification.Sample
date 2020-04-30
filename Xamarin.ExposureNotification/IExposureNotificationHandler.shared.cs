@@ -1,13 +1,16 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Xamarin.ExposureNotifications
 {
 	public interface IExposureNotificationHandler
 	{
-		// App should send tracing keys to the backend server
-		void ShouldSubmitTemporaryExposureKeys(List<TemporaryExposureKey> keys);
+		Configuration Configuration { get; }
 
-		// Contact was detected, user should be alerted!
-		void OnContactsDetected(IEnumerable<ContactInfo> contacts);
+		// App should send keys to the backend server
+		Task RequestDiagnosisKeys();
+
+		// Might be exposed, check and alert user if necessary
+		Task ExposureStateUpdated();
 	}
 }

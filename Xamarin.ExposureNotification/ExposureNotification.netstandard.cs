@@ -17,7 +17,10 @@ namespace Xamarin.ExposureNotifications
 			=> throw new PlatformNotSupportedException();
 
 		// Gets the contact info of anyone the user had contact with who was diagnosed
-		static Task<IEnumerable<ContactInfo>> PlatformGetContacts()
+		static Task<IEnumerable<ExposureInfo>> PlatformGetExposureInformation()
+			=> throw new PlatformNotSupportedException();
+
+		static Task<ExposureDetectionSummary> PlatformGetExposureSummary()
 			=> throw new PlatformNotSupportedException();
 
 		// Call this when the user has confirmed diagnosis
@@ -26,6 +29,9 @@ namespace Xamarin.ExposureNotifications
 
 		// Tells the local API when new diagnosis keys have been obtained from the server
 		static Task PlatformProcessDiagnosisKeys(IEnumerable<TemporaryExposureKey> diagnosisKeys)
+			=> throw new PlatformNotSupportedException();
+
+		static async Task<IEnumerable<TemporaryExposureKey>> PlatformGetTemporaryExposureKeys()
 			=> throw new PlatformNotSupportedException();
 	}
 }

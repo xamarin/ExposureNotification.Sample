@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using ExposureNotification.Core;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -28,7 +30,7 @@ namespace ExposureNotification.Backend
 		readonly DbContextOptions dbContextOptions;
 		readonly ITemporaryExposureKeyEncoding temporaryExposureKeyConding;
 
-		public async Task<IEnumerable<TemporaryExposureKey>> GetKeysAsync(DateTime? since)
+		public async Task<KeysResponse> GetKeysAsync(DateTime? since)
 		{
 			using (var ctx = new ExposureNotificationContext(dbContextOptions))
 			{
@@ -41,10 +43,17 @@ namespace ExposureNotification.Backend
 					.Where(dtk => dtk.Timestamp >= since)
 					.ToListAsync().ConfigureAwait(false);
 
-				return results.Select(dtk => new TemporaryExposureKey {
-					KeyData = temporaryExposureKeyConding.Decode(Convert.FromBase64String(dtk.Base64KeyData)),
-					Timestamp = dtk.Timestamp
-				});
+				var newestTimestamp = results.OrderByDescending(dtk => dtk.Timestamp).FirstOrDefault()?.Timestamp;
+
+				return new KeysResponse {
+					Timestamp = newestTimestamp ?? DateTime.MinValue,
+					Keys = results.Select(dtk => new TemporaryExposureKey {
+						KeyData = temporaryExposureKeyConding.Decode(Convert.FromBase64String(dtk.Base64KeyData)),
+						RollingDuration = dtk.RollingDuration,
+						RollingStart = dtk.RollingStart,
+						TransmissionRiskLevel = dtk.TransmissionRiskLevel
+					}).ToList()
+				};
 			}
 		}
 
@@ -94,11 +103,10 @@ namespace ExposureNotification.Backend
 				if (!ctx.Diagnoses.Any(d => d.DiagnosisUid == diagnosisUid))
 					throw new InvalidOperationException();
 
-				var dbKeys = keys.Where(k => k.Timestamp.ToUniversalTime() >= DateTime.UtcNow.AddDays(-14))
-					.Select(k => new DbTemporaryExposureKey
+				var dbKeys = keys.Select(k => new DbTemporaryExposureKey
 						{
 							Base64KeyData = Convert.ToBase64String(temporaryExposureKeyConding.Encode(k.KeyData)),
-							Timestamp = k.Timestamp
+							Timestamp = DateTime.UtcNow
 						}).ToList();
 
 				foreach (var dbk in dbKeys)

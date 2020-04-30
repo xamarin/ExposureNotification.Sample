@@ -1,14 +1,20 @@
 ﻿using Newtonsoft.Json;
 using System;
 
-namespace ExposureNotification
+namespace ExposureNotification.Core
 {
 	public class TemporaryExposureKey
 	{
 		[JsonProperty("keyData")]
 		public byte[] KeyData { get; set; }
 
-		[JsonProperty("timestamp")]
-		public DateTime Timestamp { get; set; }
+		[JsonProperty("rollingStart")]
+		public ulong RollingStart { get; set; }
+
+		[JsonProperty("rollingDuration")]
+		public int RollingDuration { get; set; }
+
+		[JsonProperty("transmissionRiskLevel")]
+		public int TransmissionRiskLevel { get; set; }
 	}
 }
