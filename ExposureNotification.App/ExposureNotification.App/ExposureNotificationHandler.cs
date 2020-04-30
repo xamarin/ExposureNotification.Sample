@@ -25,9 +25,10 @@ namespace ExposureNotification.App
 		public async Task ExposureDetected(ExposureDetectionSummary summary, Func<Task<IEnumerable<ExposureInfo>>> getDetailsFunc)
 		{
 			// TODO: Save this info and alert the user
+			// Pop up a local notification
 		}
 
-		public async Task<IEnumerable<Xamarin.ExposureNotifications.TemporaryExposureKey>> FetchExposureKeysFromServer()
+		public async Task<IEnumerable<TemporaryExposureKey>> FetchExposureKeysFromServer()
 		{
 			const string prefsSinceKey = "keys_since";
 

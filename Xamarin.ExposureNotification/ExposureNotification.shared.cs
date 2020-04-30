@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -72,6 +73,20 @@ namespace Xamarin.ExposureNotifications
 
 		internal static Task<IEnumerable<TemporaryExposureKey>> GetSelfTemporaryExposureKeysAsync()
 			=> PlatformGetTemporaryExposureKeys();
+
+		public static async Task<bool> UpdateKeysFromServer()
+		{
+			var keys = await Handler?.FetchExposureKeysFromServer();
+
+			var updates = keys != null && keys.Any();
+
+			if (updates)
+				await AddDiagnosisKeysAsync(keys);
+
+			// TODO: Check Exposure status
+
+			return updates;
+		}
 	}
 
 	public class Configuration

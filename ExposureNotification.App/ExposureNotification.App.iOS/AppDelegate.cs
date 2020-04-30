@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Foundation;
+using ObjCRuntime;
 using UIKit;
 
 namespace ExposureNotification.App.iOS
@@ -25,7 +26,17 @@ namespace ExposureNotification.App.iOS
 			global::Xamarin.Forms.Forms.Init();
 			LoadApplication(new App());
 
+			UIApplication.SharedApplication.SetMinimumBackgroundFetchInterval(UIApplication.BackgroundFetchIntervalMinimum);
+
 			return base.FinishedLaunching(app, options);
+		}
+
+		public override void PerformFetch(UIApplication application, Action<UIBackgroundFetchResult> completionHandler)
+		{
+			Xamarin.ExposureNotifications.ExposureNotification.UpdateKeysFromServer()
+				.ContinueWith(t =>
+					completionHandler(t.IsFaulted ? UIBackgroundFetchResult.Failed
+						: t.Result ? UIBackgroundFetchResult.NewData : UIBackgroundFetchResult.NoData));			
 		}
 	}
 }
