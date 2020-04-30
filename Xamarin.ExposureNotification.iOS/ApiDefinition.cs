@@ -143,7 +143,6 @@ namespace ExposureNotifications
         byte MaximumRiskScore { get; }
     }
 
-    // TODO: If possible provide a better type for the NSNumber[] using BindAs
     [Introduced(PlatformName.iOS, 13, 5)]
     [BaseType(typeof(NSObject))]
     interface ENExposureConfiguration
@@ -151,24 +150,28 @@ namespace ExposureNotifications
         [Export("minimumRiskScore")]
         byte MinimumRiskScore { get; set; }
 
+        [BindAs (typeof (int[]))]
         [Export("attenuationScores", ArgumentSemantic.Copy)]
         NSNumber[] AttenuationScores { get; set; }
 
         [Export("attenuationWeight")]
         double AttenuationWeight { get; set; }
 
+        [BindAs(typeof(int[]))]
         [Export("daysSinceLastExposureScores", ArgumentSemantic.Copy)]
         NSNumber[] DaysSinceLastExposureScores { get; set; }
 
         [Export("daysSinceLastExposureWeight")]
         double DaysSinceLastExposureWeight { get; set; }
 
+        [BindAs(typeof(int[]))]
         [Export("durationScores", ArgumentSemantic.Copy)]
         NSNumber[] DurationScores { get; set; }
 
         [Export("durationWeight")]
         double DurationWeight { get; set; }
 
+        [BindAs(typeof(int[]))]
         [Export("transmissionRiskScores", ArgumentSemantic.Copy)]
         NSNumber[] TransmissionRiskScores { get; set; }
 
