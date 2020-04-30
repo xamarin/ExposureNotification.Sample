@@ -57,13 +57,13 @@ namespace Xamarin.ExposureNotifications
 		// Call this when the user has confirmed diagnosis
 		static async Task PlatformSubmitPositiveDiagnosis()
 		{
-			// Try and get a handler instance and call it to request sending the keys
-			var callbackHandler = ExposureNotification.GetCallbackHandlerInstance();
-
-			if (callbackHandler == null)
-				throw new Exception(); // TODO: Better exception
-
-			callbackHandler?.RequestDiagnosisKeys();
+			var selfKeys = await Instance.GetTemporaryExposureKeyHistory();
+			await ExposureNotification.Handler.SubmitSelfDiagnosisKeysToServer(
+				selfKeys.Select(k => new TemporaryExposureKey(
+					k.KeyData,
+					(ulong)k.RollingStartNumber,
+					TimeSpan.FromMinutes(k.RollingDuration),
+					(RiskLevel)k.TransmissionRiskLevel)));
 		}
 
 		// Tells the local API when new diagnosis keys have been obtained from the server
@@ -79,7 +79,6 @@ namespace Xamarin.ExposureNotifications
 					.ToList();
 
 				await Instance.ProvideDiagnosisKeys(batch);
-				
 			}
 		}
 

@@ -11,11 +11,10 @@ namespace ContactTracing.App.ViewModels
 {
 	public class MainViewModel : BaseViewModel
 	{
+		const string PrefsDiagnosisSubmissionDate = "prefs_diagnosis_submit_date";
+
 		public MainViewModel()
 		{
-			IsEnabled = Xamarin.ExposureNotifications.ExposureNotification.LastEnabledState;
-			NotifyPropertyChanged(nameof(IsEnabled));
-
 			Xamarin.ExposureNotifications.ExposureNotification.IsEnabledAsync()
 				.ContinueWith(t =>
 				{
@@ -24,7 +23,7 @@ namespace ContactTracing.App.ViewModels
 				});
 		}
 
-		public bool IsEnabled { get; set; }
+		public bool IsEnabled { get; set; } = false;
 
 		public string EnableDisableText
 			=> IsEnabled ? "Disable" : "Enable";
@@ -32,7 +31,8 @@ namespace ContactTracing.App.ViewModels
 		public string DiagnosisUid { get; set; }
 
 		public bool HasSubmittedDiagnosis
-			=> Xamarin.ExposureNotifications.ExposureNotification.HasSubmittedDiagnosis;
+			=> Preferences.Get(PrefsDiagnosisSubmissionDate, DateTime.MinValue)
+				>= DateTime.UtcNow.AddDays(-14);
 
 		public ICommand EnableDisableCommand
 			=> new Command(async () =>
@@ -40,9 +40,9 @@ namespace ContactTracing.App.ViewModels
 				var enabled = await Xamarin.ExposureNotifications.ExposureNotification.IsEnabledAsync();
 
 				if (enabled)
-					await Xamarin.ExposureNotifications.ExposureNotification.Stop();
+					await Xamarin.ExposureNotifications.ExposureNotification.StopAsync();
 				else
-					await Xamarin.ExposureNotifications.ExposureNotification.Start<ExposureNotificationHandler>();
+					await Xamarin.ExposureNotifications.ExposureNotification.StartAsync();
 			});
 
 		public ICommand SubmitDiagnosisCommand
@@ -63,7 +63,10 @@ namespace ContactTracing.App.ViewModels
 						return;
 					}
 
-					await Xamarin.ExposureNotifications.ExposureNotification.SubmitPositiveDiagnosis();
+					// Set the diagnosis key so we can use it
+					Preferences.Set(ExposureNotificationHandler.PrefsDiagnosisUidKey, DiagnosisUid);
+
+					await Xamarin.ExposureNotifications.ExposureNotification.SubmitSelfDiagnosisAsync();
 
 					NotifyPropertyChanged(nameof(HasSubmittedDiagnosis));
 

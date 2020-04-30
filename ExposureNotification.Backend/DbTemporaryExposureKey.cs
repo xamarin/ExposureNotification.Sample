@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Buffers.Text;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
+using Xamarin.ExposureNotifications;
 
 namespace ExposureNotification.Backend
 {
@@ -20,5 +22,22 @@ namespace ExposureNotification.Backend
 		public int RollingDuration { get; set; }
 
 		public int TransmissionRiskLevel { get; set; }
+
+		public TemporaryExposureKey ToKey()
+			=> new TemporaryExposureKey(
+				Convert.FromBase64String(Base64KeyData),
+				RollingStart,
+				TimeSpan.FromMinutes(RollingDuration),
+				(RiskLevel)TransmissionRiskLevel);
+
+		public static DbTemporaryExposureKey FromKey(TemporaryExposureKey key)
+			=> new DbTemporaryExposureKey
+			{
+				Base64KeyData = Convert.ToBase64String(key.KeyData),
+				Timestamp = DateTime.UtcNow,
+				RollingStart = key.RollingStart,
+				RollingDuration = (int)key.RollingDuration.TotalMinutes,
+				TransmissionRiskLevel = (int)key.TransmissionRiskLevel
+			};
 	}
 }

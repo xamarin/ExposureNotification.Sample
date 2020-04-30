@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Internal;
 using System.Linq;
 using ExposureNotification.Core;
+using Xamarin.ExposureNotifications;
 
 namespace ExposureNotification.Tests
 {

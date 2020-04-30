@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using System.Xml.Schema;
+using Xamarin.ExposureNotifications;
 
 namespace ExposureNotification.Backend
 {
@@ -47,12 +48,7 @@ namespace ExposureNotification.Backend
 
 				return new KeysResponse {
 					Timestamp = newestTimestamp ?? DateTime.MinValue,
-					Keys = results.Select(dtk => new TemporaryExposureKey {
-						KeyData = temporaryExposureKeyConding.Decode(Convert.FromBase64String(dtk.Base64KeyData)),
-						RollingDuration = dtk.RollingDuration,
-						RollingStart = dtk.RollingStart,
-						TransmissionRiskLevel = dtk.TransmissionRiskLevel
-					}).ToList()
+					Keys = results.Select(dtk => dtk.ToKey()).ToList()
 				};
 			}
 		}
@@ -103,11 +99,7 @@ namespace ExposureNotification.Backend
 				if (!ctx.Diagnoses.Any(d => d.DiagnosisUid == diagnosisUid))
 					throw new InvalidOperationException();
 
-				var dbKeys = keys.Select(k => new DbTemporaryExposureKey
-						{
-							Base64KeyData = Convert.ToBase64String(temporaryExposureKeyConding.Encode(k.KeyData)),
-							Timestamp = DateTime.UtcNow
-						}).ToList();
+				var dbKeys = keys.Select(k => DbTemporaryExposureKey.FromKey(k)).ToList();
 
 				foreach (var dbk in dbKeys)
 					ctx.TemporaryExposureKeys.Add(dbk);

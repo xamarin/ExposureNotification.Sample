@@ -55,4 +55,10 @@
 	    <Version>71.1601.0</Version>
 	  </PackageReference>
 	</ItemGroup>
+
+	<ItemGroup>
+	  <Reference Include="Xamarin.iOS.ExposureNotification">
+	    <HintPath>..\libs\Xamarin.iOS.ExposureNotification.dll</HintPath>
+	  </Reference>
+	</ItemGroup>
 </Project>
