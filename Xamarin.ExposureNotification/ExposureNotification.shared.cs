@@ -81,9 +81,19 @@ namespace Xamarin.ExposureNotifications
 			var updates = keys != null && keys.Any();
 
 			if (updates)
+			{
 				await AddDiagnosisKeysAsync(keys);
 
-			// TODO: Check Exposure status
+				// Now check exposure
+				var summary = await GetExposureSummaryAsync();
+
+				if (summary != null && summary.MatchedKeyCount > 0)
+				{
+					Task.Run(() => 
+						Handler.ExposureDetected(summary, 
+							() => GetExposureInformationAsync()));
+				}
+			}
 
 			return updates;
 		}
