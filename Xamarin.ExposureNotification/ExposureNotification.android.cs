@@ -67,19 +67,30 @@ namespace Xamarin.ExposureNotifications
 		}
 
 		// Tells the local API when new diagnosis keys have been obtained from the server
-		static async Task PlatformProcessDiagnosisKeys(IEnumerable<TemporaryExposureKey> diagnosisKeys)
+		static async Task<ExposureDetectionSummary> PlatformAddDiagnosisKeys(IEnumerable<TemporaryExposureKey> diagnosisKeys)
 		{
 			var batchSize = await Instance.GetMaxDiagnosisKeys();
+			var sequence = diagnosisKeys;
 
-			for (int i = 0; i < diagnosisKeys.Count(); i += batchSize)
+			while (sequence.Any())
 			{
-				// TODO: map xplat key to native
-				var batch = diagnosisKeys.Skip(i).Take(batchSize)
-					.Select(k => new ExposureNotificationClient.TemporaryExposureKey())
-					.ToList();
+				var batch = sequence.Take(batchSize);
+				sequence = sequence.Skip(batchSize);
 
-				await Instance.ProvideDiagnosisKeys(batch);
+				await Instance.ProvideDiagnosisKeys(
+					batch.Select(k => new ExposureNotificationClient.TemporaryExposureKey
+					{
+						KeyData = k.KeyData,
+						RollingStartNumber = (long)k.RollingStart,
+						RollingDuration = (long)k.RollingDuration.TotalMinutes,
+						TransmissionRiskLevel = (ExposureNotificationClient.RiskLevel)k.TransmissionRiskLevel
+					}).ToList());
 			}
+
+			var summary = await Instance.GetExposureSummary();
+
+			// TODO: Reevaluate byte usage here
+			return new ExposureDetectionSummary(summary.DaysSinceLastExposure, (ulong)summary.MatchedKeyCount, (byte)summary.MaximumRiskScore);
 		}
 
 		static async Task<IEnumerable<TemporaryExposureKey>> PlatformGetTemporaryExposureKeys()

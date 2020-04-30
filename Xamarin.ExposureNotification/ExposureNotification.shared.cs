@@ -65,8 +65,8 @@ namespace Xamarin.ExposureNotifications
 			=> PlatformGetExposureSummary();
 
 		// Tells the local API when new diagnosis keys have been obtained from the server
-		internal static Task AddDiagnosisKeysAsync(IEnumerable<TemporaryExposureKey> diagnosisKeys)
-			=> PlatformProcessDiagnosisKeys(diagnosisKeys);
+		internal static Task<ExposureDetectionSummary> AddDiagnosisKeysAsync(IEnumerable<TemporaryExposureKey> diagnosisKeys)
+			=> PlatformAddDiagnosisKeys(diagnosisKeys);
 
 		public static Task SubmitSelfDiagnosisAsync()
 			=> PlatformSubmitPositiveDiagnosis();
@@ -82,10 +82,7 @@ namespace Xamarin.ExposureNotifications
 
 			if (updates)
 			{
-				await AddDiagnosisKeysAsync(keys);
-
-				// Now check exposure
-				var summary = await GetExposureSummaryAsync();
+				var summary = await AddDiagnosisKeysAsync(keys);
 
 				if (summary != null && summary.MatchedKeyCount > 0)
 				{

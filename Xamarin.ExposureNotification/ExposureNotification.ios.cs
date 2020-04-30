@@ -85,16 +85,42 @@ namespace Xamarin.ExposureNotifications
 		}
 
 		// Tells the local API when new diagnosis keys have been obtained from the server
-		static async Task PlatformProcessDiagnosisKeys(IEnumerable<TemporaryExposureKey> diagnosisKeys)
+		static async Task<ExposureDetectionSummary> PlatformAddDiagnosisKeys(IEnumerable<TemporaryExposureKey> diagnosisKeys)
 		{
 			var s = await GetSessionAsync();
 
-			await s.AddDiagnosisKeysAsync(diagnosisKeys.Select(k =>
-				new ENTemporaryExposureKey
-				{
-					KeyData = NSData.FromArray(k.KeyData),
-					RollingStartNumber = (uint)k.RollingStart
-				}).ToArray());
+			// Batch up adding our items
+			var batchSize = (int)s.MaximumKeyCount;
+			var sequence = diagnosisKeys;
+
+			while (sequence.Any())
+			{
+				var batch = sequence.Take(batchSize);
+				sequence = sequence.Skip(batchSize);
+				
+				await s.AddDiagnosisKeysAsync(diagnosisKeys.Select(k =>
+					new ENTemporaryExposureKey
+					{
+						KeyData = NSData.FromArray(k.KeyData),
+						RollingStartNumber = (uint)k.RollingStart
+					}).ToArray());
+			}
+
+			var summary = await s.FinishedDiagnosisKeysAsync();
+
+			return new ExposureDetectionSummary(
+				(int)summary.DaysSinceLastExposure,
+				summary.MatchedKeyCount,
+				summary.MaximumRiskScore);
+		}
+
+		static async Task<IEnumerable<TemporaryExposureKey>> PlatformGetTemporaryExposureKeys()
+		{
+			var m = await GetManagerAsync();
+			var selfKeys = await m.GetDiagnosisKeysAsync();
+
+			return selfKeys.Select(k =>
+				new TemporaryExposureKey(k.KeyData.ToArray(), k.RollingStartNumber, new TimeSpan(), (RiskLevel)k.TransmissionRiskLevel));
 		}
 	}
 }
