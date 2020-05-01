@@ -9,8 +9,8 @@ When a person has confirmed a diagnosis, they tell their device which then submi
 
 Devices continually request the keys submitted by diagnosed people from the backend server.  The device then compares these keys to the unique identifiers of other devices it has been near in the last 14 days.
 
-## iOS API
-A NuGet package is available for the native iOS Exposure Notification bindings:
+## iOS Native API - NuGet
+A NuGet package is also available for the native iOS Exposure Notification bindings:
 https://www.nuget.org/packages/Xamarin.iOS.ExposureNotification/1.0.0-beta1
 
 This package requires that you build with XCode 11.5 beta1 or newer.
