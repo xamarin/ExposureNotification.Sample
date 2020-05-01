@@ -10,6 +10,8 @@ namespace Xamarin.ExposureNotifications
 {
 	public static partial class ExposureNotification
 	{
+		public delegate Task UploadKeysToServerDelegate(IEnumerable<TemporaryExposureKey> selfTemporaryExposureKeys);
+
 		static IExposureNotificationHandler handler;
 
 		internal static IExposureNotificationHandler Handler
@@ -58,18 +60,15 @@ namespace Xamarin.ExposureNotifications
 			=> await PlatformStop();
 
 		// Gets the contact info of anyone the user had contact with who was diagnosed
-		public static Task<IEnumerable<ExposureInfo>> GetExposureInformationAsync()
+		internal static Task<IEnumerable<ExposureInfo>> GetExposureInformationAsync()
 			=> PlatformGetExposureInformation();
-
-		public static Task<ExposureDetectionSummary> GetExposureSummaryAsync()
-			=> PlatformGetExposureSummary();
 
 		// Tells the local API when new diagnosis keys have been obtained from the server
 		internal static Task<ExposureDetectionSummary> AddDiagnosisKeysAsync(IEnumerable<TemporaryExposureKey> diagnosisKeys)
 			=> PlatformAddDiagnosisKeys(diagnosisKeys);
 
-		public static Task SubmitSelfDiagnosisAsync()
-			=> PlatformSubmitPositiveDiagnosis();
+		public static Task SubmitSelfDiagnosisAsync(UploadKeysToServerDelegate uploadKeysToServerDelegate)
+			=> PlatformSubmitSelfDiagnosis(uploadKeysToServerDelegate);
 
 		internal static Task<IEnumerable<TemporaryExposureKey>> GetSelfTemporaryExposureKeysAsync()
 			=> PlatformGetTemporaryExposureKeys();
@@ -84,11 +83,13 @@ namespace Xamarin.ExposureNotifications
 			{
 				var summary = await AddDiagnosisKeysAsync(keys);
 
+				// Check that the summary has any matches before notifying the callback
 				if (summary != null && summary.MatchedKeyCount > 0)
 				{
-					Task.Run(() => 
-						Handler.ExposureDetected(summary, 
-							() => GetExposureInformationAsync()));
+					// This will run and invoke the handler in the background to deal with results
+					_ = Task.Run(() =>
+						  Handler.ExposureDetected(summary,
+							  () => GetExposureInformationAsync()));
 				}
 			}
 

@@ -60,17 +60,14 @@ namespace Xamarin.ExposureNotifications
 
 		protected override async void OnHandleWork(Intent workIntent)
 		{
-			var typeName = Preferences.Get(ExposureNotification.Prefs_ExposureNotification_Handler_Type_Key, string.Empty);
-
-			if (string.IsNullOrEmpty(typeName))
-				throw new NullReferenceException(nameof(typeName));
-
-			var handlerInstance = (IExposureNotificationHandler)Activator.CreateInstance(Type.GetType(typeName));
-
 			if (workIntent.Action == ExposureNotificationCallbackBroadcastReceiver.ActionExposureStateUpdated)
-				await handlerInstance.ExposureStateUpdated(); // State updated check for exposure
+			{
+				//	TODO:
+			}
 			else if (workIntent.Action == ExposureNotificationCallbackBroadcastReceiver.ActionRequestDiagnosisKeys)
-				await handlerInstance.RequestDiagnosisKeys(); //Send more keys to the server
+			{
+				//	TODO:
+			}
 		}
 	}
 }

@@ -12,7 +12,6 @@ namespace Xamarin.ExposureNotifications
 	{
 		static ENManager manager;
 		static ENExposureDetectionSession session;
-		
 
 		static async Task<ENManager> GetManagerAsync()
 		{
@@ -57,22 +56,24 @@ namespace Xamarin.ExposureNotifications
 		// Gets the contact info of anyone the user had contact with who was diagnosed
 		static async Task<IEnumerable<ExposureInfo>> PlatformGetExposureInformation()
 		{
-			return null;
-			//var s = await GetSessionAsync();
-			//s.
-			//s.GetExposureInfoAsync();
-		}
+			var s = await GetSessionAsync();
+			
+			// TODO: Check max
+			var info = await s.GetExposureInfoAsync(100);
 
-		static async Task<ExposureDetectionSummary> PlatformGetExposureSummary()
-		{
-			return null;
-			//var s = await GetSessionAsync();
-			//s.AddDiagnosisKeysAsync()
+			return info.Exposures.Select(i =>
+				new ExposureInfo(
+					TimeZone.CurrentTimeZone.ToLocalTime(new DateTime(2001, 1, 1, 0, 0, 0))
+						.AddSeconds(i.Date.SecondsSinceReferenceDate),
+					TimeSpan.FromMinutes(i.Duration),
+					(int)i.AttenuationValue,
+					(byte)i.TotalRiskScore,
+					(RiskLevel)i.TransmissionRiskLevel));
 		}
 
 		// Call this when the user has confirmed diagnosis
-		static async Task PlatformSubmitPositiveDiagnosis()
-		{	
+		static async Task PlatformSubmitSelfDiagnosis(UploadKeysToServerDelegate uploadKeysToServerDelegate)
+		{
 			var m = await GetManagerAsync();
 			var selfKeys = await m.GetDiagnosisKeysAsync();
 

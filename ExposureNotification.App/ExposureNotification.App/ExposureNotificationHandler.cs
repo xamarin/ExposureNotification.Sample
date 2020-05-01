@@ -52,50 +52,6 @@ namespace ExposureNotification.App
 			return keys.Keys;
 		}
 
-		internal const string PrefsDiagnosisUidKey = "diagnosis_uid";
-
-		public async Task SubmitSelfDiagnosisKeysToServer(IEnumerable<TemporaryExposureKey> temporaryExposureKeys)
-		{
-			var diagnosisUid = Preferences.Get(PrefsDiagnosisUidKey, (string)null);
-			if (string.IsNullOrEmpty(diagnosisUid))
-				throw new InvalidOperationException();
-
-			X509Certificate2 cert = null;
-
-			using (var s = Assembly.GetCallingAssembly().GetManifestResourceStream(Config.CertificateResourceFilename))
-			using (var m = new MemoryStream())
-			{
-				await s.CopyToAsync(m);
-				m.Position = 0;
-
-				cert = new X509Certificate2(m.ToArray());
-			}
-
-			var encoder = new DefaultTemporaryExposureKeyEncoder(cert);
-
-			var url = GetUrl($"diagnosis");
-
-			var encodedKeys = temporaryExposureKeys.Select(k => new TemporaryExposureKey
-			{
-				KeyData = encoder.Encode(k.KeyData),
-				RollingStart = k.RollingStart,
-				RollingDuration = k.RollingDuration,
-				TransmissionRiskLevel = k.TransmissionRiskLevel
-			});
-
-			var json = JsonConvert.SerializeObject(new DiagnosisSubmission
-			{
-				DiagnosisUid = diagnosisUid,
-				TemporaryExposureKeys = encodedKeys.ToList()
-			});
-
-			var response = await http.PostAsync(url, new StringContent(json));
-
-			response.EnsureSuccessStatusCode();
-
-			Preferences.Set(PrefsDiagnosisUidKey, diagnosisUid);
-		}
-
 		static string GetUrl(string path)
 			=> Config.ApiUrlBase.TrimEnd('/') + path;
 	}

@@ -63,9 +63,10 @@ namespace ContactTracing.App.ViewModels
 						return;
 					}
 
-					// Set the diagnosis key so we can use it
+					// Set the diagnosis key so we can use it from the callback handler
 					Preferences.Set(ExposureNotificationHandler.PrefsDiagnosisUidKey, DiagnosisUid);
 
+					// Submit our diagnosis
 					await Xamarin.ExposureNotifications.ExposureNotification.SubmitSelfDiagnosisAsync();
 
 					NotifyPropertyChanged(nameof(HasSubmittedDiagnosis));
