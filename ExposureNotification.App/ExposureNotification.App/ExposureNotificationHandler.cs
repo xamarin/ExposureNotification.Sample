@@ -36,7 +36,7 @@ namespace ExposureNotification.App
 			// or if no date stored, only return as much as the past 14 days of keys
 			var since = Preferences.Get(prefsSinceKey, DateTime.UtcNow.AddDays(-14));
 
-			var url = GetUrl($"keys?since={since:o}");
+			var url = $"{Config.ApiUrlBase.TrimEnd('/')}/keys?since={since:o}";
 
 			var response = await http.GetAsync(url);
 
@@ -51,8 +51,5 @@ namespace ExposureNotification.App
 
 			return keys.Keys;
 		}
-
-		static string GetUrl(string path)
-			=> Config.ApiUrlBase.TrimEnd('/') + path;
 	}
 }
