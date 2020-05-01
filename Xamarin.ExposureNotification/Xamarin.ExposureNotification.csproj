@@ -36,11 +36,19 @@
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('monoandroid')) ">
 		<Compile Include="**\*.android.cs" />
 		<Compile Include="**\*.android.*.cs" />
+
+		<PackageReference Include="Xamarin.GooglePlayServices.Basement">
+			<Version>71.1620.0</Version>
+		</PackageReference>
+		<PackageReference Include="Xamarin.GooglePlayServices.Tasks">
+			<Version>71.1601.0</Version>
+		</PackageReference>
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('xamarin.ios')) ">
 		<Compile Include="*.ios.cs" />
 		<Compile Include="*.ios.*.cs" />
+		
 		<PackageReference Include="Xamarin.iOS.ExposureNotification">
 			<Version>1.0.0-beta1</Version>
 		</PackageReference>
@@ -50,18 +58,4 @@
 	  <PackageReference Include="Xamarin.Essentials" Version="1.5.3.1" />
 	</ItemGroup>
 
-	<ItemGroup Condition="'$(TargetFramework)' == 'monoandroid10.0'">
-	  <PackageReference Include="Xamarin.GooglePlayServices.Basement">
-	    <Version>71.1620.0</Version>
-	  </PackageReference>
-	  <PackageReference Include="Xamarin.GooglePlayServices.Tasks">
-	    <Version>71.1601.0</Version>
-	  </PackageReference>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Reference Include="Xamarin.iOS.ExposureNotification">
-	    <HintPath>..\libs\Xamarin.iOS.ExposureNotification.dll</HintPath>
-	  </Reference>
-	</ItemGroup>
 </Project>

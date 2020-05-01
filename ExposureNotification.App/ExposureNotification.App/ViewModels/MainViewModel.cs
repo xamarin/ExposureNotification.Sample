@@ -1,10 +1,18 @@
 ﻿using Acr.UserDialogs;
 using ExposureNotification.App;
+using ExposureNotification.Core;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
+using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Windows.Input;
 using Xamarin.Essentials;
+using Xamarin.ExposureNotifications;
 using Xamarin.Forms;
 
 namespace ContactTracing.App.ViewModels
@@ -12,6 +20,7 @@ namespace ContactTracing.App.ViewModels
 	public class MainViewModel : BaseViewModel
 	{
 		const string PrefsDiagnosisSubmissionDate = "prefs_diagnosis_submit_date";
+		const string PrefsDiagnosisSubmissionUid = "prefs_diagnosis_submit_uid";
 
 		public MainViewModel()
 		{
@@ -63,11 +72,52 @@ namespace ContactTracing.App.ViewModels
 						return;
 					}
 
-					// Set the diagnosis key so we can use it from the callback handler
-					Preferences.Set(ExposureNotificationHandler.PrefsDiagnosisUidKey, DiagnosisUid);
-
+					
 					// Submit our diagnosis
-					await Xamarin.ExposureNotifications.ExposureNotification.SubmitSelfDiagnosisAsync();
+					await Xamarin.ExposureNotifications.ExposureNotification.SubmitSelfDiagnosisAsync(async tempExposureKeys =>
+					{
+						var diagnosisUid = DiagnosisUid;
+
+						if (string.IsNullOrEmpty(diagnosisUid))
+							throw new InvalidOperationException();
+
+						X509Certificate2 cert = null;
+
+						using (var s = Assembly.GetCallingAssembly().GetManifestResourceStream(Config.CertificateResourceFilename))
+						using (var m = new MemoryStream())
+						{
+							await s.CopyToAsync(m);
+							m.Position = 0;
+
+							cert = new X509Certificate2(m.ToArray());
+						}
+
+						var encoder = new DefaultTemporaryExposureKeyEncoder(cert);
+
+						var url = $"{Config.ApiUrlBase.TrimEnd('/')}/diagnosis";
+
+						var encodedKeys = tempExposureKeys.Select(k => new TemporaryExposureKey
+						{
+							KeyData = encoder.Encode(k.KeyData),
+							RollingStart = k.RollingStart,
+							RollingDuration = k.RollingDuration,
+							TransmissionRiskLevel = k.TransmissionRiskLevel
+						});
+
+						var json = JsonConvert.SerializeObject(new DiagnosisSubmission
+						{
+							DiagnosisUid = diagnosisUid,
+							TemporaryExposureKeys = encodedKeys.ToList()
+						});
+
+						var http = new HttpClient();
+						var response = await http.PostAsync(url, new StringContent(json));
+
+						response.EnsureSuccessStatusCode();
+
+						Preferences.Set(PrefsDiagnosisSubmissionDate, DateTime.UtcNow);
+						Preferences.Set(PrefsDiagnosisSubmissionUid, diagnosisUid);
+					});
 
 					NotifyPropertyChanged(nameof(HasSubmittedDiagnosis));
 
