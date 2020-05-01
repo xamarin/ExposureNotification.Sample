@@ -77,7 +77,7 @@ namespace Xamarin.ExposureNotifications
 			var m = await GetManagerAsync();
 			var selfKeys = await m.GetDiagnosisKeysAsync();
 
-			await ExposureNotification.Handler.SubmitSelfDiagnosisKeysToServer(
+			await uploadKeysToServerDelegate(
 				selfKeys.Select(k => new TemporaryExposureKey(
 					k.KeyData.ToArray(),
 					k.RollingStartNumber,

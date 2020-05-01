@@ -8,9 +8,6 @@ namespace Xamarin.ExposureNotifications
 	{
 		Configuration Configuration { get; }
 
-		// App should send keys to the backend server
-		Task SubmitSelfDiagnosisKeysToServer(IEnumerable<TemporaryExposureKey> temporaryExposureKeys);
-
 		// Go fetch the keys from your server
 		Task<IEnumerable<TemporaryExposureKey>> FetchExposureKeysFromServer();
 

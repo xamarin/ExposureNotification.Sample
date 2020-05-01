@@ -19,8 +19,7 @@ namespace Xamarin.ExposureNotifications
 
 		protected override async void OnHandleWork(Intent workIntent)
 		{
-			if (Preferences.Get(ExposureNotification.Prefs_ExposureNotification_Enabled_Key, false))
-				await ExposureNotification.Start();
+			await ExposureNotification.StartAsync();
 		}
 	}
 

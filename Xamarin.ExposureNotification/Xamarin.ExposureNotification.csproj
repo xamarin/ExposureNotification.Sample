@@ -41,6 +41,9 @@
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('xamarin.ios')) ">
 		<Compile Include="*.ios.cs" />
 		<Compile Include="*.ios.*.cs" />
+		<PackageReference Include="Xamarin.iOS.ExposureNotification">
+			<Version>1.0.0-beta1</Version>
+		</PackageReference>
 	</ItemGroup>
 
 	<ItemGroup>
