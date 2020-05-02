@@ -59,7 +59,7 @@ namespace ExposureNotification.Tests
 			foreach (var d in diagnosisUids)
 				Assert.False(await Storage.CheckIfDiagnosisUidExistsAsync(d));
 		}
-		
+
 		[Fact]
 		public async Task Submit_Diagnosis_Test()
 		{
@@ -81,7 +81,8 @@ namespace ExposureNotification.Tests
 		{
 			var keys = GenerateTemporaryExposureKeys(14);
 
-			await Assert.ThrowsAsync<InvalidOperationException>(async () => {
+			await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+			{
 				await Storage.SubmitPositiveDiagnosisAsync("notaddeduid1", keys);
 			});
 		}

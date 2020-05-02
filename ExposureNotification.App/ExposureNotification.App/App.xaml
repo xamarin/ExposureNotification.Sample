@@ -1,47 +1,47 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Application xmlns="http://xamarin.com/schemas/2014/forms"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             mc:Ignorable="d"
-             x:Class="ExposureNotification.App.App">
-    <Application.Resources>
-        <Color x:Key="PrimaryColor">#2196F3</Color>
-        <Color x:Key="BackgroundColor">#E6E6E6</Color>
-        <Color x:Key="TextPrimaryColor">#6F6F6F</Color>
-        <Color x:Key="TextSecondaryColor">#60000000</Color>
-        <Color x:Key="TextTernaryColor">#40000000</Color>
-        
-        
-        <!--Icons-->
-        <x:String x:Key="IconProfile">&#xf2bd;</x:String>
-        <x:String x:Key="IconTracking">&#xf1fe;</x:String>
-        <x:String x:Key="IconFriends">&#xf0c0;</x:String>
-        <x:String x:Key="IconAbout">&#xf129;</x:String>
-        <x:String x:Key="IconFavorite">&#xf005;</x:String>
-        <x:String x:Key="IconTrash">&#xf2ed;</x:String>
-        <x:String x:Key="IconSend">&#xf1d8;</x:String>
-        <x:String x:Key="IconInbox">&#xf01c;</x:String>
-        <x:String x:Key="IconBlog">&#xf0ac;</x:String>
-        <x:String x:Key="IconGitHub">&#xf09b;</x:String>
-        <x:String x:Key="IconTwitter">&#xf099;</x:String>
-        <x:String x:Key="IconSave">&#xf0c7;</x:String>
-        <x:String x:Key="IconRefresh">&#xf021;</x:String>
-        <x:String x:Key="IconThumbsUp">&#xf164;</x:String>
-        <x:String x:Key="IconWarning">&#xf071;</x:String>
-        <x:String x:Key="IconFriendAdd">&#xf234;</x:String>
-        <x:String x:Key="IconApprove">&#xf4fc;</x:String>
-        <x:String x:Key="IconDeny">&#xf00d;</x:String>
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	mc:Ignorable="d"
+	x:Class="ExposureNotification.App.App">
+	<Application.Resources>
+		<Color x:Key="PrimaryColor">#2196F3</Color>
+		<Color x:Key="BackgroundColor">#E6E6E6</Color>
+		<Color x:Key="TextPrimaryColor">#6F6F6F</Color>
+		<Color x:Key="TextSecondaryColor">#60000000</Color>
+		<Color x:Key="TextTernaryColor">#40000000</Color>
 
-        <x:String x:Key="IconGraph">&#xf1fe;</x:String>
 
-        <Style x:Key="ButtonRounded" TargetType="Button">
-            <Setter Property="HorizontalOptions" Value="FillAndExpand" />
-            <Setter Property="HeightRequest" Value="44"/>
-            <Setter Property="BorderRadius" Value="22" />
-            <Setter Property="BorderWidth" Value="4"/>            
-            <Setter Property="BorderColor" Value="{StaticResource PrimaryColor}"/>
-            <Setter Property="TextColor" Value="{StaticResource TextPrimaryColor}" />
+		<!--Icons-->
+		<x:String x:Key="IconProfile">&#xf2bd;</x:String>
+		<x:String x:Key="IconTracking">&#xf1fe;</x:String>
+		<x:String x:Key="IconFriends">&#xf0c0;</x:String>
+		<x:String x:Key="IconAbout">&#xf129;</x:String>
+		<x:String x:Key="IconFavorite">&#xf005;</x:String>
+		<x:String x:Key="IconTrash">&#xf2ed;</x:String>
+		<x:String x:Key="IconSend">&#xf1d8;</x:String>
+		<x:String x:Key="IconInbox">&#xf01c;</x:String>
+		<x:String x:Key="IconBlog">&#xf0ac;</x:String>
+		<x:String x:Key="IconGitHub">&#xf09b;</x:String>
+		<x:String x:Key="IconTwitter">&#xf099;</x:String>
+		<x:String x:Key="IconSave">&#xf0c7;</x:String>
+		<x:String x:Key="IconRefresh">&#xf021;</x:String>
+		<x:String x:Key="IconThumbsUp">&#xf164;</x:String>
+		<x:String x:Key="IconWarning">&#xf071;</x:String>
+		<x:String x:Key="IconFriendAdd">&#xf234;</x:String>
+		<x:String x:Key="IconApprove">&#xf4fc;</x:String>
+		<x:String x:Key="IconDeny">&#xf00d;</x:String>
+
+		<x:String x:Key="IconGraph">&#xf1fe;</x:String>
+
+		<Style x:Key="ButtonRounded" TargetType="Button">
+			<Setter Property="HorizontalOptions" Value="FillAndExpand" />
+			<Setter Property="HeightRequest" Value="44"/>
+			<Setter Property="BorderRadius" Value="22" />
+			<Setter Property="BorderWidth" Value="4"/>
+			<Setter Property="BorderColor" Value="{StaticResource PrimaryColor}"/>
+			<Setter Property="TextColor" Value="{StaticResource TextPrimaryColor}" />
 			<Setter Property="BackgroundColor" Value="{StaticResource BackgroundColor}" />
 		</Style>
 	</Application.Resources>

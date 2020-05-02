@@ -57,17 +57,16 @@ namespace Xamarin.ExposureNotifications
 		static async Task<IEnumerable<ExposureInfo>> PlatformGetExposureInformation()
 		{
 			var s = await GetSessionAsync();
-			
+
 			// TODO: Check max
 			var info = await s.GetExposureInfoAsync(100);
 
 			return info.Exposures.Select(i =>
 				new ExposureInfo(
-					TimeZone.CurrentTimeZone.ToLocalTime(new DateTime(2001, 1, 1, 0, 0, 0))
-						.AddSeconds(i.Date.SecondsSinceReferenceDate),
+					((DateTime)i.Date).ToLocalTime(),
 					TimeSpan.FromMinutes(i.Duration),
-					(int)i.AttenuationValue,
-					(byte)i.TotalRiskScore,
+					i.AttenuationValue,
+					i.TotalRiskScore,
 					(RiskLevel)i.TransmissionRiskLevel));
 		}
 
@@ -98,12 +97,13 @@ namespace Xamarin.ExposureNotifications
 			{
 				var batch = sequence.Take(batchSize);
 				sequence = sequence.Skip(batchSize);
-				
+
 				await s.AddDiagnosisKeysAsync(diagnosisKeys.Select(k =>
 					new ENTemporaryExposureKey
 					{
 						KeyData = NSData.FromArray(k.KeyData),
-						RollingStartNumber = (uint)k.RollingStart
+						RollingStartNumber = (uint)k.RollingStartLong,
+						TransmissionRiskLevel = (ENRiskLevel)k.TransmissionRiskLevel
 					}).ToArray());
 			}
 

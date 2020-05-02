@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,23 +25,28 @@ namespace ExposureNotification.Backend
 
 		readonly DbContextOptions dbContextOptions;
 
-		public async Task<(DateTime, IEnumerable<TemporaryExposureKey>)> GetKeysAsync(DateTime? since)
+		public async Task<KeysResponse> GetKeysAsync(long sinceEpochSeconds)
 		{
 			using (var ctx = new ExposureNotificationContext(dbContextOptions))
 			{
-				var oldest = DateTime.UtcNow.AddDays(-14);
+				var oldest = DateTimeOffset.UtcNow.AddDays(-14).ToUnixTimeSeconds();
 
-				if (!since.HasValue || since.Value.ToUniversalTime() < oldest)
-					since = oldest;
+				// Only allow the last 14 days +
+				if (sinceEpochSeconds < oldest)
+					sinceEpochSeconds = oldest;
 
 				var results = await ctx.TemporaryExposureKeys.AsQueryable()
-					.Where(dtk => dtk.Timestamp >= since)
+					.Where(dtk => dtk.TimestampSecondsSinceEpoch >= sinceEpochSeconds)
 					.ToListAsync().ConfigureAwait(false);
 
-				var newestTimestamp = results.OrderByDescending(dtk => dtk.Timestamp).FirstOrDefault()?.Timestamp;
+				var newestTimestamp = results.OrderByDescending(dtk => dtk.TimestampSecondsSinceEpoch).FirstOrDefault()?.TimestampSecondsSinceEpoch;
 				var keys = results.Select(dtk => dtk.ToKey());
 
-				return (newestTimestamp ?? DateTime.MinValue, keys);
+				return new KeysResponse
+				{
+					Timestamp = newestTimestamp ?? DateTimeOffset.MinValue.ToUnixTimeSeconds(),
+					Keys = keys
+				};
 			}
 		}
 
@@ -82,21 +88,39 @@ namespace ExposureNotification.Backend
 				return Task.FromResult(ctx.Diagnoses.Any(d => d.DiagnosisUid.Equals(diagnosisUid)));
 		}
 
-		public async Task SubmitPositiveDiagnosisAsync(string diagnosisUid, IEnumerable<TemporaryExposureKey> keys)
+		public async Task SubmitPositiveDiagnosisAsync(SelfDiagnosisSubmissionRequest diagnosis)
 		{
 			using (var ctx = new ExposureNotificationContext(dbContextOptions))
 			{
 				// Ensure the database contains the diagnosis uid
-				if (!ctx.Diagnoses.Any(d => d.DiagnosisUid == diagnosisUid))
+				if (!ctx.Diagnoses.Any(d => d.DiagnosisUid == diagnosis.DiagnosisUid))
 					throw new InvalidOperationException();
 
-				var dbKeys = keys.Select(k => DbTemporaryExposureKey.FromKey(k)).ToList();
+				var dbKeys = diagnosis.Keys.Select(k => DbTemporaryExposureKey.FromKey(k)).ToList();
 
 				foreach (var dbk in dbKeys)
 					ctx.TemporaryExposureKeys.Add(dbk);
 
 				await ctx.SaveChangesAsync();
 			}
+		}
+
+		public class SelfDiagnosisSubmissionRequest
+		{
+			[JsonProperty("diagnosisUid")]
+			public string DiagnosisUid { get; set; }
+
+			[JsonProperty("keys")]
+			public IEnumerable<TemporaryExposureKey> Keys { get; set; }
+		}
+
+		public class KeysResponse
+		{
+			[JsonProperty("timestamp")]
+			public long Timestamp { get; set; }
+
+			[JsonProperty("keys")]
+			public IEnumerable<TemporaryExposureKey> Keys { get; set; }
 		}
 	}
 }

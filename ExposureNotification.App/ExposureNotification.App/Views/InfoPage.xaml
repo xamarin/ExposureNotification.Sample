@@ -1,28 +1,28 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage
-    x:Class="ExposureNotification.App.Views.InfoPage"
-    xmlns="http://xamarin.com/schemas/2014/forms"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:d="http://xamarin.com/schemas/2014/forms/design"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    BackgroundColor="{StaticResource BackgroundColor}"
-    Title="Information"
-    mc:Ignorable="d">
-    <ScrollView>
-        <StackLayout Padding="20" Spacing="12">
-            <Frame>
-                <StackLayout>
-                    <Label Text="If you think you may be infected, please consult a local health care provider to confirm your diagnosis." />
+	x:Class="ExposureNotification.App.Views.InfoPage"
+	xmlns="http://xamarin.com/schemas/2014/forms"
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	BackgroundColor="{StaticResource BackgroundColor}"
+	Title="Information"
+	mc:Ignorable="d">
+	<ScrollView>
+		<StackLayout Padding="20" Spacing="12">
+			<Frame>
+				<StackLayout>
+					<Label Text="If you think you may be infected, please consult a local health care provider to confirm your diagnosis." />
 
-                    <Button
-                        Command="{Binding SubmitDiagnosisCommand}"
-                        HorizontalOptions="End"
-                        IsEnabled="{Binding IsEnabled}"
-                        Style="{DynamicResource ButtonRounded}"
-                        Text="How do I get tested?" />
+					<Button
+						Command="{Binding SubmitDiagnosisCommand}"
+						HorizontalOptions="End"
+						IsEnabled="{Binding IsEnabled}"
+						Style="{DynamicResource ButtonRounded}"
+						Text="How do I get tested?" />
 
-                </StackLayout>
-            </Frame>
-        </StackLayout>
-    </ScrollView>
+				</StackLayout>
+			</Frame>
+		</StackLayout>
+	</ScrollView>
 </ContentPage>

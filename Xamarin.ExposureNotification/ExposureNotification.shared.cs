@@ -103,7 +103,7 @@ namespace Xamarin.ExposureNotifications
 
 		// Scores assigned to the attenuation of the BTLE signal of exposures
 		// A > 73dBm, 73 <= A > 63, 63 <= A > 51, 51 <= A > 33, 33 <= A > 27, 27 <= A > 15, 15 <= A > 10, A <= 10
-		public int[] AttenuationScores { get; set; } = new [] { 1, 2, 3, 4, 5, 6, 7, 8 };
+		public int[] AttenuationScores { get; set; } = new[] { 1, 2, 3, 4, 5, 6, 7, 8 };
 
 		// Scores assigned to each length of exposure
 		// < 5min, 5min, 10min, 15min, 20min, 25min, 30min, > 30min

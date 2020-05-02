@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Resources;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Xamarin.ExposureNotifications;
@@ -17,7 +18,7 @@ namespace ExposureNotification.App
 {
 	public class ExposureNotificationHandler : IExposureNotificationHandler
 	{
-		const string ApiUrlBase = "http://localhost:7071/api/";
+		const string apiUrlBase = "http://localhost:7071/api/";
 
 		static readonly HttpClient http = new HttpClient();
 
@@ -36,10 +37,8 @@ namespace ExposureNotification.App
 
 			// Get the newest date we have keys from and request since then
 			// or if no date stored, only return as much as the past 14 days of keys
-			var since = Preferences.Get(prefsSinceKey, DateTime.UtcNow.AddDays(-14));
-			var sinceEpochSeconds = new DateTimeOffset(since).ToUnixTimeSeconds();
-
-			var url = $"{ApiUrlBase.TrimEnd('/')}/keys?since={sinceEpochSeconds}";
+			var sinceEpochSeconds = Preferences.Get(prefsSinceKey, DateTimeOffset.MinValue.ToUnixTimeSeconds());
+			var url = $"{apiUrlBase.TrimEnd('/')}/keys?since={sinceEpochSeconds}";
 
 			var response = await http.GetAsync(url);
 
@@ -47,25 +46,26 @@ namespace ExposureNotification.App
 
 			var responseData = await response.Content.ReadAsStringAsync();
 
-			var keys = JsonConvert.DeserializeObject<(DateTime timestamp, List<TemporaryExposureKey> keys)>(responseData);
+			// Response contains the timestamp in seconds since epoch, and the list of keys
+			var keys = JsonConvert.DeserializeObject<KeysResponse>(responseData);
 
 			// Save newest timestamp for next request
-			Preferences.Set(prefsSinceKey, keys.timestamp.ToUniversalTime());
+			Preferences.Set(prefsSinceKey, keys.Timestamp);
 
-			return keys.keys;
+			return keys.Keys;
 		}
 
-		const string PrefsDiagnosisSubmissionDate = "prefs_diagnosis_submit_date";
-		const string PrefsDiagnosisSubmissionUid = "prefs_diagnosis_submit_uid";
+		const string prefsDiagnosisSubmissionDate = "prefs_diagnosis_submit_date";
+		const string prefsDiagnosisSubmissionUid = "prefs_diagnosis_submit_uid";
 
 		public static bool HasSubmittedDiagnosis
-			=> Preferences.Get(PrefsDiagnosisSubmissionDate, DateTime.MinValue)
+			=> Preferences.Get(prefsDiagnosisSubmissionDate, DateTime.MinValue)
 				>= DateTime.UtcNow.AddDays(-14);
 
 		public static string DiagnosisUid
 		{
-			get => Preferences.Get(PrefsDiagnosisSubmissionUid, (string)null);
-			set => Preferences.Set(PrefsDiagnosisSubmissionUid, value);
+			get => Preferences.Get(prefsDiagnosisSubmissionUid, (string)null);
+			set => Preferences.Set(prefsDiagnosisSubmissionUid, value);
 		}
 
 		public async Task UploadSelfExposureKeysToServer(IEnumerable<TemporaryExposureKey> temporaryExposureKeys)
@@ -77,9 +77,13 @@ namespace ExposureNotification.App
 
 			try
 			{
-				var url = $"{ApiUrlBase.TrimEnd('/')}/selfdiagnosis";
+				var url = $"{apiUrlBase.TrimEnd('/')}/selfdiagnosis";
 
-				var json = JsonConvert.SerializeObject((diagnosisUid, temporaryExposureKeys));
+				var json = JsonConvert.SerializeObject(new SelfDiagnosisSubmissionRequest
+				{
+					DiagnosisUid = diagnosisUid,
+					Keys = temporaryExposureKeys
+				});
 
 				var http = new HttpClient();
 				var response = await http.PostAsync(url, new StringContent(json));
@@ -87,15 +91,33 @@ namespace ExposureNotification.App
 				response.EnsureSuccessStatusCode();
 
 				// Store the date we were diagnosed
-				Preferences.Set(PrefsDiagnosisSubmissionDate, DateTime.UtcNow);
+				Preferences.Set(prefsDiagnosisSubmissionDate, DateTime.UtcNow);
 			}
 			catch
 			{
 				// Reset diagnosis status since we don't have one that was successfully submitted
 				// and then re-throw
-				Preferences.Set(PrefsDiagnosisSubmissionDate, DateTime.UtcNow.AddDays(-100));
+				Preferences.Set(prefsDiagnosisSubmissionDate, DateTime.UtcNow.AddDays(-100));
 				throw;
 			}
+		}
+
+		class SelfDiagnosisSubmissionRequest
+		{
+			[JsonProperty("diagnosisUid")]
+			public string DiagnosisUid { get; set; }
+
+			[JsonProperty("keys")]
+			public IEnumerable<TemporaryExposureKey> Keys { get; set; }
+		}
+
+		class KeysResponse
+		{
+			[JsonProperty("timestamp")]
+			public long Timestamp { get; set; }
+
+			[JsonProperty("keys")]
+			public IEnumerable<TemporaryExposureKey> Keys { get; set; }
 		}
 	}
 }
