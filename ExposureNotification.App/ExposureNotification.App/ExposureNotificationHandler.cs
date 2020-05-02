@@ -35,8 +35,9 @@ namespace ExposureNotification.App
 			// Get the newest date we have keys from and request since then
 			// or if no date stored, only return as much as the past 14 days of keys
 			var since = Preferences.Get(prefsSinceKey, DateTime.UtcNow.AddDays(-14));
+			var sinceEpochSeconds = new DateTimeOffset(since).ToUnixTimeSeconds();
 
-			var url = $"{Config.ApiUrlBase.TrimEnd('/')}/keys?since={since:o}";
+			var url = $"{Config.ApiUrlBase.TrimEnd('/')}/keys?since={sinceEpochSeconds}";
 
 			var response = await http.GetAsync(url);
 

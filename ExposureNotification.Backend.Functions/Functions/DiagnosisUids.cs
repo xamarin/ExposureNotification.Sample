@@ -5,17 +5,17 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Collections.Generic;
-using Xamarin.ExposureNotifications;
 
-namespace ExposureNotification.Backend.Functions
+namespace ExposureNotification.Backend.Functions.Functions
 {
-	public class Diagnosis
+	public static class DiagnosisUids
 	{
-		[FunctionName("Diagnosis")]
-		public async Task<IActionResult> Run(
-			[HttpTrigger(AuthorizationLevel.Anonymous, "post", "put", "delete", Route = "diagnosis")] HttpRequest req)
+		[FunctionName("DiagnosisUids")]
+		public static async Task<IActionResult> Run(
+			[HttpTrigger(AuthorizationLevel.Function, "put", "delete", Route = null)] HttpRequest req)
 		{
 			var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
 
@@ -30,12 +30,6 @@ namespace ExposureNotification.Backend.Functions
 				var diagnosisUids = JsonConvert.DeserializeObject<IEnumerable<string>>(requestBody);
 
 				await Startup.Database.RemoveDiagnosisUidsAsync(diagnosisUids);
-			}
-			else if (req.Method.Equals("post", StringComparison.OrdinalIgnoreCase))
-			{
-				var (diagnosisUid, keys) = JsonConvert.DeserializeObject<(string diagnosisUid, IEnumerable<TemporaryExposureKey> keys)>(requestBody);
-
-				await Startup.Database.SubmitPositiveDiagnosisAsync(diagnosisUid, keys);
 			}
 
 			return new OkResult();
