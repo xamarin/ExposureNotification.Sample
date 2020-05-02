@@ -24,7 +24,7 @@ namespace Xamarin.ExposureNotifications
 			=> throw new PlatformNotSupportedException();
 
 		// Call this when the user has confirmed diagnosis
-		static Task PlatformSubmitSelfDiagnosis(UploadKeysToServerDelegate uploadKeysToServerDelegate)
+		static Task PlatformSubmitSelfDiagnosis()
 			=> throw new PlatformNotSupportedException();
 
 		// Tells the local API when new diagnosis keys have been obtained from the server

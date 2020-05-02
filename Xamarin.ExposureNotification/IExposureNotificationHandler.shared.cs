@@ -13,5 +13,7 @@ namespace Xamarin.ExposureNotifications
 
 		// Might be exposed, check and alert user if necessary
 		Task ExposureDetected(ExposureDetectionSummary summary, Func<Task<IEnumerable<ExposureInfo>>> getDetailsFunc);
+
+		Task UploadSelfExposureKeysToServer(IEnumerable<TemporaryExposureKey> temporaryExposureKeys);
 	}
 }

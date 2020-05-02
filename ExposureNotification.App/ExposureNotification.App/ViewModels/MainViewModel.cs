@@ -11,9 +11,6 @@ namespace ContactTracing.App.ViewModels
 {
 	public class MainViewModel : BaseViewModel
 	{
-		const string PrefsDiagnosisSubmissionDate = "prefs_diagnosis_submit_date";
-		const string PrefsDiagnosisSubmissionUid = "prefs_diagnosis_submit_uid";
-
 		public MainViewModel()
 		{
 			Xamarin.ExposureNotifications.ExposureNotification.IsEnabledAsync()
@@ -32,8 +29,7 @@ namespace ContactTracing.App.ViewModels
 		public string DiagnosisUid { get; set; }
 
 		public bool HasSubmittedDiagnosis
-			=> Preferences.Get(PrefsDiagnosisSubmissionDate, DateTime.MinValue)
-				>= DateTime.UtcNow.AddDays(-14);
+			=> ExposureNotificationHandler.HasSubmittedDiagnosis;
 
 		public ICommand EnableDisableCommand
 			=> new Command(async () =>
@@ -56,34 +52,22 @@ namespace ContactTracing.App.ViewModels
 					var enabled = await Xamarin.ExposureNotifications.ExposureNotification.IsEnabledAsync();
 
 					if (!enabled)
+					{
+						await UserDialogs.Instance.AlertAsync("Please enable Exposure Notifications before submitting a diagnosis.", "Exposure Notifications Disabled", "OK");
 						return;
+					}
 
 					if (string.IsNullOrEmpty(DiagnosisUid))
 					{
 						await UserDialogs.Instance.AlertAsync("Please provide a Diagnosis Identifier", "Diagnosis Identifier Required", "OK");
 						return;
 					}
-					
+
+					// Set the submitted UID
+					ExposureNotificationHandler.DiagnosisUid = DiagnosisUid;
+
 					// Submit our diagnosis
-					await Xamarin.ExposureNotifications.ExposureNotification.SubmitSelfDiagnosisAsync(async tempExposureKeys =>
-					{
-						var diagnosisUid = DiagnosisUid;
-
-						if (string.IsNullOrEmpty(diagnosisUid))
-							throw new InvalidOperationException();
-
-						var url = $"{Config.ApiUrlBase.TrimEnd('/')}/diagnosis";
-
-						var json = JsonConvert.SerializeObject((diagnosisUid, tempExposureKeys));
-
-						var http = new HttpClient();
-						var response = await http.PostAsync(url, new StringContent(json));
-
-						response.EnsureSuccessStatusCode();
-
-						Preferences.Set(PrefsDiagnosisSubmissionDate, DateTime.UtcNow);
-						Preferences.Set(PrefsDiagnosisSubmissionUid, diagnosisUid);
-					});
+					await Xamarin.ExposureNotifications.ExposureNotification.SubmitSelfDiagnosisAsync();
 
 					NotifyPropertyChanged(nameof(HasSubmittedDiagnosis));
 

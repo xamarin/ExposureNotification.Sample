@@ -54,12 +54,12 @@ namespace Xamarin.ExposureNotifications
 		}
 
 		// Call this when the user has confirmed diagnosis
-		static async Task PlatformSubmitSelfDiagnosis(UploadKeysToServerDelegate uploadKeysToServerDelegate)
+		static async Task PlatformSubmitSelfDiagnosis()
 		{
 			var selfKeys = await Instance.GetTemporaryExposureKeyHistory();
 
-			await uploadKeysToServerDelegate
-				.Invoke(selfKeys.Select(k => new TemporaryExposureKey(
+			await Handler.UploadSelfExposureKeysToServer(
+				selfKeys.Select(k => new TemporaryExposureKey(
 					k.KeyData,
 					(ulong)k.RollingStartNumber,
 					TimeSpan.FromMinutes(k.RollingDuration),
@@ -106,7 +106,7 @@ namespace Xamarin.ExposureNotifications
 					));
 		}
 
-		static async Task<ExposureDetectionSummary> PlatformGetExposureSummary()
+		internal static async Task<ExposureDetectionSummary> AndroidGetExposureSummary()
 		{
 			var s = await Instance.GetExposureSummary();
 

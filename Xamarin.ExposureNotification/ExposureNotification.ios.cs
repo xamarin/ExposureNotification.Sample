@@ -72,12 +72,12 @@ namespace Xamarin.ExposureNotifications
 		}
 
 		// Call this when the user has confirmed diagnosis
-		static async Task PlatformSubmitSelfDiagnosis(UploadKeysToServerDelegate uploadKeysToServerDelegate)
+		static async Task PlatformSubmitSelfDiagnosis()
 		{
 			var m = await GetManagerAsync();
 			var selfKeys = await m.GetDiagnosisKeysAsync();
 
-			await uploadKeysToServerDelegate(
+			await Handler.UploadSelfExposureKeysToServer(
 				selfKeys.Select(k => new TemporaryExposureKey(
 					k.KeyData.ToArray(),
 					k.RollingStartNumber,

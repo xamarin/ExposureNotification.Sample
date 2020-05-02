@@ -9,8 +9,6 @@ namespace Xamarin.ExposureNotifications
 {
 	public static partial class ExposureNotification
 	{
-		public delegate Task UploadKeysToServerDelegate(IEnumerable<TemporaryExposureKey> selfTemporaryExposureKeys);
-
 		static IExposureNotificationHandler handler;
 
 		internal static IExposureNotificationHandler Handler
@@ -66,8 +64,8 @@ namespace Xamarin.ExposureNotifications
 		internal static Task<ExposureDetectionSummary> AddDiagnosisKeysAsync(IEnumerable<TemporaryExposureKey> diagnosisKeys)
 			=> PlatformAddDiagnosisKeys(diagnosisKeys);
 
-		public static Task SubmitSelfDiagnosisAsync(UploadKeysToServerDelegate uploadKeysToServerDelegate)
-			=> PlatformSubmitSelfDiagnosis(uploadKeysToServerDelegate);
+		public static Task SubmitSelfDiagnosisAsync()
+			=> PlatformSubmitSelfDiagnosis();
 
 		internal static Task<IEnumerable<TemporaryExposureKey>> GetSelfTemporaryExposureKeysAsync()
 			=> PlatformGetTemporaryExposureKeys();

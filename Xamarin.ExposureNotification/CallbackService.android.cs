@@ -1,33 +1,38 @@
 ﻿using Android.App;
 using Android.Content;
+using Android.OS;
 using AndroidX.Core.App;
 
 namespace Xamarin.ExposureNotifications
 {
-	[Service(
-		DirectBootAware = true,
-		Permission = "android.permission.BIND_JOB_SERVICE")]
-	internal class ExposureNotificationBootService : JobIntentService
-	{
-		const int JobId = 0x01;
+	// TODO: Verify if this is still needed
+	// Previously the spec suggested starting the API needed to be done each boot
+	// but it looks like in the latest revision this is not the case
 
-		public static void EnqueueWork(Context context, Intent work)
-			=> JobIntentService.EnqueueWork(context, Java.Lang.Class.FromType(typeof(ExposureNotificationBootService)), JobId, work);
+	//[Service(
+	//	DirectBootAware = true,
+	//	Permission = "android.permission.BIND_JOB_SERVICE")]
+	//internal class ExposureNotificationBootService : JobIntentService
+	//{
+	//	const int JobId = 0x01;
 
-		protected override async void OnHandleWork(Intent workIntent)
-			=> await ExposureNotification.StartAsync();
-	}
+	//	public static void EnqueueWork(Context context, Intent work)
+	//		=> JobIntentService.EnqueueWork(context, Java.Lang.Class.FromType(typeof(ExposureNotificationBootService)), JobId, work);
 
-	[BroadcastReceiver]
-	[IntentFilter(new [] { Intent.ActionBootCompleted })]
-	internal class ExposureNotificationBootBroadcastReceiver : BroadcastReceiver
-	{
-		public override void OnReceive(Context context, Intent intent)
-		{
-			if (intent.Action == Intent.ActionBootCompleted)
-				ExposureNotificationBootService.EnqueueWork(context, new Intent());
-		}
-	}
+	//	protected override async void OnHandleWork(Intent workIntent)
+	//		=> await ExposureNotification.StartAsync();
+	//}
+
+	//[BroadcastReceiver]
+	//[IntentFilter(new [] { Intent.ActionBootCompleted })]
+	//internal class ExposureNotificationBootBroadcastReceiver : BroadcastReceiver
+	//{
+	//	public override void OnReceive(Context context, Intent intent)
+	//	{
+	//		if (intent.Action == Intent.ActionBootCompleted)
+	//			ExposureNotificationBootService.EnqueueWork(context, new Intent());
+	//	}
+	//}
 
 	[BroadcastReceiver(Permission = "com.google.android.gms.nearby.exposurenotification.EXPOSURE_CALLBACK")]
 	[IntentFilter(new[]
@@ -56,11 +61,23 @@ namespace Xamarin.ExposureNotifications
 		{
 			if (workIntent.Action == ExposureNotificationCallbackBroadcastReceiver.ActionExposureStateUpdated)
 			{
-				//	TODO:
+				var summary = await ExposureNotification.AndroidGetExposureSummary();
+
+				if (summary != null && summary.MatchedKeyCount > 0)
+				{
+					// Invoke the custom implementation handler code with the summary info
+					await ExposureNotification.Handler.ExposureDetected(
+						summary,
+						() => ExposureNotification.GetExposureInformationAsync());
+				}
 			}
 			else if (workIntent.Action == ExposureNotificationCallbackBroadcastReceiver.ActionRequestDiagnosisKeys)
 			{
-				// TODO:
+				// Get any new keys
+				var keys = await ExposureNotification.GetSelfTemporaryExposureKeysAsync();
+
+				// Upload them to the server
+				await ExposureNotification.Handler.UploadSelfExposureKeysToServer(keys);
 			}
 		}
 	}
