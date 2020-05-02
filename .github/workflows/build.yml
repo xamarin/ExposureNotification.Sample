@@ -15,8 +15,8 @@ jobs:
       steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v1.0.0
+      # - name: Setup MSBuild
+      #   uses: microsoft/setup-msbuild@v1.0.0
       - name: NuGet Restore
         run: msbuild /t:Restore /p:Configuration=Release .\ExposureNotification.sln
       - name: Build
