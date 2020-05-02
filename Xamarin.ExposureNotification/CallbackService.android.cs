@@ -1,9 +1,6 @@
 ﻿using Android.App;
 using Android.Content;
-using Android.Gms.ExposureNotifications;
 using AndroidX.Core.App;
-using System;
-using Xamarin.Essentials;
 
 namespace Xamarin.ExposureNotifications
 {
@@ -18,9 +15,7 @@ namespace Xamarin.ExposureNotifications
 			=> JobIntentService.EnqueueWork(context, Java.Lang.Class.FromType(typeof(ExposureNotificationBootService)), JobId, work);
 
 		protected override async void OnHandleWork(Intent workIntent)
-		{
-			await ExposureNotification.StartAsync();
-		}
+			=> await ExposureNotification.StartAsync();
 	}
 
 	[BroadcastReceiver]
@@ -65,7 +60,7 @@ namespace Xamarin.ExposureNotifications
 			}
 			else if (workIntent.Action == ExposureNotificationCallbackBroadcastReceiver.ActionRequestDiagnosisKeys)
 			{
-				//	TODO:
+				// TODO:
 			}
 		}
 	}

@@ -5,24 +5,17 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Collections.Generic;
-using ExposureNotification.Core;
+using Xamarin.ExposureNotifications;
 
 namespace ExposureNotification.Backend.Functions
 {
 	public class Diagnosis
 	{
-		public Diagnosis(IExposureNotificationStorage storage)
-			=> this.storage = storage;
-
-		readonly IExposureNotificationStorage storage;
-
 		[FunctionName("Diagnosis")]
 		public async Task<IActionResult> Run(
-			[HttpTrigger(AuthorizationLevel.Anonymous, "post", "put", "delete", Route = "diagnosis")] HttpRequest req,
-			ILogger log)
+			[HttpTrigger(AuthorizationLevel.Anonymous, "post", "put", "delete", Route = "diagnosis")] HttpRequest req)
 		{
 			var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
 
@@ -30,19 +23,19 @@ namespace ExposureNotification.Backend.Functions
 			{
 				var diagnosisUids = JsonConvert.DeserializeObject<IEnumerable<string>>(requestBody);
 
-				await storage.AddDiagnosisUidsAsync(diagnosisUids);
+				await Startup.Database.AddDiagnosisUidsAsync(diagnosisUids);
 			}
 			else if (req.Method.Equals("delete", StringComparison.OrdinalIgnoreCase))
 			{
 				var diagnosisUids = JsonConvert.DeserializeObject<IEnumerable<string>>(requestBody);
 
-				await storage.RemoveDiagnosisUidsAsync(diagnosisUids);
+				await Startup.Database.RemoveDiagnosisUidsAsync(diagnosisUids);
 			}
 			else if (req.Method.Equals("post", StringComparison.OrdinalIgnoreCase))
 			{
-				var submission = JsonConvert.DeserializeObject<DiagnosisSubmission>(requestBody);
+				var (diagnosisUid, keys) = JsonConvert.DeserializeObject<(string diagnosisUid, IEnumerable<TemporaryExposureKey> keys)>(requestBody);
 
-				await storage.SubmitPositiveDiagnosisAsync(submission.DiagnosisUid, submission.TemporaryExposureKeys);
+				await Startup.Database.SubmitPositiveDiagnosisAsync(diagnosisUid, keys);
 			}
 
 			return new OkResult();

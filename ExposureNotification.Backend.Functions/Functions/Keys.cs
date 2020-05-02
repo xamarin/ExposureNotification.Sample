@@ -12,20 +12,14 @@ namespace ExposureNotification.Backend.Functions
 {
 	public class Keys
 	{
-		public Keys(IExposureNotificationStorage storage)
-			=> this.storage = storage;
-
-		readonly IExposureNotificationStorage storage;
-
 		[FunctionName("Keys")]
 		public async Task<IActionResult> Run(
-			[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "keys")] HttpRequest req,
-			ILogger log)
+			[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "keys")] HttpRequest req)
 		{
 			if (!DateTime.TryParse(req.Query?["since"], out var since))
 				since = DateTime.UtcNow.AddDays(-14);
 
-			var keysResponse = await storage.GetKeysAsync(since);
+			var keysResponse = await Startup.Database.GetKeysAsync(since);
 
 			return new OkObjectResult(keysResponse);
 		}

@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AndroidPendingIntent = global::Android.App.PendingIntent;
-using Xamarin.Essentials;
 using Android.Gms.ExposureNotifications;
 using Android.App;
 

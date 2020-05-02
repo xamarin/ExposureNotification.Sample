@@ -33,6 +33,7 @@ namespace ExposureNotification.App.iOS
 
 		public override void PerformFetch(UIApplication application, Action<UIBackgroundFetchResult> completionHandler)
 		{
+			// Get updated keys from server
 			Xamarin.ExposureNotifications.ExposureNotification.UpdateKeysFromServer()
 				.ContinueWith(t =>
 					completionHandler(t.IsFaulted ? UIBackgroundFetchResult.Failed

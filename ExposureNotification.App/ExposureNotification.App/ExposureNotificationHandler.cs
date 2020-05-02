@@ -1,5 +1,5 @@
-﻿using ExposureNotification.Core;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -42,14 +42,14 @@ namespace ExposureNotification.App
 
 			response.EnsureSuccessStatusCode();
 
-			var json = await response.Content.ReadAsStringAsync();
+			var responseData = await response.Content.ReadAsStringAsync();
 
-			var keys = JsonConvert.DeserializeObject<KeysResponse>(json);
+			var keys = JsonConvert.DeserializeObject<(DateTime timestamp, List<TemporaryExposureKey> keys)>(responseData);
 
 			// Save newest timestamp for next request
-			Preferences.Set(prefsSinceKey, keys.Timestamp.ToUniversalTime());
+			Preferences.Set(prefsSinceKey, keys.timestamp.ToUniversalTime());
 
-			return keys.Keys;
+			return keys.keys;
 		}
 	}
 }

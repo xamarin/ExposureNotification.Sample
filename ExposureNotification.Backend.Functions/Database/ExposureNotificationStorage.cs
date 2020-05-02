@@ -1,18 +1,14 @@
-﻿using ExposureNotification.Core;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
-using System.Xml.Schema;
 using Xamarin.ExposureNotifications;
 
 namespace ExposureNotification.Backend
 {
-	public class ExposureNotificationStorage : IExposureNotificationStorage
+	public class ExposureNotificationStorage
 	{
 		public ExposureNotificationStorage(
 			Action<DbContextOptionsBuilder> buildDbContextOpetions = null,

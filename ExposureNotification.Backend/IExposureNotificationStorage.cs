@@ -8,7 +8,7 @@ namespace ExposureNotification.Backend
 {
 	public interface IExposureNotificationStorage
 	{
-		Task<KeysResponse> GetKeysAsync(DateTime? since);
+		Task<(DateTime timestamp, IEnumerable<TemporaryExposureKey> keys)> GetKeysAsync(DateTime? since);
 
 		Task AddDiagnosisUidsAsync(IEnumerable<string> diagnosisUids);
 
