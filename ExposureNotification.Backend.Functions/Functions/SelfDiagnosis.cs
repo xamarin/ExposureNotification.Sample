@@ -33,9 +33,9 @@ namespace ExposureNotification.Backend.Functions
 			}
 			else if (req.Method.Equals("post", StringComparison.OrdinalIgnoreCase))
 			{
-				var (diagnosisUid, keys) = JsonConvert.DeserializeObject<(string diagnosisUid, IEnumerable<TemporaryExposureKey> keys)>(requestBody);
+				var diagnosis = JsonConvert.DeserializeObject<ExposureNotificationStorage.SelfDiagnosisSubmissionRequest>(requestBody);
 
-				await Startup.Database.SubmitPositiveDiagnosisAsync(diagnosisUid, keys);
+				await Startup.Database.SubmitPositiveDiagnosisAsync(diagnosis);
 			}
 
 			return new OkResult();

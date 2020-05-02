@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Resources;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Xamarin.ExposureNotifications;
@@ -36,9 +37,7 @@ namespace ExposureNotification.App
 
 			// Get the newest date we have keys from and request since then
 			// or if no date stored, only return as much as the past 14 days of keys
-			var since = Preferences.Get(prefsSinceKey, DateTime.UtcNow.AddDays(-14));
-			var sinceEpochSeconds = new DateTimeOffset(since).ToUnixTimeSeconds();
-
+			var sinceEpochSeconds = Preferences.Get(prefsSinceKey, DateTimeOffset.MinValue.ToUnixTimeSeconds());
 			var url = $"{apiUrlBase.TrimEnd('/')}/keys?since={sinceEpochSeconds}";
 
 			var response = await http.GetAsync(url);
@@ -47,12 +46,13 @@ namespace ExposureNotification.App
 
 			var responseData = await response.Content.ReadAsStringAsync();
 
-			var keys = JsonConvert.DeserializeObject<(DateTime timestamp, List<TemporaryExposureKey> keys)>(responseData);
+			// Response contains the timestamp in seconds since epoch, and the list of keys
+			var keys = JsonConvert.DeserializeObject<KeysResponse>(responseData);
 
 			// Save newest timestamp for next request
-			Preferences.Set(prefsSinceKey, keys.timestamp.ToUniversalTime());
+			Preferences.Set(prefsSinceKey, keys.Timestamp);
 
-			return keys.keys;
+			return keys.Keys;
 		}
 
 		const string prefsDiagnosisSubmissionDate = "prefs_diagnosis_submit_date";
@@ -79,7 +79,11 @@ namespace ExposureNotification.App
 			{
 				var url = $"{apiUrlBase.TrimEnd('/')}/selfdiagnosis";
 
-				var json = JsonConvert.SerializeObject((diagnosisUid, temporaryExposureKeys));
+				var json = JsonConvert.SerializeObject(new SelfDiagnosisSubmissionRequest
+				{
+					DiagnosisUid = diagnosisUid,
+					Keys = temporaryExposureKeys
+				});
 
 				var http = new HttpClient();
 				var response = await http.PostAsync(url, new StringContent(json));
@@ -96,6 +100,24 @@ namespace ExposureNotification.App
 				Preferences.Set(prefsDiagnosisSubmissionDate, DateTime.UtcNow.AddDays(-100));
 				throw;
 			}
+		}
+
+		class SelfDiagnosisSubmissionRequest
+		{
+			[JsonProperty("diagnosisUid")]
+			public string DiagnosisUid { get; set; }
+
+			[JsonProperty("keys")]
+			public IEnumerable<TemporaryExposureKey> Keys { get; set; }
+		}
+
+		class KeysResponse
+		{
+			[JsonProperty("timestamp")]
+			public long Timestamp { get; set; }
+
+			[JsonProperty("keys")]
+			public IEnumerable<TemporaryExposureKey> Keys { get; set; }
 		}
 	}
 }

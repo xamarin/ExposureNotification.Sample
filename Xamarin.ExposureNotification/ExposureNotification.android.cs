@@ -49,7 +49,7 @@ namespace Xamarin.ExposureNotifications
 				DateTimeOffset.UnixEpoch.AddMilliseconds(d.DateMillisSinceEpoch).UtcDateTime,
 				TimeSpan.FromMinutes(d.DurationMinutes),
 				d.AttenuationValue,
-				(byte)d.TotalRiskScore, // TODO: Check
+				d.TotalRiskScore,
 				(RiskLevel)((int)d.TransmissionRiskLevel)));
 		}
 
@@ -61,7 +61,7 @@ namespace Xamarin.ExposureNotifications
 			await Handler.UploadSelfExposureKeysToServer(
 				selfKeys.Select(k => new TemporaryExposureKey(
 					k.KeyData,
-					(ulong)k.RollingStartNumber,
+					k.RollingStartNumber,
 					TimeSpan.FromMinutes(k.RollingDuration),
 					(RiskLevel)k.TransmissionRiskLevel)));
 		}
@@ -81,7 +81,7 @@ namespace Xamarin.ExposureNotifications
 					batch.Select(k => new ExposureNotificationClient.TemporaryExposureKey
 					{
 						KeyData = k.KeyData,
-						RollingStartNumber = (long)k.RollingStart,
+						RollingStartNumber = k.RollingStartLong,
 						RollingDuration = (long)k.RollingDuration.TotalMinutes,
 						TransmissionRiskLevel = (ExposureNotificationClient.RiskLevel)k.TransmissionRiskLevel
 					}).ToList());
@@ -100,7 +100,7 @@ namespace Xamarin.ExposureNotifications
 			return exposureKeyHistory.Select(k =>
 				new TemporaryExposureKey(
 					k.KeyData,
-					(ulong)k.RollingStartNumber,
+					k.RollingStartNumber,
 					TimeSpan.FromMinutes(k.RollingDuration * 10),
 					(RiskLevel)((int)k.TransmissionRiskLevel)
 					));

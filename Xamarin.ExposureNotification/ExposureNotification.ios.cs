@@ -63,11 +63,10 @@ namespace Xamarin.ExposureNotifications
 
 			return info.Exposures.Select(i =>
 				new ExposureInfo(
-					TimeZone.CurrentTimeZone.ToLocalTime(new DateTime(2001, 1, 1, 0, 0, 0))
-						.AddSeconds(i.Date.SecondsSinceReferenceDate),
+					((DateTime)i.Date).ToLocalTime(),
 					TimeSpan.FromMinutes(i.Duration),
-					(int)i.AttenuationValue,
-					(byte)i.TotalRiskScore,
+					i.AttenuationValue,
+					i.TotalRiskScore,
 					(RiskLevel)i.TransmissionRiskLevel));
 		}
 
@@ -103,7 +102,8 @@ namespace Xamarin.ExposureNotifications
 					new ENTemporaryExposureKey
 					{
 						KeyData = NSData.FromArray(k.KeyData),
-						RollingStartNumber = (uint)k.RollingStart
+						RollingStartNumber = (uint)k.RollingStartLong,
+						TransmissionRiskLevel = (ENRiskLevel)k.TransmissionRiskLevel
 					}).ToArray());
 			}
 

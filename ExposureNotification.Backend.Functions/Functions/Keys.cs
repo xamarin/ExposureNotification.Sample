@@ -19,8 +19,7 @@ namespace ExposureNotification.Backend.Functions
 			if (!long.TryParse(req.Query?["since"], out var sinceEpochSeconds))
 				sinceEpochSeconds = new DateTimeOffset(DateTime.UtcNow.AddDays(-14)).ToUnixTimeSeconds();
 
-			var since = DateTimeOffset.FromUnixTimeSeconds(sinceEpochSeconds).UtcDateTime;
-			var keysResponse = await Startup.Database.GetKeysAsync(since);
+			var keysResponse = await Startup.Database.GetKeysAsync(sinceEpochSeconds);
 
 			return new OkObjectResult(keysResponse);
 		}

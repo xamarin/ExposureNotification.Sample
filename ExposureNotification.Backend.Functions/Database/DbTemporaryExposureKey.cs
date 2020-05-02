@@ -11,9 +11,9 @@ namespace ExposureNotification.Backend
 
 		public string Base64KeyData { get; set; }
 
-		public DateTime Timestamp { get; set; }
+		public long TimestampSecondsSinceEpoch { get; set; }
 
-		public ulong RollingStart { get; set; }
+		public long RollingStartSecondsSinceEpoch { get; set; }
 
 		public int RollingDuration { get; set; }
 
@@ -22,7 +22,7 @@ namespace ExposureNotification.Backend
 		public TemporaryExposureKey ToKey()
 			=> new TemporaryExposureKey(
 				Convert.FromBase64String(Base64KeyData),
-				RollingStart,
+				DateTimeOffset.FromUnixTimeSeconds(RollingStartSecondsSinceEpoch),
 				TimeSpan.FromMinutes(RollingDuration),
 				(RiskLevel)TransmissionRiskLevel);
 
@@ -30,8 +30,8 @@ namespace ExposureNotification.Backend
 			=> new DbTemporaryExposureKey
 			{
 				Base64KeyData = Convert.ToBase64String(key.KeyData),
-				Timestamp = DateTime.UtcNow,
-				RollingStart = key.RollingStart,
+				TimestampSecondsSinceEpoch = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+				RollingStartSecondsSinceEpoch = key.RollingStart.ToUnixTimeSeconds(),
 				RollingDuration = (int)key.RollingDuration.TotalMinutes,
 				TransmissionRiskLevel = (int)key.TransmissionRiskLevel
 			};
