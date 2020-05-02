@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="ExposureNotification.App.Views.DiagnosisPage"
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewmodel="clr-namespace:ContactTracing.App.ViewModels"
+    Title="Diagnosis"
+    BackgroundColor="{StaticResource BackgroundColor}"
+    mc:Ignorable="d">
+    <d:ContentPage.BindingContext>
+        <viewmodel:MainViewModel />
+    </d:ContentPage.BindingContext>
+
+    <ScrollView>
+        <StackLayout Padding="20" Spacing="12">        
+
+          
+           
+
+            <Frame>
+                <StackLayout>
+                    <Label Text="Your local health authority will provide you with a Unique Diagnosis Identifier, enter it in the field below:" />
+                    <Entry
+                        HorizontalOptions="FillAndExpand"
+                        Placeholder="Diagnosis Identifier"
+                        Text="{Binding DiagnosisUid, Mode=TwoWay}"
+                        TextColor="{StaticResource TextPrimaryColor}" />
+
+                    <Button
+                        Command="{Binding SubmitDiagnosisCommand}"
+                        HorizontalOptions="End"
+                        IsEnabled="{Binding IsEnabled}"
+                        Style="{DynamicResource ButtonRounded}"
+                        Text="Submit a diagnosis" />
+
+                </StackLayout>
+            </Frame>
+        </StackLayout>
+    </ScrollView>
+</ContentPage>
