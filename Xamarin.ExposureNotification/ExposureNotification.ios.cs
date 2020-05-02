@@ -57,7 +57,7 @@ namespace Xamarin.ExposureNotifications
 		static async Task<IEnumerable<ExposureInfo>> PlatformGetExposureInformation()
 		{
 			var s = await GetSessionAsync();
-			
+
 			// TODO: Check max
 			var info = await s.GetExposureInfoAsync(100);
 
@@ -98,7 +98,7 @@ namespace Xamarin.ExposureNotifications
 			{
 				var batch = sequence.Take(batchSize);
 				sequence = sequence.Skip(batchSize);
-				
+
 				await s.AddDiagnosisKeysAsync(diagnosisKeys.Select(k =>
 					new ENTemporaryExposureKey
 					{

@@ -31,7 +31,7 @@ namespace Xamarin.ExposureNotifications
 		static Task<ExposureDetectionSummary> PlatformAddDiagnosisKeys(IEnumerable<TemporaryExposureKey> diagnosisKeys)
 			=> throw new PlatformNotSupportedException();
 
-		static async Task<IEnumerable<TemporaryExposureKey>> PlatformGetTemporaryExposureKeys()
+		static Task<IEnumerable<TemporaryExposureKey>> PlatformGetTemporaryExposureKeys()
 			=> throw new PlatformNotSupportedException();
 	}
 }

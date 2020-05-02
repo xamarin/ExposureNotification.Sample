@@ -37,7 +37,7 @@ namespace ExposureNotification.App.iOS
 			Xamarin.ExposureNotifications.ExposureNotification.UpdateKeysFromServer()
 				.ContinueWith(t =>
 					completionHandler(t.IsFaulted ? UIBackgroundFetchResult.Failed
-						: t.Result ? UIBackgroundFetchResult.NewData : UIBackgroundFetchResult.NoData));			
+						: t.Result ? UIBackgroundFetchResult.NewData : UIBackgroundFetchResult.NoData));
 		}
 	}
 }

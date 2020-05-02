@@ -17,7 +17,7 @@ namespace ExposureNotification.App
 {
 	public class ExposureNotificationHandler : IExposureNotificationHandler
 	{
-		const string ApiUrlBase = "http://localhost:7071/api/";
+		const string apiUrlBase = "http://localhost:7071/api/";
 
 		static readonly HttpClient http = new HttpClient();
 
@@ -39,7 +39,7 @@ namespace ExposureNotification.App
 			var since = Preferences.Get(prefsSinceKey, DateTime.UtcNow.AddDays(-14));
 			var sinceEpochSeconds = new DateTimeOffset(since).ToUnixTimeSeconds();
 
-			var url = $"{ApiUrlBase.TrimEnd('/')}/keys?since={sinceEpochSeconds}";
+			var url = $"{apiUrlBase.TrimEnd('/')}/keys?since={sinceEpochSeconds}";
 
 			var response = await http.GetAsync(url);
 
@@ -55,17 +55,17 @@ namespace ExposureNotification.App
 			return keys.keys;
 		}
 
-		const string PrefsDiagnosisSubmissionDate = "prefs_diagnosis_submit_date";
-		const string PrefsDiagnosisSubmissionUid = "prefs_diagnosis_submit_uid";
+		const string prefsDiagnosisSubmissionDate = "prefs_diagnosis_submit_date";
+		const string prefsDiagnosisSubmissionUid = "prefs_diagnosis_submit_uid";
 
 		public static bool HasSubmittedDiagnosis
-			=> Preferences.Get(PrefsDiagnosisSubmissionDate, DateTime.MinValue)
+			=> Preferences.Get(prefsDiagnosisSubmissionDate, DateTime.MinValue)
 				>= DateTime.UtcNow.AddDays(-14);
 
 		public static string DiagnosisUid
 		{
-			get => Preferences.Get(PrefsDiagnosisSubmissionUid, (string)null);
-			set => Preferences.Set(PrefsDiagnosisSubmissionUid, value);
+			get => Preferences.Get(prefsDiagnosisSubmissionUid, (string)null);
+			set => Preferences.Set(prefsDiagnosisSubmissionUid, value);
 		}
 
 		public async Task UploadSelfExposureKeysToServer(IEnumerable<TemporaryExposureKey> temporaryExposureKeys)
@@ -77,7 +77,7 @@ namespace ExposureNotification.App
 
 			try
 			{
-				var url = $"{ApiUrlBase.TrimEnd('/')}/selfdiagnosis";
+				var url = $"{apiUrlBase.TrimEnd('/')}/selfdiagnosis";
 
 				var json = JsonConvert.SerializeObject((diagnosisUid, temporaryExposureKeys));
 
@@ -87,13 +87,13 @@ namespace ExposureNotification.App
 				response.EnsureSuccessStatusCode();
 
 				// Store the date we were diagnosed
-				Preferences.Set(PrefsDiagnosisSubmissionDate, DateTime.UtcNow);
+				Preferences.Set(prefsDiagnosisSubmissionDate, DateTime.UtcNow);
 			}
 			catch
 			{
 				// Reset diagnosis status since we don't have one that was successfully submitted
 				// and then re-throw
-				Preferences.Set(PrefsDiagnosisSubmissionDate, DateTime.UtcNow.AddDays(-100));
+				Preferences.Set(prefsDiagnosisSubmissionDate, DateTime.UtcNow.AddDays(-100));
 				throw;
 			}
 		}

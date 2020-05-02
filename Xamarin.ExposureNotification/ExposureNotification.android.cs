@@ -96,7 +96,7 @@ namespace Xamarin.ExposureNotifications
 		static async Task<IEnumerable<TemporaryExposureKey>> PlatformGetTemporaryExposureKeys()
 		{
 			var exposureKeyHistory = await Instance.GetTemporaryExposureKeyHistory();
-			
+
 			return exposureKeyHistory.Select(k =>
 				new TemporaryExposureKey(
 					k.KeyData,

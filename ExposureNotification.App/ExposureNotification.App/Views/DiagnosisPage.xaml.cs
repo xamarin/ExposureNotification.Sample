@@ -9,7 +9,6 @@ namespace ExposureNotification.App.Views
 		public DiagnosisPage()
 		{
 			InitializeComponent();
-			//BindingContext = new MainViewModel();
 		}
 	}
 }
