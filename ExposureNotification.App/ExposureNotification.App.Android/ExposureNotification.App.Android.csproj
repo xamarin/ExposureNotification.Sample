@@ -57,8 +57,8 @@
     <PackageReference Include="Acr.UserDialogs">
       <Version>7.1.0.442</Version>
     </PackageReference>
-    <PackageReference Include="System.Text.Json">
-      <Version>4.7.1</Version>
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>12.0.3</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Forms" Version="4.6.0.726" />
     <PackageReference Include="Xamarin.Essentials" Version="1.5.3.1" />
@@ -98,10 +98,6 @@
     <Folder Include="Resources\drawable\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\ExposureNotification.Core\ExposureNotification.Core.csproj">
-      <Project>{6ddc5dce-9b68-45ac-8b7a-a010167e1343}</Project>
-      <Name>ExposureNotification.Core</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\Xamarin.ExposureNotification\Xamarin.ExposureNotification.csproj">
       <Project>{455bd53e-c845-4530-be1f-27e871c256fe}</Project>
       <Name>Xamarin.ExposureNotification</Name>

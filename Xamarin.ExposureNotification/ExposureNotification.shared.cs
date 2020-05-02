@@ -1,68 +1,116 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using Xamarin.Essentials;
 
 namespace Xamarin.ExposureNotifications
 {
 	public static partial class ExposureNotification
 	{
-		internal const string Prefs_ExposureNotification_Enabled_Key = "ExposureNotification_enabled";
-		internal const string Prefs_ExposureNotification_SubmittedDate_Key = "ExposureNotification_submitteddate";
-		internal const string Prefs_ExposureNotification_Handler_Type_Key = "ExposureNotification_handler_type";
+		static IExposureNotificationHandler handler;
 
-		public static Task Start<TExposureNotificationHandler>() where TExposureNotificationHandler : IExposureNotificationHandler
-			=> StartWithTypeName(typeof(TExposureNotificationHandler).FullName);
+		internal static IExposureNotificationHandler Handler
+		{
+			get
+			{
+				if (handler != default)
+					return handler;
 
-		internal static Task Start()
-			=> StartWithTypeName(Preferences.Get(Prefs_ExposureNotification_Handler_Type_Key, string.Empty));
+				// Look up implementations of IExposureNotificationHandler
+				var allAssemblies = AppDomain.CurrentDomain.GetAssemblies();
+				foreach (var asm in allAssemblies)
+				{
+					if (asm.IsDynamic)
+						continue;
+
+					var asmName = asm.GetName().Name;
+
+					if (asmName.StartsWith("System.", StringComparison.OrdinalIgnoreCase)
+						|| asmName.StartsWith("Xamarin.", StringComparison.OrdinalIgnoreCase))
+						continue;
+
+					var allTypes = asm.GetExportedTypes();
+
+					foreach (var t in allTypes)
+					{
+						if (t.IsClass && t.IsAssignableFrom(typeof(IExposureNotificationHandler)))
+							handler = (IExposureNotificationHandler)Activator.CreateInstance(t.GetType());
+					}
+				}
+
+				if (handler == default)
+					throw new NotImplementedException($"Missing an implementation for {nameof(IExposureNotificationHandler)}");
+
+				return handler;
+			}
+		}
 
 		public static Task<bool> IsEnabledAsync()
 			=> PlatformIsEnabled();
 
-		public static bool LastEnabledState
-			=> Preferences.Get(Prefs_ExposureNotification_Enabled_Key, false);
+		public static async Task StartAsync()
+			=> await PlatformStart(Handler);
 
-		static async Task StartWithTypeName(string typeName)
-		{
-			if (string.IsNullOrEmpty(typeName))
-				throw new NullReferenceException(nameof(typeName));
+		public static async Task StopAsync()
+			=> await PlatformStop();
 
-			var handlerInstance = (IExposureNotificationHandler)Activator.CreateInstance(Type.GetType(typeName));
-
-			await PlatformStart(handlerInstance);
-
-			Preferences.Set(Prefs_ExposureNotification_Handler_Type_Key, typeName);
-			Preferences.Set(Prefs_ExposureNotification_Enabled_Key, true);
-		}
-
-		public static async Task Stop()
-		{
-			await PlatformStop();
-
-			Preferences.Set(Prefs_ExposureNotification_Handler_Type_Key, string.Empty);
-			Preferences.Set(Prefs_ExposureNotification_Enabled_Key, false);
-		}
-		
 		// Gets the contact info of anyone the user had contact with who was diagnosed
-		public static Task<IEnumerable<ContactInfo>> GetContacts()
-			=> PlatformGetContacts();
-
-		// Call this when the user has confirmed diagnosis
-		public static async Task SubmitPositiveDiagnosis()
-		{
-			await PlatformSubmitPositiveDiagnosis();
-
-			Preferences.Set(Prefs_ExposureNotification_SubmittedDate_Key, DateTime.UtcNow);
-		}
-
-		public static bool HasSubmittedDiagnosis
-			=> Preferences.Get(Prefs_ExposureNotification_SubmittedDate_Key, DateTime.UtcNow.AddYears(-1))
-				>= DateTime.UtcNow.AddDays(-14);
+		internal static Task<IEnumerable<ExposureInfo>> GetExposureInformationAsync()
+			=> PlatformGetExposureInformation();
 
 		// Tells the local API when new diagnosis keys have been obtained from the server
-		public static Task ProcessDiagnosisKeys(IEnumerable<TemporaryExposureKey> diagnosisKeys)
-			=> PlatformProcessDiagnosisKeys(diagnosisKeys);
+		internal static Task<ExposureDetectionSummary> AddDiagnosisKeysAsync(IEnumerable<TemporaryExposureKey> diagnosisKeys)
+			=> PlatformAddDiagnosisKeys(diagnosisKeys);
+
+		public static Task SubmitSelfDiagnosisAsync()
+			=> PlatformSubmitSelfDiagnosis();
+
+		internal static Task<IEnumerable<TemporaryExposureKey>> GetSelfTemporaryExposureKeysAsync()
+			=> PlatformGetTemporaryExposureKeys();
+
+		public static async Task<bool> UpdateKeysFromServer()
+		{
+			var keys = await Handler?.FetchExposureKeysFromServer();
+
+			var updates = keys != null && keys.Any();
+
+			if (updates)
+			{
+				var summary = await AddDiagnosisKeysAsync(keys);
+
+				// Check that the summary has any matches before notifying the callback
+				if (summary != null && summary.MatchedKeyCount > 0)
+				{
+					// This will run and invoke the handler in the background to deal with results
+					_ = Task.Run(() =>
+						  Handler.ExposureDetected(summary,
+							  () => GetExposureInformationAsync()));
+				}
+			}
+
+			return updates;
+		}
+	}
+
+	public class Configuration
+	{
+		// Minimum risk score required to record
+		public int MinimumRiskScore { get; set; } = 1;
+
+		public int[] TransmissionRiskScores { get; set; } = new int[] { 1, 1, 1, 1, 1, 1, 1, 1 };
+
+		// Scores assigned to the attenuation of the BTLE signal of exposures
+		// A > 73dBm, 73 <= A > 63, 63 <= A > 51, 51 <= A > 33, 33 <= A > 27, 27 <= A > 15, 15 <= A > 10, A <= 10
+		public int[] AttenuationScores { get; set; } = new [] { 1, 2, 3, 4, 5, 6, 7, 8 };
+
+		// Scores assigned to each length of exposure
+		// < 5min, 5min, 10min, 15min, 20min, 25min, 30min, > 30min
+		public int[] DurationScores { get; set; } = new[] { 1, 2, 3, 4, 5, 6, 7, 8 };
+
+		// Scores assigned to each range of days of exposure
+		// >= 14days, 13-12, 11-10, 9-8, 7-6, 5-4, 3-2, 1-0
+		public int[] DaysScores { get; set; } = new[] { 8, 7, 6, 5, 4, 3, 2, 1 };
 	}
 }

@@ -6,75 +6,112 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AndroidPendingIntent = global::Android.App.PendingIntent;
-using Xamarin.Essentials;
-using Android.Gms.ContactTracing;
+using Android.Gms.ExposureNotifications;
+using Android.App;
+
+[assembly: UsesPermission(Android.Manifest.Permission.Bluetooth)]
 
 namespace Xamarin.ExposureNotifications
 {
 	public static partial class ExposureNotification
 	{
-		static ContactTracing instance;
+		static ExposureNotificationClient instance;
 
-		static ContactTracing Instance
-			=> instance ??= new ContactTracing();
+		static ExposureNotificationClient Instance
+			=> instance ??= new ExposureNotificationClient();
 
 		static async Task PlatformStart(IExposureNotificationHandler handler)
 		{
-			var context = Platform.AppContext;
+			var c = handler.Configuration;
 
-			var callbackIntent = new Intent(context, typeof(ExposureNotificationCallbackService));
-
-			var status = await Instance.StartContactTracing(AndroidPendingIntent.GetService(
-				context,
-				101,
-				callbackIntent,
-				global::Android.App.PendingIntentFlags.UpdateCurrent));
-
-			if (status != Status.Success)
-				throw new Exception();
+			// TODO: Verify mapping of config
+			await Instance.Start(new ExposureNotificationClient.ExposureConfiguration
+			{
+				AttenuationScores = c.AttenuationScores,
+				DurationScores = c.DurationScores,
+				DaysSinceLastExposureScores = c.DaysScores,
+				TransmissionRiskScores = c.TransmissionRiskScores
+			});
 		}
 
-		static async Task PlatformStop()
-		{
-			var status = await Instance.StopContactTracing();
+		static Task PlatformStop()
+			=> Instance.Stop();
 
-			if (status != Status.Success)
-				throw new Exception();
-		}
-
-		static async Task<bool> PlatformIsEnabled()
-			=> await Instance.IsContactTracingEnabled() == Status.Success;
+		static Task<bool> PlatformIsEnabled()
+			=> Instance.IsEnabled();
 
 		// Gets the contact info of anyone the user had contact with who was diagnosed
-		static async Task<IEnumerable<ContactInfo>> PlatformGetContacts()
+		static async Task<IEnumerable<ExposureInfo>> PlatformGetExposureInformation()
 		{
-			var contacts = await Instance.GetContactInformation();
-			return contacts.Select(c => new ContactInfo(c.ContactDate, TimeSpan.FromMinutes(c.Duration)));
+			var details = await Instance.GetExposureInformation();
+
+			return details.Select(d => new ExposureInfo(
+				DateTimeOffset.UnixEpoch.AddMilliseconds(d.DateMillisSinceEpoch).UtcDateTime,
+				TimeSpan.FromMinutes(d.DurationMinutes),
+				d.AttenuationValue,
+				(byte)d.TotalRiskScore, // TODO: Check
+				(RiskLevel)((int)d.TransmissionRiskLevel)));
 		}
 
 		// Call this when the user has confirmed diagnosis
-		static async Task PlatformSubmitPositiveDiagnosis()
+		static async Task PlatformSubmitSelfDiagnosis()
 		{
-			var status = await Instance.StartSharingDailyTracingKeys();
-			if (status != Status.Success)
-				throw new Exception();
+			var selfKeys = await Instance.GetTemporaryExposureKeyHistory();
+
+			await Handler.UploadSelfExposureKeysToServer(
+				selfKeys.Select(k => new TemporaryExposureKey(
+					k.KeyData,
+					(ulong)k.RollingStartNumber,
+					TimeSpan.FromMinutes(k.RollingDuration),
+					(RiskLevel)k.TransmissionRiskLevel)));
 		}
 
 		// Tells the local API when new diagnosis keys have been obtained from the server
-		static async Task PlatformProcessDiagnosisKeys(IEnumerable<TemporaryExposureKey> diagnosisKeys)
+		static async Task<ExposureDetectionSummary> PlatformAddDiagnosisKeys(IEnumerable<TemporaryExposureKey> diagnosisKeys)
 		{
-			var batchSize = Instance.MaxDiagnosisKeys;
+			var batchSize = await Instance.GetMaxDiagnosisKeys();
+			var sequence = diagnosisKeys;
 
-			for (int i = 0; i < diagnosisKeys.Count(); i += batchSize)
+			while (sequence.Any())
 			{
-				var batch = diagnosisKeys.Skip(i).Take(batchSize)
-					.Select(k => new global::Android.Gms.ContactTracing.DailyTracingKey(k.KeyData, k.Timestamp))
-					.ToList();
+				var batch = sequence.Take(batchSize);
+				sequence = sequence.Skip(batchSize);
 
-				var status = await Instance.ProvideDiagnosisKeys(batch);
-				if (status != Status.Success)
-					throw new Exception();
+				await Instance.ProvideDiagnosisKeys(
+					batch.Select(k => new ExposureNotificationClient.TemporaryExposureKey
+					{
+						KeyData = k.KeyData,
+						RollingStartNumber = (long)k.RollingStart,
+						RollingDuration = (long)k.RollingDuration.TotalMinutes,
+						TransmissionRiskLevel = (ExposureNotificationClient.RiskLevel)k.TransmissionRiskLevel
+					}).ToList());
 			}
+
+			var summary = await Instance.GetExposureSummary();
+
+			// TODO: Reevaluate byte usage here
+			return new ExposureDetectionSummary(summary.DaysSinceLastExposure, (ulong)summary.MatchedKeyCount, (byte)summary.MaximumRiskScore);
+		}
+
+		static async Task<IEnumerable<TemporaryExposureKey>> PlatformGetTemporaryExposureKeys()
+		{
+			var exposureKeyHistory = await Instance.GetTemporaryExposureKeyHistory();
+			
+			return exposureKeyHistory.Select(k =>
+				new TemporaryExposureKey(
+					k.KeyData,
+					(ulong)k.RollingStartNumber,
+					TimeSpan.FromMinutes(k.RollingDuration * 10),
+					(RiskLevel)((int)k.TransmissionRiskLevel)
+					));
+		}
+
+		internal static async Task<ExposureDetectionSummary> AndroidGetExposureSummary()
+		{
+			var s = await Instance.GetExposureSummary();
+
+			// TODO: Verify risk score byte 
+			return new ExposureDetectionSummary(s.DaysSinceLastExposure, (ulong)s.MatchedKeyCount, (byte)s.MaximumRiskScore);
 		}
 	}
 }

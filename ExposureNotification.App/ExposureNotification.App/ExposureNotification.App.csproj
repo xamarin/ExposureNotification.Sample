@@ -17,10 +17,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Resource Include="..\..\Certificates\sample.exposurenotification.xamarin.com.cert" Link="sample.exposurenotification.xamarin.com.cert" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="Acr.UserDialogs" Version="7.1.0.442" />
 		<PackageReference Include="System.Text.Json" Version="4.7.1" />
 		<PackageReference Include="Xamarin.Forms" Version="4.6.0.726" />
@@ -29,7 +25,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\ExposureNotification.Core\ExposureNotification.Core.csproj" />
 	  <ProjectReference Include="..\..\Xamarin.ExposureNotification\Xamarin.ExposureNotification.csproj" />
 	</ItemGroup>
 </Project>

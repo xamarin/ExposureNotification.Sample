@@ -1,0 +1,23 @@
+name: Build
+
+on:
+  pull_request:
+  push:
+  release:
+    types: [published]
+
+jobs:
+    build:
+      name: Build
+      env:
+        NUPKG_MAJOR: 0.1.0
+      runs-on: macos-latest
+      steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: NuGet Restore
+        run: msbuild -t:Restore ./ExposureNotification.sln
+      - name: Build
+        run: msbuild -t:Build ./ExposureNotification.sln
+      - name: Run Tests
+        run: dotnet test ./ExposureNotification.Tests/ExposureNotification.Tests.csproj

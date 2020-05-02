@@ -3,6 +3,9 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# Azure Functions
+local.settings.json
+
 # User-specific files
 *.rsuser
 *.suo
@@ -226,7 +229,6 @@ ClientBin/
 *.dbmdl
 *.dbproj.schemaview
 *.jfm
-*.pfx
 *.publishsettings
 orleans.codegen.cs
 
@@ -348,3 +350,9 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+
+# Ignore .DS_Store for those of us using VisualStudio for Mac
+.DS_Store
+._.DS_Store
+**/.DS_Store
+**/._.DS_Store

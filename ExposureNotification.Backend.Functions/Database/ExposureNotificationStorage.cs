@@ -1,17 +1,16 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
-using System.Xml.Schema;
+using Xamarin.ExposureNotifications;
 
 namespace ExposureNotification.Backend
 {
-	public class ExposureNotificationStorage : IExposureNotificationStorage
+	public class ExposureNotificationStorage
 	{
-		public ExposureNotificationStorage(ITemporaryExposureKeyEncoding tempExposureKeyEncoding,
+		public ExposureNotificationStorage(
 			Action<DbContextOptionsBuilder> buildDbContextOpetions = null,
 			Action<DbContext> initializeDb = null)
 		{
@@ -19,16 +18,13 @@ namespace ExposureNotification.Backend
 			buildDbContextOpetions?.Invoke(dbContextOptionsBuilder);
 			dbContextOptions = dbContextOptionsBuilder.Options;
 
-			temporaryExposureKeyConding = tempExposureKeyEncoding;
-
 			using (var ctx = new ExposureNotificationContext(dbContextOptions))
 				initializeDb?.Invoke(ctx);
 		}
 
 		readonly DbContextOptions dbContextOptions;
-		readonly ITemporaryExposureKeyEncoding temporaryExposureKeyConding;
 
-		public async Task<IEnumerable<TemporaryExposureKey>> GetKeysAsync(DateTime? since)
+		public async Task<(DateTime, IEnumerable<TemporaryExposureKey>)> GetKeysAsync(DateTime? since)
 		{
 			using (var ctx = new ExposureNotificationContext(dbContextOptions))
 			{
@@ -41,10 +37,10 @@ namespace ExposureNotification.Backend
 					.Where(dtk => dtk.Timestamp >= since)
 					.ToListAsync().ConfigureAwait(false);
 
-				return results.Select(dtk => new TemporaryExposureKey {
-					KeyData = temporaryExposureKeyConding.Decode(Convert.FromBase64String(dtk.Base64KeyData)),
-					Timestamp = dtk.Timestamp
-				});
+				var newestTimestamp = results.OrderByDescending(dtk => dtk.Timestamp).FirstOrDefault()?.Timestamp;
+				var keys = results.Select(dtk => dtk.ToKey());
+
+				return (newestTimestamp ?? DateTime.MinValue, keys);
 			}
 		}
 
@@ -94,12 +90,7 @@ namespace ExposureNotification.Backend
 				if (!ctx.Diagnoses.Any(d => d.DiagnosisUid == diagnosisUid))
 					throw new InvalidOperationException();
 
-				var dbKeys = keys.Where(k => k.Timestamp.ToUniversalTime() >= DateTime.UtcNow.AddDays(-14))
-					.Select(k => new DbTemporaryExposureKey
-						{
-							Base64KeyData = Convert.ToBase64String(temporaryExposureKeyConding.Encode(k.KeyData)),
-							Timestamp = k.Timestamp
-						}).ToList();
+				var dbKeys = keys.Select(k => DbTemporaryExposureKey.FromKey(k)).ToList();
 
 				foreach (var dbk in dbKeys)
 					ctx.TemporaryExposureKeys.Add(dbk);

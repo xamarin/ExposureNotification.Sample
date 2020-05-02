@@ -1,8 +1,8 @@
 ﻿using Acr.UserDialogs;
 using ExposureNotification.App;
+using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Net.Http;
 using System.Windows.Input;
 using Xamarin.Essentials;
 using Xamarin.Forms;
@@ -13,9 +13,6 @@ namespace ContactTracing.App.ViewModels
 	{
 		public MainViewModel()
 		{
-			IsEnabled = Xamarin.ExposureNotifications.ExposureNotification.LastEnabledState;
-			NotifyPropertyChanged(nameof(IsEnabled));
-
 			Xamarin.ExposureNotifications.ExposureNotification.IsEnabledAsync()
 				.ContinueWith(t =>
 				{
@@ -24,7 +21,7 @@ namespace ContactTracing.App.ViewModels
 				});
 		}
 
-		public bool IsEnabled { get; set; }
+		public bool IsEnabled { get; set; } = false;
 
 		public string EnableDisableText
 			=> IsEnabled ? "Disable" : "Enable";
@@ -32,7 +29,7 @@ namespace ContactTracing.App.ViewModels
 		public string DiagnosisUid { get; set; }
 
 		public bool HasSubmittedDiagnosis
-			=> Xamarin.ExposureNotifications.ExposureNotification.HasSubmittedDiagnosis;
+			=> ExposureNotificationHandler.HasSubmittedDiagnosis;
 
 		public ICommand EnableDisableCommand
 			=> new Command(async () =>
@@ -40,9 +37,9 @@ namespace ContactTracing.App.ViewModels
 				var enabled = await Xamarin.ExposureNotifications.ExposureNotification.IsEnabledAsync();
 
 				if (enabled)
-					await Xamarin.ExposureNotifications.ExposureNotification.Stop();
+					await Xamarin.ExposureNotifications.ExposureNotification.StopAsync();
 				else
-					await Xamarin.ExposureNotifications.ExposureNotification.Start<ExposureNotificationHandler>();
+					await Xamarin.ExposureNotifications.ExposureNotification.StartAsync();
 			});
 
 		public ICommand SubmitDiagnosisCommand
@@ -55,7 +52,10 @@ namespace ContactTracing.App.ViewModels
 					var enabled = await Xamarin.ExposureNotifications.ExposureNotification.IsEnabledAsync();
 
 					if (!enabled)
+					{
+						await UserDialogs.Instance.AlertAsync("Please enable Exposure Notifications before submitting a diagnosis.", "Exposure Notifications Disabled", "OK");
 						return;
+					}
 
 					if (string.IsNullOrEmpty(DiagnosisUid))
 					{
@@ -63,7 +63,11 @@ namespace ContactTracing.App.ViewModels
 						return;
 					}
 
-					await Xamarin.ExposureNotifications.ExposureNotification.SubmitPositiveDiagnosis();
+					// Set the submitted UID
+					ExposureNotificationHandler.DiagnosisUid = DiagnosisUid;
+
+					// Submit our diagnosis
+					await Xamarin.ExposureNotifications.ExposureNotification.SubmitSelfDiagnosisAsync();
 
 					NotifyPropertyChanged(nameof(HasSubmittedDiagnosis));
 
