@@ -67,13 +67,17 @@ namespace ExposureNotification.Tests
 
 			await Storage.AddDiagnosisUidsAsync(new[] { "posuid1" });
 
-			await Storage.SubmitPositiveDiagnosisAsync("posuid1", keys);
+			await Storage.SubmitPositiveDiagnosisAsync(new ExposureNotificationStorage.SelfDiagnosisSubmissionRequest
+			{
+				DiagnosisUid = "posuid1",
+				Keys = keys
+			});
 
-			var positiveKeys = await Storage.GetKeysAsync(DateTime.UtcNow.AddDays(-14));
+			var positiveKeys = await Storage.GetKeysAsync(DateTimeOffset.UtcNow.AddDays(-14).ToUnixTimeSeconds());
 
 			var keyToEnsureExists = keys.Skip(keys.Count / 2).First();
 
-			Assert.Contains(positiveKeys.Item2, p => p.KeyData.SequenceEqual(keyToEnsureExists.KeyData));
+			Assert.Contains(positiveKeys.Keys, p => p.KeyData.SequenceEqual(keyToEnsureExists.KeyData));
 		}
 
 		[Fact]
@@ -83,7 +87,11 @@ namespace ExposureNotification.Tests
 
 			await Assert.ThrowsAsync<InvalidOperationException>(async () =>
 			{
-				await Storage.SubmitPositiveDiagnosisAsync("notaddeduid1", keys);
+				await Storage.SubmitPositiveDiagnosisAsync(new ExposureNotificationStorage.SelfDiagnosisSubmissionRequest
+				{
+					DiagnosisUid = "notaddeduid1",
+					Keys = keys
+				});
 			});
 		}
 
