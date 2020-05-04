@@ -10,7 +10,7 @@ using Nearby = Android.Gms.Nearby.NearbyClass;
 
 namespace Xamarin.ExposureNotifications
 {
-    public static partial class ExposureNotification
+	public static partial class ExposureNotification
 	{
 		static IExposureNotificationClient instance;
 
@@ -30,45 +30,45 @@ namespace Xamarin.ExposureNotifications
 				.SetTransmissionRiskScores(c.TransmissionRiskScores)
 				.Build();
 
-			await Instance.Start(config);
+			await Instance.StartAsync(config);
 		}
 
 		static Task PlatformStop()
-			=> Instance.Stop();
+			=> Instance.StopAsync();
 
 		static async Task<bool> PlatformIsEnabled()
-			=> (bool)await Instance.IsEnabled();
+			=> await Instance.IsEnabledAsync();
 
 		// Gets the contact info of anyone the user had contact with who was diagnosed
 		static async Task<IEnumerable<ExposureInfo>> PlatformGetExposureInformation()
 		{
-			var details = await Instance.GetExposureInformation();
+			var details = await Instance.GetExposureInformationAsync();
 
 			return details.Select(d => new ExposureInfo(
 				DateTimeOffset.UnixEpoch.AddMilliseconds(d.DateMillisSinceEpoch).UtcDateTime,
 				TimeSpan.FromMinutes(d.DurationMinutes),
 				d.AttenuationValue,
 				d.TotalRiskScore,
-				(RiskLevel)d.TransmissionRiskLevel)); // // TODO: check enum values
+				(RiskLevel)d.TransmissionRiskLevel));
 		}
 
 		// Call this when the user has confirmed diagnosis
 		static async Task PlatformSubmitSelfDiagnosis()
 		{
-			var selfKeys = await Instance.GetTemporaryExposureKeyHistory();
+			var selfKeys = await Instance.GetTemporaryExposureKeyHistoryAsync();
 
 			await Handler.UploadSelfExposureKeysToServer(
 				selfKeys.Select(k => new TemporaryExposureKey(
 					k.GetKeyData(),
 					k.RollingStartIntervalNumber,
-					TimeSpan.FromMinutes(k.RollingDuration),
-					(RiskLevel)k.TransmissionRiskLevel))); // TODO: check enum values
+					TimeSpan.Zero, // TODO: TimeSpan.FromMinutes(k.RollingDuration),
+					(RiskLevel)k.TransmissionRiskLevel)));
 		}
 
 		// Tells the local API when new diagnosis keys have been obtained from the server
 		static async Task<ExposureDetectionSummary> PlatformAddDiagnosisKeys(IEnumerable<TemporaryExposureKey> diagnosisKeys)
 		{
-			var batchSize = (int)await Instance.GetMaxDiagnosisKeyCount();
+			var batchSize = await Instance.GetMaxDiagnosisKeyCountAsync();
 			var sequence = diagnosisKeys;
 
 			while (sequence.Any())
@@ -78,15 +78,15 @@ namespace Xamarin.ExposureNotifications
 
 				// TODO: RollingDuration is missing
 
-				await Instance.ProvideDiagnosisKeys(
+				await Instance.ProvideDiagnosisKeysAsync(
 					batch.Select(k => new global::Android.Gms.Nearby.ExposureNotification.TemporaryExposureKey.TemporaryExposureKeyBuilder()
 						.SetKeyData(k.KeyData)
 						.SetRollingStartIntervalNumber((int)k.RollingStartLong)
-						.SetTransmissionRiskLevel((int)k.TransmissionRiskLevel) // TODO: check enum values
+						.SetTransmissionRiskLevel((int)k.TransmissionRiskLevel)
 						.Build()).ToList());
 			}
 
-			var summary = await Instance.GetExposureSummary();
+			var summary = await Instance.GetExposureSummaryAsync();
 
 			// TODO: Reevaluate byte usage here
 			return new ExposureDetectionSummary(summary.DaysSinceLastExposure, (ulong)summary.MatchedKeyCount, (byte)summary.MaximumRiskScore);
@@ -94,19 +94,19 @@ namespace Xamarin.ExposureNotifications
 
 		static async Task<IEnumerable<TemporaryExposureKey>> PlatformGetTemporaryExposureKeys()
 		{
-			var exposureKeyHistory = await Instance.GetTemporaryExposureKeyHistory();
+			var exposureKeyHistory = await Instance.GetTemporaryExposureKeyHistoryAsync();
 
 			return exposureKeyHistory.Select(k =>
 				new TemporaryExposureKey(
 					k.GetKeyData(),
 					k.RollingStartIntervalNumber,
-					TimeSpan.FromMinutes(k.RollingDuration * 10),
-					(RiskLevel)k.TransmissionRiskLevel)); // TODO: check enum values
+					TimeSpan.Zero, // TODO: TimeSpan.FromMinutes(k.RollingDuration * 10),
+					(RiskLevel)k.TransmissionRiskLevel));
 		}
 
 		internal static async Task<ExposureDetectionSummary> AndroidGetExposureSummary()
 		{
-			var s = await Instance.GetExposureSummary();
+			var s = await Instance.GetExposureSummaryAsync();
 
 			// TODO: Verify risk score byte 
 			return new ExposureDetectionSummary(s.DaysSinceLastExposure, (ulong)s.MatchedKeyCount, (byte)s.MaximumRiskScore);

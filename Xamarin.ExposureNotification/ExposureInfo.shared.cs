@@ -44,13 +44,14 @@ namespace Xamarin.ExposureNotifications
 
 	public enum RiskLevel
 	{
-		RiskLevelInvalid = 0,
-		RiskLevelLowest = 1,
-		RiskLevelLow = 2,
-		RiskLEvelMedium = 3,
-		RiskLevelMediumHigh = 4,
-		RiskLevelHigh = 6,
-		RiskLevelVeryHigh = 7,
-		RiskLevelHighest = 8
+		Invalid = 0,
+		Lowest = 1,
+		Low = 2,
+		MediumLow = 3,
+		Medium = 4,
+		MediumHigh = 5,
+		High = 6,
+		VeryHigh = 7,
+		Highest = 8
 	}
 }

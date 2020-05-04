@@ -6,6 +6,7 @@
 		<AssemblyVersion>1.0.0.0</AssemblyVersion>
 		<AssemblyFileVersion>1.0.0.0</AssemblyFileVersion>
 		<Version>1.0.0</Version>
+		<LangVersion>8.0</LangVersion>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -39,7 +40,7 @@
 
 		<PackageReference Include="Xamarin.GooglePlayServices.Basement" Version="117.0.0-preview01" />
 		<PackageReference Include="Xamarin.GooglePlayServices.Tasks" Version="117.0.0-preview01" />
-		<PackageReference Include="Xamarin.GooglePlayServices.Nearby.ExposureNotification" Version="18.0.2-eap.1" />
+		<PackageReference Include="Xamarin.GooglePlayServices.Nearby.ExposureNotification" Version="18.0.2-eap.2" />
 		<PackageReference Include="Xamarin.AndroidX.Core" Version="1.2.0" />
 	</ItemGroup>
 
