@@ -17,16 +17,10 @@ This package requires that you build with XCode 11.5 beta1 or newer.
 
 ## Xamarin.ExposureNotification
 
-This is a cross platform API wrapper around the native Android and iOS API's.
+This project contains the cross platform wrapper API around the native Android and iOS API's.
 
-### Xamarin.ExposureNotification
+`Xamarin.ExposureNotification/NativeApi.android.cs` contains the stubs for what we think the C# binding will look like to the Google Exposure Notification native API/SDK.
 
-This project contains the cross platform wrapper API.
-
-Currently it also contains stubs for what we think each C# binding to the actual native API's will look like:
-
-- `Xamarin.ExposureNotification/NativeApi.android.cs`
-- `Xamarin.ExposureNotification/NativeApi.ios.cs`
 
 ## Sample
 
