@@ -37,15 +37,16 @@
 		<Compile Include="**\*.android.cs" />
 		<Compile Include="**\*.android.*.cs" />
 
-		<PackageReference Include="Xamarin.GooglePlayServices.Basement" Version="71.1620.0" />
-		<PackageReference Include="Xamarin.GooglePlayServices.Tasks" Version="71.1601.0" />
+		<PackageReference Include="Xamarin.GooglePlayServices.Basement" Version="117.0.0-preview01" />
+		<PackageReference Include="Xamarin.GooglePlayServices.Tasks" Version="117.0.0-preview01" />
+		<PackageReference Include="Xamarin.GooglePlayServices.Nearby.ExposureNotification" Version="18.0.2-eap.1" />
 		<PackageReference Include="Xamarin.AndroidX.Core" Version="1.2.0" />
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('xamarin.ios')) ">
 		<Compile Include="*.ios.cs" />
 		<Compile Include="*.ios.*.cs" />
-		
+
 		<PackageReference Include="Xamarin.iOS.ExposureNotification" Version="1.0.0-beta1" />
 	</ItemGroup>
 

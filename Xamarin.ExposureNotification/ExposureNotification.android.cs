@@ -1,44 +1,43 @@
-﻿using Android.AccessibilityServices;
-using Android.Content;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using AndroidPendingIntent = global::Android.App.PendingIntent;
-using Android.Gms.ExposureNotifications;
 using Android.App;
+using Android.Gms.Nearby.ExposureNotification;
+using Nearby = Android.Gms.Nearby.NearbyClass;
 
 [assembly: UsesPermission(Android.Manifest.Permission.Bluetooth)]
 
 namespace Xamarin.ExposureNotifications
 {
-	public static partial class ExposureNotification
+    public static partial class ExposureNotification
 	{
-		static ExposureNotificationClient instance;
+		static IExposureNotificationClient instance;
 
-		static ExposureNotificationClient Instance
-			=> instance ??= new ExposureNotificationClient();
+		static IExposureNotificationClient Instance
+			=> instance ??= Nearby.GetExposureNotificationClient(Application.Context);
 
 		static async Task PlatformStart(IExposureNotificationHandler handler)
 		{
 			var c = handler.Configuration;
 
-			// TODO: Verify mapping of config
-			await Instance.Start(new ExposureNotificationClient.ExposureConfiguration
-			{
-				AttenuationScores = c.AttenuationScores,
-				DurationScores = c.DurationScores,
-				DaysSinceLastExposureScores = c.DaysScores,
-				TransmissionRiskScores = c.TransmissionRiskScores
-			});
+			// TODO: weights are missing
+
+			var config = new ExposureConfiguration.ExposureConfigurationBuilder()
+				.SetAttenuationScores(c.AttenuationScores)
+				.SetDurationScores(c.DurationScores)
+				.SetDaysSinceLastExposureScores(c.DaysScores)
+				.SetTransmissionRiskScores(c.TransmissionRiskScores)
+				.Build();
+
+			await Instance.Start(config);
 		}
 
 		static Task PlatformStop()
 			=> Instance.Stop();
 
-		static Task<bool> PlatformIsEnabled()
-			=> Instance.IsEnabled();
+		static async Task<bool> PlatformIsEnabled()
+			=> (bool)await Instance.IsEnabled();
 
 		// Gets the contact info of anyone the user had contact with who was diagnosed
 		static async Task<IEnumerable<ExposureInfo>> PlatformGetExposureInformation()
@@ -50,7 +49,7 @@ namespace Xamarin.ExposureNotifications
 				TimeSpan.FromMinutes(d.DurationMinutes),
 				d.AttenuationValue,
 				d.TotalRiskScore,
-				(RiskLevel)((int)d.TransmissionRiskLevel)));
+				(RiskLevel)d.TransmissionRiskLevel)); // // TODO: check enum values
 		}
 
 		// Call this when the user has confirmed diagnosis
@@ -60,16 +59,16 @@ namespace Xamarin.ExposureNotifications
 
 			await Handler.UploadSelfExposureKeysToServer(
 				selfKeys.Select(k => new TemporaryExposureKey(
-					k.KeyData,
-					k.RollingStartNumber,
+					k.GetKeyData(),
+					k.RollingStartIntervalNumber,
 					TimeSpan.FromMinutes(k.RollingDuration),
-					(RiskLevel)k.TransmissionRiskLevel)));
+					(RiskLevel)k.TransmissionRiskLevel))); // TODO: check enum values
 		}
 
 		// Tells the local API when new diagnosis keys have been obtained from the server
 		static async Task<ExposureDetectionSummary> PlatformAddDiagnosisKeys(IEnumerable<TemporaryExposureKey> diagnosisKeys)
 		{
-			var batchSize = await Instance.GetMaxDiagnosisKeys();
+			var batchSize = (int)await Instance.GetMaxDiagnosisKeyCount();
 			var sequence = diagnosisKeys;
 
 			while (sequence.Any())
@@ -77,14 +76,14 @@ namespace Xamarin.ExposureNotifications
 				var batch = sequence.Take(batchSize);
 				sequence = sequence.Skip(batchSize);
 
+				// TODO: RollingDuration is missing
+
 				await Instance.ProvideDiagnosisKeys(
-					batch.Select(k => new ExposureNotificationClient.TemporaryExposureKey
-					{
-						KeyData = k.KeyData,
-						RollingStartNumber = k.RollingStartLong,
-						RollingDuration = (long)k.RollingDuration.TotalMinutes,
-						TransmissionRiskLevel = (ExposureNotificationClient.RiskLevel)k.TransmissionRiskLevel
-					}).ToList());
+					batch.Select(k => new global::Android.Gms.Nearby.ExposureNotification.TemporaryExposureKey.TemporaryExposureKeyBuilder()
+						.SetKeyData(k.KeyData)
+						.SetRollingStartIntervalNumber((int)k.RollingStartLong)
+						.SetTransmissionRiskLevel((int)k.TransmissionRiskLevel) // TODO: check enum values
+						.Build()).ToList());
 			}
 
 			var summary = await Instance.GetExposureSummary();
@@ -99,11 +98,10 @@ namespace Xamarin.ExposureNotifications
 
 			return exposureKeyHistory.Select(k =>
 				new TemporaryExposureKey(
-					k.KeyData,
-					k.RollingStartNumber,
+					k.GetKeyData(),
+					k.RollingStartIntervalNumber,
 					TimeSpan.FromMinutes(k.RollingDuration * 10),
-					(RiskLevel)((int)k.TransmissionRiskLevel)
-					));
+					(RiskLevel)k.TransmissionRiskLevel)); // TODO: check enum values
 		}
 
 		internal static async Task<ExposureDetectionSummary> AndroidGetExposureSummary()
