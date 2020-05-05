@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Android.App;
 using Android.Gms.Nearby.ExposureNotification;
 using Nearby = Android.Gms.Nearby.NearbyClass;
+using AndroidRiskLevel = Android.Gms.Nearby.ExposureNotification.RiskLevel;
 
 [assembly: UsesPermission(Android.Manifest.Permission.Bluetooth)]
 
@@ -49,7 +50,7 @@ namespace Xamarin.ExposureNotifications
 				TimeSpan.FromMinutes(d.DurationMinutes),
 				d.AttenuationValue,
 				d.TotalRiskScore,
-				(RiskLevel)d.TransmissionRiskLevel));
+				d.TransmissionRiskLevel.FromNative()));
 		}
 
 		// Call this when the user has confirmed diagnosis
@@ -62,7 +63,7 @@ namespace Xamarin.ExposureNotifications
 					k.GetKeyData(),
 					k.RollingStartIntervalNumber,
 					TimeSpan.Zero, // TODO: TimeSpan.FromMinutes(k.RollingDuration),
-					(RiskLevel)k.TransmissionRiskLevel)));
+					k.TransmissionRiskLevel.FromNative())));
 		}
 
 		// Tells the local API when new diagnosis keys have been obtained from the server
@@ -82,7 +83,7 @@ namespace Xamarin.ExposureNotifications
 					batch.Select(k => new global::Android.Gms.Nearby.ExposureNotification.TemporaryExposureKey.TemporaryExposureKeyBuilder()
 						.SetKeyData(k.KeyData)
 						.SetRollingStartIntervalNumber((int)k.RollingStartLong)
-						.SetTransmissionRiskLevel((int)k.TransmissionRiskLevel)
+						.SetTransmissionRiskLevel(k.TransmissionRiskLevel.ToNative())
 						.Build()).ToList());
 			}
 
@@ -101,7 +102,7 @@ namespace Xamarin.ExposureNotifications
 					k.GetKeyData(),
 					k.RollingStartIntervalNumber,
 					TimeSpan.Zero, // TODO: TimeSpan.FromMinutes(k.RollingDuration * 10),
-					(RiskLevel)k.TransmissionRiskLevel));
+					k.TransmissionRiskLevel.FromNative()));
 		}
 
 		internal static async Task<ExposureDetectionSummary> AndroidGetExposureSummary()
@@ -111,5 +112,36 @@ namespace Xamarin.ExposureNotifications
 			// TODO: Verify risk score byte 
 			return new ExposureDetectionSummary(s.DaysSinceLastExposure, (ulong)s.MatchedKeyCount, (byte)s.MaximumRiskScore);
 		}
+	}
+
+	static partial class Utils
+	{
+		public static RiskLevel FromNative(this int riskLevel) =>
+			riskLevel switch
+			{
+				AndroidRiskLevel.RiskLevelLowest => RiskLevel.Lowest,
+				AndroidRiskLevel.RiskLevelLow => RiskLevel.Low,
+				AndroidRiskLevel.RiskLevelLowMedium=> RiskLevel.MediumLow,
+				AndroidRiskLevel.RiskLevelMedium => RiskLevel.Medium,
+				AndroidRiskLevel.RiskLevelMediumHigh => RiskLevel.MediumHigh,
+				AndroidRiskLevel.RiskLevelHigh => RiskLevel.High,
+				AndroidRiskLevel.RiskLevelVeryHigh => RiskLevel.VeryHigh,
+				AndroidRiskLevel.RiskLevelHighest => RiskLevel.Highest,
+				_ => AndroidRiskLevel.RiskLevelInvalid,
+			};
+
+		public static int ToNative(this RiskLevel riskLevel) =>
+			riskLevel switch
+			{
+				RiskLevel.Lowest => AndroidRiskLevel.RiskLevelLowest,
+				RiskLevel.Low => AndroidRiskLevel.RiskLevelLow,
+				RiskLevel.MediumLow => AndroidRiskLevel.RiskLevelLowMedium,
+				RiskLevel.Medium => AndroidRiskLevel.RiskLevelMedium,
+				RiskLevel.MediumHigh => AndroidRiskLevel.RiskLevelMediumHigh,
+				RiskLevel.High => AndroidRiskLevel.RiskLevelHigh,
+				RiskLevel.VeryHigh => AndroidRiskLevel.RiskLevelVeryHigh,
+				RiskLevel.Highest => AndroidRiskLevel.RiskLevelHighest,
+				_ => AndroidRiskLevel.RiskLevelInvalid,
+			};
 	}
 }
