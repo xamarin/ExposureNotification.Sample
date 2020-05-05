@@ -9,29 +9,20 @@ When a person has confirmed a diagnosis, they tell their device which then submi
 
 Devices continually request the keys submitted by diagnosed people from the backend server.  The device then compares these keys to the unique identifiers of other devices it has been near in the last 14 days.
 
-## iOS Native API - NuGet
-A NuGet package is also available for the native iOS Exposure Notification bindings:
-https://www.nuget.org/packages/Xamarin.iOS.ExposureNotification/1.0.0-beta1
-
-This package requires that you build with XCode 11.5 beta1 or newer.
-
 ## Xamarin.ExposureNotification
 
-This is a cross platform API wrapper around the native Android and iOS API's.
+This project contains the cross platform wrapper API around the native Android and iOS API's.  The sample app uses this library to implement the exposure notification code one time for both platforms.
 
-### Xamarin.ExposureNotification
-
-This project contains the cross platform wrapper API.
-
-Currently it also contains stubs for what we think each C# binding to the actual native API's will look like:
-
-- `Xamarin.ExposureNotification/NativeApi.android.cs`
-- `Xamarin.ExposureNotification/NativeApi.ios.cs`
-
-## Sample
+## Sample App
 
 A sample Mobile app and Back end server to use the API.
 
+## Bindings to Native API's - NuGet
+
+We also have NuGet packages available with bindings to the native Android and iOS Exposure Notifaction API's
+
+ - iOS https://www.nuget.org/packages/Xamarin.iOS.ExposureNotification/ (Requires XCode 11.5 beta1 or newer)
+ - Android https://www.nuget.org/packages/Xamarin.GooglePlayServices.Nearby.ExposureNotification/
 
 # Contributing
 

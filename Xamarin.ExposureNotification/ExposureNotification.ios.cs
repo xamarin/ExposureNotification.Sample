@@ -1,10 +1,9 @@
-﻿using Foundation;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using System.Threading.Tasks;
 using ExposureNotifications;
-using System.Linq;
+using Foundation;
 
 namespace Xamarin.ExposureNotifications
 {
@@ -81,7 +80,7 @@ namespace Xamarin.ExposureNotifications
 					TimeSpan.FromMinutes(i.Duration),
 					i.AttenuationValue,
 					i.TotalRiskScore,
-					(RiskLevel)i.TransmissionRiskLevel));
+					i.TransmissionRiskLevel.FromNative()));
 		}
 
 		// Call this when the user has confirmed diagnosis
@@ -95,7 +94,7 @@ namespace Xamarin.ExposureNotifications
 					k.KeyData.ToArray(),
 					k.RollingStartNumber,
 					TimeSpan.FromMinutes(k.RollingStartNumber),
-					(RiskLevel)k.TransmissionRiskLevel)));
+					k.TransmissionRiskLevel.FromNative())));
 		}
 
 		// Tells the local API when new diagnosis keys have been obtained from the server
@@ -117,7 +116,7 @@ namespace Xamarin.ExposureNotifications
 					{
 						KeyData = NSData.FromArray(k.KeyData),
 						RollingStartNumber = (uint)k.RollingStartLong,
-						TransmissionRiskLevel = (ENRiskLevel)k.TransmissionRiskLevel
+						TransmissionRiskLevel = k.TransmissionRiskLevel.ToNative(),
 					}).ToArray());
 			}
 
@@ -135,7 +134,38 @@ namespace Xamarin.ExposureNotifications
 			var selfKeys = await m.GetDiagnosisKeysAsync();
 
 			return selfKeys.Select(k =>
-				new TemporaryExposureKey(k.KeyData.ToArray(), k.RollingStartNumber, new TimeSpan(), (RiskLevel)k.TransmissionRiskLevel));
+				new TemporaryExposureKey(k.KeyData.ToArray(), k.RollingStartNumber, new TimeSpan(), k.TransmissionRiskLevel.FromNative()));
 		}
+	}
+
+	static partial class Utils
+	{
+		public static RiskLevel FromNative(this ENRiskLevel riskLevel) =>
+			riskLevel switch
+			{
+				ENRiskLevel.Lowest => RiskLevel.Lowest,
+				ENRiskLevel.Low => RiskLevel.Low,
+				ENRiskLevel.LowMedium => RiskLevel.MediumLow,
+				ENRiskLevel.Medium => RiskLevel.Medium,
+				ENRiskLevel.MediumHigh => RiskLevel.MediumHigh,
+				ENRiskLevel.High => RiskLevel.High,
+				ENRiskLevel.VeryHigh => RiskLevel.VeryHigh,
+				ENRiskLevel.Highest => RiskLevel.Highest,
+				_ => RiskLevel.Invalid,
+			};
+
+		public static ENRiskLevel ToNative(this RiskLevel riskLevel) =>
+			riskLevel switch
+			{
+				RiskLevel.Lowest => ENRiskLevel.Lowest,
+				RiskLevel.Low => ENRiskLevel.Low,
+				RiskLevel.MediumLow => ENRiskLevel.LowMedium,
+				RiskLevel.Medium => ENRiskLevel.Medium,
+				RiskLevel.MediumHigh => ENRiskLevel.MediumHigh,
+				RiskLevel.High => ENRiskLevel.High,
+				RiskLevel.VeryHigh => ENRiskLevel.VeryHigh,
+				RiskLevel.Highest => ENRiskLevel.Highest,
+				_ => ENRiskLevel.Invalid,
+			};
 	}
 }
