@@ -22,6 +22,7 @@
 		<RepositoryUrl>https://github.com/xamarin/xamarin.exposurenotification</RepositoryUrl>
 		<PackageLicenseFile>LICENSE.md</PackageLicenseFile>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageProjectUrl>https://go.microsoft.com/fwlink/?linkid=2129007</PackageProjectUrl>
 	</PropertyGroup>
 
 	<ItemGroup>
