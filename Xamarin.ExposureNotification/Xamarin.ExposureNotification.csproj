@@ -20,7 +20,7 @@
 		<NeutralLanguage>en</NeutralLanguage>
 		<Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
 		<RepositoryUrl>https://github.com/xamarin/xamarin.exposurenotification</RepositoryUrl>
-		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<PackageLicenseFile>..\LICENSE</PackageLicenseFile>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
 	</PropertyGroup>
 
