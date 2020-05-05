@@ -20,13 +20,15 @@
 		<NeutralLanguage>en</NeutralLanguage>
 		<Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
 		<RepositoryUrl>https://github.com/xamarin/xamarin.exposurenotification</RepositoryUrl>
-		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<PackageLicenseFile>LICENSE.md</PackageLicenseFile>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<Compile Include="**\*.shared.cs" />
 		<Compile Include="**\*.shared.*.cs" />
+
+		<None Include="..\LICENSE.md"  Pack="True" PackagePath="LICENSE.md" />
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
