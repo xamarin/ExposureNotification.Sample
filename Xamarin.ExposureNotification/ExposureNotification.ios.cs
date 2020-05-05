@@ -28,7 +28,21 @@ namespace Xamarin.ExposureNotifications
 		{
 			if (session == null)
 			{
+				var c = Handler.Configuration;
+
 				session = new ENExposureDetectionSession();
+				session.Configuration = new ENExposureConfiguration
+				{
+					AttenuationScores = c.AttenuationScores,
+					DurationScores = c.DurationScores,
+					DaysSinceLastExposureScores = c.DaysSinceLastExposureScores,
+					TransmissionRiskScores = c.TransmissionRiskScores,
+					AttenuationWeight = c.AttenuationWeight,
+					DaysSinceLastExposureWeight = c.DaysSinceLastExposureWeight,
+					DurationWeight = c.DurationWeight,
+					TransmissionRiskWeight = c.TransmissionWeight,
+					MinimumRiskScore = (byte)c.MinimumRiskScore
+				};
 				await session.ActivateAsync();
 			}
 

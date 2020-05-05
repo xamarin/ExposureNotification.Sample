@@ -24,13 +24,17 @@ namespace Xamarin.ExposureNotifications
 		{
 			var c = handler.Configuration;
 
-			// TODO: Verify mapping of config
 			await Instance.Start(new ExposureNotificationClient.ExposureConfiguration
 			{
 				AttenuationScores = c.AttenuationScores,
 				DurationScores = c.DurationScores,
-				DaysSinceLastExposureScores = c.DaysScores,
-				TransmissionRiskScores = c.TransmissionRiskScores
+				DaysSinceLastExposureScores = c.DaysSinceLastExposureScores,
+				TransmissionRiskScores = c.TransmissionRiskScores,
+				AttenuationWeight = c.AttenuationWeight,
+				DaysSinceLastExposureWeight = c.DaysSinceLastExposureWeight,
+				DurationWeight = c.DurationWeight,
+				TransmissionRiskWeight = c.TransmissionWeight,
+				MinimumRiskScore = c.MinimumRiskScore
 			});
 		}
 
