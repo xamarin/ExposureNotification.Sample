@@ -28,3 +28,9 @@ using Android.App;
 // Add some common permissions, these can be removed if not needed
 [assembly: UsesPermission(Android.Manifest.Permission.Internet)]
 [assembly: UsesPermission(Android.Manifest.Permission.WriteExternalStorage)]
+
+//<uses-feature android:name="android.hardware.bluetooth_le" android:required="true" />
+//<uses-feature android:name="android.hardware.bluetooth" />
+
+[assembly: UsesFeature("android.hardware.bluetooth_le", Required=true)]
+[assembly: UsesFeature("android.hardware.bluetooth", Required = false)]
