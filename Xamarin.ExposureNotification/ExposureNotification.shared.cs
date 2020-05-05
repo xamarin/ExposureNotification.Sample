@@ -97,20 +97,28 @@ namespace Xamarin.ExposureNotifications
 	public class Configuration
 	{
 		// Minimum risk score required to record
-		public int MinimumRiskScore { get; set; } = 1;
+		public int MinimumRiskScore { get; set; } = 4;
 
-		public int[] TransmissionRiskScores { get; set; } = new int[] { 1, 1, 1, 1, 1, 1, 1, 1 };
+		public int AttenuationWeight { get; set; } = 50;
+
+		public int TransmissionWeight { get; set; } = 50;
+
+		public int DurationWeight { get; set; } = 50;
+
+		public int DaysSinceLastExposureWeight { get; set; } = 50;
+
+		public int[] TransmissionRiskScores { get; set; } = new int[] { 4, 4, 4, 4, 4, 4, 4, 4 };
 
 		// Scores assigned to the attenuation of the BTLE signal of exposures
 		// A > 73dBm, 73 <= A > 63, 63 <= A > 51, 51 <= A > 33, 33 <= A > 27, 27 <= A > 15, 15 <= A > 10, A <= 10
-		public int[] AttenuationScores { get; set; } = new[] { 1, 2, 3, 4, 5, 6, 7, 8 };
+		public int[] AttenuationScores { get; set; } = new[] { 4, 4, 4, 4, 4, 4, 4, 4 };
 
 		// Scores assigned to each length of exposure
 		// < 5min, 5min, 10min, 15min, 20min, 25min, 30min, > 30min
-		public int[] DurationScores { get; set; } = new[] { 1, 2, 3, 4, 5, 6, 7, 8 };
+		public int[] DurationScores { get; set; } = new[] { 4, 4, 4, 4, 4, 4, 4, 4 };
 
 		// Scores assigned to each range of days of exposure
 		// >= 14days, 13-12, 11-10, 9-8, 7-6, 5-4, 3-2, 1-0
-		public int[] DaysScores { get; set; } = new[] { 8, 7, 6, 5, 4, 3, 2, 1 };
+		public int[] DaysSinceLastExposureScores { get; set; } = new[] { 4, 4, 4, 4, 4, 4, 4, 4 };
 	}
 }
