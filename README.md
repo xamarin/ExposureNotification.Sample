@@ -1,7 +1,7 @@
 
 # Xamarin Exposure Notification
 
-[Paper Doc with more details](https://paper.dropbox.com/doc/Xamarin-XPlat-Exposure-Notification-API--AzBqj9iHowyA04l865o2nKxeAQ-Ix1589Ce0r04i3DjvK2sa)
+[Read our Planning Document with more details about how Exposure Notifications work](https://github.com/xamarin/xamarin.exposurenotification/blob/master/Exposure%20Notification%20Planning.pdf)
 
 Apple and Google are both creating API’s for a compatible BLE based Contact Tracing implementation which relies heavily on generating and storing rolling unique identifiers on a device, which are broadcast to nearby devices.  Devices which detect nearby identifiers then store these identifiers as they come into range (or contact) with for up to 14 days.
 
