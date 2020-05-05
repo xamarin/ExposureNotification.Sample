@@ -28,24 +28,26 @@
 	<!-- Your Pages -->
 
 	<TabBar x:Name="TabBar">
-		<Tab Title="Tracing" Route="tracing">
-			<Tab.Icon>
-				<FontImageSource Glyph="{StaticResource IconProfile}" FontFamily="FA-S" />
-			</Tab.Icon>
-			<ShellContent ContentTemplate="{DataTemplate view:ProfilePage}"/>
-		</Tab>
-		<Tab Title="Diagnosis" Route="diagnosis">
-			<Tab.Icon>
-				<FontImageSource FontFamily="FA-S" Glyph="{StaticResource IconDeny}"/>
-			</Tab.Icon>
-			<ShellContent ContentTemplate="{DataTemplate view:DiagnosisPage}"/>
-		</Tab>
-
 		<Tab Title="Info" Route="info">
 			<Tab.Icon>
-				<FontImageSource FontFamily="FA-S" Glyph="{StaticResource IconAbout}"/>
+				<FontImageSource FontFamily="FA-R" Glyph="{StaticResource IconInfo}"/>
 			</Tab.Icon>
 			<ShellContent ContentTemplate="{DataTemplate view:InfoPage}"/>
 		</Tab>
+		
+		<Tab Title="Exposures" Route="exposures">
+			<Tab.Icon>
+				<FontImageSource Glyph="{StaticResource IconBell}" FontFamily="FA-R" />
+			</Tab.Icon>
+			<ShellContent ContentTemplate="{DataTemplate view:ExposuresPage}"/>
+		</Tab>
+		
+		<Tab Title="Notify Others" Route="notify">
+			<Tab.Icon>
+				<FontImageSource FontFamily="FA-R" Glyph="{StaticResource IconFlag}"/>
+			</Tab.Icon>
+			<ShellContent ContentTemplate="{DataTemplate view:NotifyOthersPage}"/>
+		</Tab>
+
 	</TabBar>
 </Shell>

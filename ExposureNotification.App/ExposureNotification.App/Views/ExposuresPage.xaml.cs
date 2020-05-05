@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
-namespace ContactTracing.App
+namespace ExposureNotification.App.Views
 {
 	[XamlCompilation(XamlCompilationOptions.Compile)]
-	public partial class PossibleContactPage : ContentPage
+	public partial class ExposuresPage : ContentPage
 	{
-		public PossibleContactPage()
+		public ExposuresPage()
 		{
 			InitializeComponent();
 		}

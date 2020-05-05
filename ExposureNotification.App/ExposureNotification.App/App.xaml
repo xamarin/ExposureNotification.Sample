@@ -35,6 +35,13 @@
 
 		<x:String x:Key="IconGraph">&#xf1fe;</x:String>
 
+		<x:String x:Key="IconBell">&#xf0f3;</x:String>
+		<x:String x:Key="IconInfo">&#xf059;</x:String>
+		<x:String x:Key="IconFlag">&#xf024;</x:String>
+		<x:String x:Key="IconCancel">&#xf00d;</x:String>
+		<x:String x:Key="IconRightArrow">&#xf35a;</x:String>
+		
+		
 		<Style x:Key="ButtonRounded" TargetType="Button">
 			<Setter Property="HorizontalOptions" Value="FillAndExpand" />
 			<Setter Property="HeightRequest" Value="44"/>
