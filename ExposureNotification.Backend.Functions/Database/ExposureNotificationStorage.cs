@@ -42,7 +42,9 @@ namespace ExposureNotification.Backend
 					.Take(take)
 					.ToListAsync().ConfigureAwait(false);
 
-				var newestTimestamp = results.OrderByDescending(dtk => dtk.TimestampSecondsSinceEpoch).FirstOrDefault()?.TimestampSecondsSinceEpoch;
+				var newestTimestamp = results
+					.FirstOrDefault()?.TimestampSecondsSinceEpoch;
+
 				var keys = results.Select(dtk => dtk.ToKey());
 
 				return new KeysResponse
@@ -53,7 +55,7 @@ namespace ExposureNotification.Backend
 			}
 		}
 
-		public async Task DeleteAllKeysAsync()
+		public void DeleteAllKeysAsync()
 		{
 			using (var ctx = new ExposureNotificationContext(dbContextOptions))
 			{

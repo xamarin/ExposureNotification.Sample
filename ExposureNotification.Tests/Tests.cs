@@ -98,12 +98,9 @@ namespace ExposureNotification.Tests
 		[Fact]
 		public async Task Page_Keys_Test()
 		{
-			var keys = GenerateTemporaryExposureKeys(10);
+			var keys = GenerateTemporaryExposureKeys(1);
 
 			var expectedCount = keys.Count();
-			var expectedTimestamp = keys
-					.OrderByDescending(k => k.RollingStart.ToUnixTimeSeconds())
-					.First().RollingStart.ToUnixTimeSeconds();
 
 			await Storage.DeleteAllKeysAsync();
 
@@ -117,7 +114,6 @@ namespace ExposureNotification.Tests
 				});
 
 			var actualCount = 0L;
-			var actualTimestamp = 0L;
 
 			var skip = 0;
 			var take = 10;
@@ -125,7 +121,7 @@ namespace ExposureNotification.Tests
 			while (true)
 			{
 				var keyBatch = await Storage.GetKeysAsync(
-					DateTimeOffset.MinValue.ToUnixTimeSeconds(),
+					DateTimeOffset.UtcNow.AddDays(-5).ToUnixTimeSeconds(),
 					skip,
 					take);
 
@@ -136,13 +132,9 @@ namespace ExposureNotification.Tests
 
 				if (batchCount <= 0)
 					break;
-
-				if (keyBatch.Timestamp >= actualTimestamp)
-					actualTimestamp = keyBatch.Timestamp;
 			}
 
 			Assert.Equal(expectedCount, actualCount);
-			Assert.Equal(expectedTimestamp, actualTimestamp);
 		}
 
 		List<TemporaryExposureKey> GenerateTemporaryExposureKeys(int daysBack)
