@@ -102,7 +102,7 @@ namespace ExposureNotification.Tests
 
 			var expectedCount = keys.Count();
 			var expectedTimestamp = keys
-					.OrderByDescending(k => k.RollingStart)
+					.OrderByDescending(k => k.RollingStart.ToUnixTimeSeconds())
 					.First().RollingStart.ToUnixTimeSeconds();
 
 			await Storage.DeleteAllKeysAsync();
@@ -161,7 +161,10 @@ namespace ExposureNotification.Tests
 
 					tracingKeys.Add(new TemporaryExposureKey
 					{
-						KeyData = rnd
+						KeyData = rnd,
+						RollingStart = nowDate,
+						RollingDuration = TimeSpan.FromMinutes(10),
+						TransmissionRiskLevel = RiskLevel.Medium
 					});
 				}
 			};
