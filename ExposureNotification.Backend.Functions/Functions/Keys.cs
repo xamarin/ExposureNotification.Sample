@@ -16,10 +16,16 @@ namespace ExposureNotification.Backend.Functions
 		public async Task<IActionResult> Run(
 			[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "keys")] HttpRequest req)
 		{
-			if (!long.TryParse(req.Query?["since"], out var sinceEpochSeconds))
-				sinceEpochSeconds = new DateTimeOffset(DateTime.UtcNow.AddDays(-14)).ToUnixTimeSeconds();
+			if (!ulong.TryParse(req.Query?["since"], out var since))
+				since = 0;
 
-			var keysResponse = await Startup.Database.GetKeysAsync(sinceEpochSeconds);
+			if (!int.TryParse(req.Query?["skip"], out var skip))
+				skip = 0;
+
+			if (!int.TryParse(req.Query?["take"], out var take))
+				take = 1000;
+
+			var keysResponse = await Startup.Database.GetKeysAsync(since, skip, take);
 
 			return new OkObjectResult(keysResponse);
 		}

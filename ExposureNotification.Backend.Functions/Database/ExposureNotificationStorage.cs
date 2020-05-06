@@ -25,31 +25,28 @@ namespace ExposureNotification.Backend
 
 		readonly DbContextOptions dbContextOptions;
 
-		public async Task<KeysResponse> GetKeysAsync(long sinceEpochSeconds, int skip = 0, int take = int.MaxValue)
+		public async Task<KeysResponse> GetKeysAsync(ulong since, int skip = 0, int take = 1000)
 		{
 			using (var ctx = new ExposureNotificationContext(dbContextOptions))
 			{
 				var oldest = DateTimeOffset.UtcNow.AddDays(-14).ToUnixTimeSeconds();
-
-				// Only allow the last 14 days +
-				if (sinceEpochSeconds < oldest)
-					sinceEpochSeconds = oldest;
-
+				
 				var results = await ctx.TemporaryExposureKeys.AsQueryable()
-					.Where(dtk => dtk.TimestampSecondsSinceEpoch >= sinceEpochSeconds)
-					.OrderByDescending(dtk => dtk.TimestampSecondsSinceEpoch)
+					.Where(dtk => dtk.Id > since
+						&& dtk.TimestampSecondsSinceEpoch >= oldest)
+					.OrderBy(dtk => dtk.Id)
 					.Skip(skip)
 					.Take(take)
 					.ToListAsync().ConfigureAwait(false);
 
-				var newestTimestamp = results
-					.FirstOrDefault()?.TimestampSecondsSinceEpoch;
+				var newestIndex = results
+					.LastOrDefault()?.Id;
 
 				var keys = results.Select(dtk => dtk.ToKey());
 
 				return new KeysResponse
 				{
-					Timestamp = newestTimestamp ?? DateTimeOffset.MinValue.ToUnixTimeSeconds(),
+					Latest = newestIndex ?? 0,
 					Keys = keys
 				};
 			}
@@ -130,8 +127,8 @@ namespace ExposureNotification.Backend
 
 		public class KeysResponse
 		{
-			[JsonProperty("timestamp")]
-			public long Timestamp { get; set; }
+			[JsonProperty("latest")]
+			public ulong Latest { get; set; }
 
 			[JsonProperty("keys")]
 			public IEnumerable<TemporaryExposureKey> Keys { get; set; }

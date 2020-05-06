@@ -73,11 +73,26 @@ namespace ExposureNotification.Tests
 				Keys = keys
 			});
 
-			var positiveKeys = await Storage.GetKeysAsync(DateTimeOffset.UtcNow.AddDays(-14).ToUnixTimeSeconds());
+			var allKeys = new List<TemporaryExposureKey>();
+
+			var skip = 0;
+			var take = 10;
+
+			while (true)
+			{
+				var r = await Storage.GetKeysAsync(0, skip, take);
+
+				if (!r.Keys.Any())
+					break;
+
+				allKeys.AddRange(r.Keys);
+
+				skip += take;
+			}
 
 			var keyToEnsureExists = keys.Skip(keys.Count / 2).First();
 
-			Assert.Contains(positiveKeys.Keys, p => p.KeyData.SequenceEqual(keyToEnsureExists.KeyData));
+			Assert.Contains(allKeys, p => p.KeyData.SequenceEqual(keyToEnsureExists.KeyData));
 		}
 
 		[Fact]
@@ -117,17 +132,22 @@ namespace ExposureNotification.Tests
 
 			var skip = 0;
 			var take = 10;
+			ulong latestIndex = 0;
 
 			while (true)
 			{
 				var keyBatch = await Storage.GetKeysAsync(
-					DateTimeOffset.UtcNow.AddDays(-5).ToUnixTimeSeconds(),
+					0,
 					skip,
 					take);
 
 				skip += take;
 
 				var batchCount = keyBatch.Keys.Count();
+
+				if (keyBatch.Latest > latestIndex)
+					latestIndex = keyBatch.Latest;
+
 				actualCount += batchCount;
 
 				if (batchCount <= 0)
