@@ -3,11 +3,12 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
 	xmlns:d="http://xamarin.com/schemas/2014/forms/design"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:converters="clr-namespace:ExposureNotification.App.Converters"
 	mc:Ignorable="d"
 	x:Class="ExposureNotification.App.App">
 	<Application.Resources>
 		<Color x:Key="PrimaryColor">#2196F3</Color>
-		<Color x:Key="BackgroundColor">#E6E6E6</Color>
+		<Color x:Key="BackgroundColor">#F6F6F6</Color>
 		<Color x:Key="TextPrimaryColor">#6F6F6F</Color>
 		<Color x:Key="TextSecondaryColor">#60000000</Color>
 		<Color x:Key="TextTernaryColor">#40000000</Color>
@@ -35,14 +36,33 @@
 
 		<x:String x:Key="IconGraph">&#xf1fe;</x:String>
 
+		<x:String x:Key="IconBell">&#xf0f3;</x:String>
+		<x:String x:Key="IconInfo">&#xf059;</x:String>
+		<x:String x:Key="IconFlag">&#xf024;</x:String>
+		<x:String x:Key="IconCancel">&#xf00d;</x:String>
+		<x:String x:Key="IconRightArrow">&#xf35a;</x:String>
+		<x:String x:Key="IconStar">&#xf005;</x:String>
+
+		<Style x:Key="CardFrame" TargetType="Frame">
+			<Setter Property="CornerRadius" Value="10" />
+			<Setter Property="Padding" Value="14" />
+		</Style>
+
+		<Style x:Key="Container" TargetType="StackLayout">
+			<Setter Property="Padding" Value="14" />
+			<Setter Property="Spacing" Value="12" />
+		</Style>
+		
 		<Style x:Key="ButtonRounded" TargetType="Button">
 			<Setter Property="HorizontalOptions" Value="FillAndExpand" />
 			<Setter Property="HeightRequest" Value="44"/>
-			<Setter Property="BorderRadius" Value="22" />
+			<Setter Property="BorderRadius" Value="10" />
 			<Setter Property="BorderWidth" Value="4"/>
 			<Setter Property="BorderColor" Value="{StaticResource PrimaryColor}"/>
-			<Setter Property="TextColor" Value="{StaticResource TextPrimaryColor}" />
-			<Setter Property="BackgroundColor" Value="{StaticResource BackgroundColor}" />
+			<Setter Property="TextColor" Value="White" />
+			<Setter Property="BackgroundColor" Value="{StaticResource PrimaryColor}" />
 		</Style>
+
+		<converters:InvertedBoolConverter x:Key="InvertedBoolConverter" />
 	</Application.Resources>
 </Application>

@@ -1,6 +1,7 @@
 ﻿using Android.App;
 using Android.Content;
 using Android.OS;
+using Android.Runtime;
 using AndroidX.Core.App;
 
 namespace Xamarin.ExposureNotifications
@@ -40,6 +41,7 @@ namespace Xamarin.ExposureNotifications
 		ActionExposureStateUpdated,
 		ActionRequestDiagnosisKeys
 	})]
+	[Preserve]
 	internal class ExposureNotificationCallbackBroadcastReceiver : BroadcastReceiver
 	{
 		internal const string ActionExposureStateUpdated = "com.google.android.gms.exposurenotification.ACTION_EXPOSURE_STATE_UPDATED";
@@ -50,6 +52,7 @@ namespace Xamarin.ExposureNotifications
 	}
 
 	[Service]
+	[Preserve]
 	internal class ExposureNotificationCallbackService : JobIntentService
 	{
 		const int JobId = 0x02;
@@ -73,11 +76,8 @@ namespace Xamarin.ExposureNotifications
 			}
 			else if (workIntent.Action == ExposureNotificationCallbackBroadcastReceiver.ActionRequestDiagnosisKeys)
 			{
-				// Get any new keys
-				var keys = await ExposureNotification.GetSelfTemporaryExposureKeysAsync();
-
-				// Upload them to the server
-				await ExposureNotification.Handler.UploadSelfExposureKeysToServer(keys);
+				// Go fetch latest keys from server
+				await ExposureNotification.UpdateKeysFromServer();
 			}
 		}
 	}

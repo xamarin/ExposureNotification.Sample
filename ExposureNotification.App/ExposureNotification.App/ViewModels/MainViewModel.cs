@@ -7,7 +7,7 @@ using System.Windows.Input;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
-namespace ContactTracing.App.ViewModels
+namespace ExposureNotification.App.ViewModels
 {
 	public class MainViewModel : BaseViewModel
 	{

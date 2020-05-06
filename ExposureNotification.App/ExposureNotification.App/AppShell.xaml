@@ -10,15 +10,15 @@
 	<Shell.Resources>
 		<ResourceDictionary>
 			<Style x:Key="BaseStyle" TargetType="Element">
-				<Setter Property="Shell.BackgroundColor" Value="{StaticResource PrimaryColor}" />
-				<Setter Property="Shell.ForegroundColor" Value="White" />
-				<Setter Property="Shell.TitleColor" Value="White" />
+				<Setter Property="Shell.BackgroundColor" Value="White" />
+				<Setter Property="Shell.ForegroundColor" Value="{StaticResource PrimaryColor}" />
+				<Setter Property="Shell.TitleColor" Value="{StaticResource PrimaryColor}" />
 				<Setter Property="Shell.DisabledColor" Value="#B4FFFFFF" />
 				<Setter Property="Shell.UnselectedColor" Value="#95FFFFFF" />
-				<Setter Property="Shell.TabBarBackgroundColor" Value="{StaticResource PrimaryColor}" />
-				<Setter Property="Shell.TabBarForegroundColor" Value="White" />
-				<Setter Property="Shell.TabBarUnselectedColor" Value="#95FFFFFF" />
-				<Setter Property="Shell.TabBarTitleColor" Value="White" />
+				<Setter Property="Shell.TabBarBackgroundColor" Value="White" />
+				<Setter Property="Shell.TabBarForegroundColor" Value="{StaticResource PrimaryColor}" />
+				<Setter Property="Shell.TabBarUnselectedColor" Value="#B0B0B0" />
+				<Setter Property="Shell.TabBarTitleColor" Value="{StaticResource PrimaryColor}" />
 			</Style>
 			<Style TargetType="TabBar" BasedOn="{StaticResource BaseStyle}" />
 		</ResourceDictionary>
@@ -26,26 +26,27 @@
 
 
 	<!-- Your Pages -->
-
 	<TabBar x:Name="TabBar">
-		<Tab Title="Tracing" Route="tracing">
-			<Tab.Icon>
-				<FontImageSource Glyph="{StaticResource IconProfile}" FontFamily="FA-S" />
-			</Tab.Icon>
-			<ShellContent ContentTemplate="{DataTemplate view:ProfilePage}"/>
-		</Tab>
-		<Tab Title="Diagnosis" Route="diagnosis">
-			<Tab.Icon>
-				<FontImageSource FontFamily="FA-S" Glyph="{StaticResource IconDeny}"/>
-			</Tab.Icon>
-			<ShellContent ContentTemplate="{DataTemplate view:DiagnosisPage}"/>
-		</Tab>
-
 		<Tab Title="Info" Route="info">
 			<Tab.Icon>
-				<FontImageSource FontFamily="FA-S" Glyph="{StaticResource IconAbout}"/>
+				<FontImageSource FontFamily="FA-R" Glyph="{StaticResource IconInfo}"/>
 			</Tab.Icon>
 			<ShellContent ContentTemplate="{DataTemplate view:InfoPage}"/>
 		</Tab>
+		
+		<Tab Title="Exposures" Route="exposures">
+			<Tab.Icon>
+				<FontImageSource Glyph="{StaticResource IconBell}" FontFamily="FA-R" />
+			</Tab.Icon>
+			<ShellContent ContentTemplate="{DataTemplate view:ExposuresPage}"/>
+		</Tab>
+		
+		<Tab Title="Notify Others" Route="notify">
+			<Tab.Icon>
+				<FontImageSource FontFamily="FA-R" Glyph="{StaticResource IconFlag}"/>
+			</Tab.Icon>
+			<ShellContent ContentTemplate="{DataTemplate view:NotifyOthersPage}"/>
+		</Tab>
+
 	</TabBar>
 </Shell>
