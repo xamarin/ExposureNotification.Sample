@@ -102,7 +102,7 @@ namespace ExposureNotification.Tests
 
 			var expectedCount = keys.Count();
 
-			await Storage.DeleteAllKeysAsync();
+			Storage.DeleteAllKeysAsync();
 
 			await Storage.AddDiagnosisUidsAsync(new[] { "testkeys" });
 
