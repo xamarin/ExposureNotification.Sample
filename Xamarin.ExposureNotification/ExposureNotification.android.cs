@@ -20,7 +20,7 @@ namespace Xamarin.ExposureNotifications
 
 		static async Task PlatformStart(IExposureNotificationHandler handler)
 		{
-			var c = handler.Configuration;
+			var c = await handler.GetConfigurationAsync();
 
 			var config = new ExposureConfiguration.ExposureConfigurationBuilder()
 				.SetAttenuationScores(c.AttenuationScores)
@@ -70,7 +70,7 @@ namespace Xamarin.ExposureNotifications
 		}
 
 		// Tells the local API when new diagnosis keys have been obtained from the server
-		static async Task<ExposureDetectionSummary> PlatformAddDiagnosisKeys(IEnumerable<TemporaryExposureKey> diagnosisKeys)
+		static async Task PlatformAddDiagnosisKeys(IEnumerable<TemporaryExposureKey> diagnosisKeys)
 		{
 			var batchSize = await Instance.GetMaxDiagnosisKeyCountAsync();
 			var sequence = diagnosisKeys;
@@ -89,7 +89,10 @@ namespace Xamarin.ExposureNotifications
 						.SetTransmissionRiskLevel(k.TransmissionRiskLevel.ToNative())
 						.Build()).ToList());
 			}
+		}
 
+		static async Task<ExposureDetectionSummary> PlatformFinishAddDiagnosisKeys()
+		{
 			var summary = await Instance.GetExposureSummaryAsync();
 
 			// TODO: Reevaluate byte usage here
@@ -124,7 +127,7 @@ namespace Xamarin.ExposureNotifications
 			{
 				AndroidRiskLevel.RiskLevelLowest => RiskLevel.Lowest,
 				AndroidRiskLevel.RiskLevelLow => RiskLevel.Low,
-				AndroidRiskLevel.RiskLevelLowMedium=> RiskLevel.MediumLow,
+				AndroidRiskLevel.RiskLevelLowMedium => RiskLevel.MediumLow,
 				AndroidRiskLevel.RiskLevelMedium => RiskLevel.Medium,
 				AndroidRiskLevel.RiskLevelMediumHigh => RiskLevel.MediumHigh,
 				AndroidRiskLevel.RiskLevelHigh => RiskLevel.High,

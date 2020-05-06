@@ -27,7 +27,7 @@ namespace Xamarin.ExposureNotifications
 		{
 			if (session == null)
 			{
-				var c = Handler.Configuration;
+				var c = await Handler.GetConfigurationAsync();
 
 				session = new ENExposureDetectionSession();
 				session.Configuration = new ENExposureConfiguration
@@ -71,10 +71,16 @@ namespace Xamarin.ExposureNotifications
 		{
 			var s = await GetSessionAsync();
 
-			// TODO: Check max
-			var info = await s.GetExposureInfoAsync(100);
+			var exposures = new List<ENExposureInfo>();
 
-			return info.Exposures.Select(i =>
+			ENExposureDetectionSessionGetExposureInfoResult result;
+			do
+			{
+				result = await s.GetExposureInfoAsync(100);
+				exposures.AddRange(result.Exposures);
+			} while (!result.Done);
+
+			return exposures.Select(i =>
 				new ExposureInfo(
 					((DateTime)i.Date).ToLocalTime(),
 					TimeSpan.FromMinutes(i.Duration),
@@ -98,7 +104,7 @@ namespace Xamarin.ExposureNotifications
 		}
 
 		// Tells the local API when new diagnosis keys have been obtained from the server
-		static async Task<ExposureDetectionSummary> PlatformAddDiagnosisKeys(IEnumerable<TemporaryExposureKey> diagnosisKeys)
+		static async Task PlatformAddDiagnosisKeys(IEnumerable<TemporaryExposureKey> diagnosisKeys)
 		{
 			var s = await GetSessionAsync();
 
@@ -119,6 +125,11 @@ namespace Xamarin.ExposureNotifications
 						TransmissionRiskLevel = k.TransmissionRiskLevel.ToNative(),
 					}).ToArray());
 			}
+		}
+
+		static async Task<ExposureDetectionSummary> PlatformFinishAddDiagnosisKeys()
+		{
+			var s = await GetSessionAsync();
 
 			var summary = await s.FinishedDiagnosisKeysAsync();
 

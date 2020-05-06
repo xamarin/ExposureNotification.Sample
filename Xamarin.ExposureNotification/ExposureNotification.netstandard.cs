@@ -20,15 +20,15 @@ namespace Xamarin.ExposureNotifications
 		static Task<IEnumerable<ExposureInfo>> PlatformGetExposureInformation()
 			=> throw new PlatformNotSupportedException();
 
-		static Task<ExposureDetectionSummary> PlatformGetExposureSummary()
-			=> throw new PlatformNotSupportedException();
-
 		// Call this when the user has confirmed diagnosis
 		static Task PlatformSubmitSelfDiagnosis()
 			=> throw new PlatformNotSupportedException();
 
 		// Tells the local API when new diagnosis keys have been obtained from the server
-		static Task<ExposureDetectionSummary> PlatformAddDiagnosisKeys(IEnumerable<TemporaryExposureKey> diagnosisKeys)
+		static Task PlatformAddDiagnosisKeys(IEnumerable<TemporaryExposureKey> diagnosisKeys)
+			=> throw new PlatformNotSupportedException();
+
+		static Task<ExposureDetectionSummary> PlatformFinishAddDiagnosisKeys()
 			=> throw new PlatformNotSupportedException();
 
 		static Task<IEnumerable<TemporaryExposureKey>> PlatformGetTemporaryExposureKeys()

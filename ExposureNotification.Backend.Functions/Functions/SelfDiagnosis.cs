@@ -15,23 +15,20 @@ namespace ExposureNotification.Backend.Functions
 	{
 		[FunctionName("Diagnosis")]
 		public async Task<IActionResult> Run(
-			[HttpTrigger(AuthorizationLevel.Anonymous, "post", "put", "delete", Route = "selfdiagnosis")] HttpRequest req)
+			[HttpTrigger(AuthorizationLevel.Anonymous, "post", "put", Route = "selfdiagnosis")] HttpRequest req)
 		{
 			var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
 
-			if (req.Method.Equals("put", StringComparison.OrdinalIgnoreCase))
+			// Verify the diagnosis uid
+			if (req.Method.Equals("post", StringComparison.OrdinalIgnoreCase))
 			{
-				var diagnosisUids = JsonConvert.DeserializeObject<IEnumerable<string>>(requestBody);
+				var diagnosisUid = requestBody;
 
-				await Startup.Database.AddDiagnosisUidsAsync(diagnosisUids);
+				if (!await Startup.Database.CheckIfDiagnosisUidExistsAsync(diagnosisUid))
+					return new ForbidResult();
 			}
-			else if (req.Method.Equals("delete", StringComparison.OrdinalIgnoreCase))
-			{
-				var diagnosisUids = JsonConvert.DeserializeObject<IEnumerable<string>>(requestBody);
-
-				await Startup.Database.RemoveDiagnosisUidsAsync(diagnosisUids);
-			}
-			else if (req.Method.Equals("post", StringComparison.OrdinalIgnoreCase))
+			// Submit a self diagnosis after verifying
+			else if (req.Method.Equals("put", StringComparison.OrdinalIgnoreCase))
 			{
 				var diagnosis = JsonConvert.DeserializeObject<ExposureNotificationStorage.SelfDiagnosisSubmissionRequest>(requestBody);
 

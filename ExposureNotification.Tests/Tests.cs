@@ -95,6 +95,48 @@ namespace ExposureNotification.Tests
 			});
 		}
 
+		[Fact]
+		public async Task Page_Keys_Test()
+		{
+			var keys = GenerateTemporaryExposureKeys(1);
+
+			var expectedCount = keys.Count();
+
+			Storage.DeleteAllKeysAsync();
+
+			await Storage.AddDiagnosisUidsAsync(new[] { "testkeys" });
+
+			await Storage.SubmitPositiveDiagnosisAsync(
+				new ExposureNotificationStorage.SelfDiagnosisSubmissionRequest
+				{
+					DiagnosisUid = "testkeys",
+					Keys = keys
+				});
+
+			var actualCount = 0L;
+
+			var skip = 0;
+			var take = 10;
+
+			while (true)
+			{
+				var keyBatch = await Storage.GetKeysAsync(
+					DateTimeOffset.UtcNow.AddDays(-5).ToUnixTimeSeconds(),
+					skip,
+					take);
+
+				skip += take;
+
+				var batchCount = keyBatch.Keys.Count();
+				actualCount += batchCount;
+
+				if (batchCount <= 0)
+					break;
+			}
+
+			Assert.Equal(expectedCount, actualCount);
+		}
+
 		List<TemporaryExposureKey> GenerateTemporaryExposureKeys(int daysBack)
 		{
 			var tracingKeys = new List<TemporaryExposureKey>();
@@ -111,7 +153,10 @@ namespace ExposureNotification.Tests
 
 					tracingKeys.Add(new TemporaryExposureKey
 					{
-						KeyData = rnd
+						KeyData = rnd,
+						RollingStart = nowDate,
+						RollingDuration = TimeSpan.FromMinutes(random.Next(5, 60)),
+						TransmissionRiskLevel = (RiskLevel)random.Next(1, 8)
 					});
 				}
 			};
