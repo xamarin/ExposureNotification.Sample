@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Windows.Input;
+using ExposureNotification.App.Services;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
@@ -9,15 +10,33 @@ namespace ExposureNotification.App.ViewModels
 {
 	public class InfoViewModel : BaseViewModel
 	{
+		public InfoViewModel()
+		{
+			//Xamarin.ExposureNotifications.ExposureNotification.IsEnabledAsync()
+			//	.ContinueWith(t =>
+			//	{
+			//		IsEnabled = t.Result;
+			//	});
+		}
 
-		internal const string welcomedPrefKey = "welcomed";
+		public bool IsEnabled
+        {
+			get => LocalStateManager.Instance.LastIsEnabled;
+			set
+            {
+				LocalStateManager.Instance.LastIsEnabled = value;
+				LocalStateManager.Save();
+				NotifyPropertyChanged(nameof(IsEnabled));
+            }
+        }
 
 		public bool IsWelcomed
 		{
-			get => Preferences.Get(welcomedPrefKey, false);
+			get => LocalStateManager.Instance.IsWelcomed;
 			set
 			{
-				Preferences.Set(welcomedPrefKey, value);
+				LocalStateManager.Instance.IsWelcomed = value;
+				LocalStateManager.Save();
 				NotifyPropertyChanged(nameof(IsWelcomed));
 			}
 		}

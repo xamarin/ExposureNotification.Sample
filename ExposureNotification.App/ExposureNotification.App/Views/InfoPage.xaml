@@ -31,7 +31,6 @@
 						Margin="0,10,0,0"
 						Command="{Binding GetStartedCommand}"
 						HorizontalOptions="End"
-						IsEnabled="{Binding IsEnabled}"
 						Style="{DynamicResource ButtonRounded}"
 						Text="Get Started" />
 
@@ -72,7 +71,6 @@
 							Margin="0,10,0,0"
 							Command="{Binding EnableDisableCommand}"
 							HorizontalOptions="End"
-							IsEnabled="{Binding IsEnabled}"
 							Style="{DynamicResource ButtonRounded}"
 							Text="Turn On" />
 					</Grid>

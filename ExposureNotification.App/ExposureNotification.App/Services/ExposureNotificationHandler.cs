@@ -1,18 +1,13 @@
-﻿using Newtonsoft.Json;
+﻿using ExposureNotification.App.Services;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net.Http;
-using System.Reflection;
-using System.Resources;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Xamarin.ExposureNotifications;
+using Xamarin.Forms;
 using Xamarin.Forms.Internals;
 
 namespace ExposureNotification.App
@@ -29,17 +24,25 @@ namespace ExposureNotification.App
 
 		public async Task ExposureDetected(ExposureDetectionSummary summary, Func<Task<IEnumerable<ExposureInfo>>> getDetailsFunc)
 		{
+			LocalStateManager.Instance.ExposureSummary = summary;
+
+			var details = await getDetailsFunc();
+
+			LocalStateManager.Instance.ExposureInformation.AddRange(details);
+
+			LocalStateManager.Save();
+
+			MessagingCenter.Instance.Send(this, "exposure_info_changed");
+
 			// TODO: Save this info and alert the user
 			// Pop up a local notification
 		}
 
 		public async Task<IEnumerable<TemporaryExposureKey>> FetchExposureKeysFromServer()
 		{
-			const string prefsSinceKey = "keys_since";
-
 			// Get the newest date we have keys from and request since then
 			// or if no date stored, only return as much as the past 14 days of keys
-			var sinceEpochSeconds = Preferences.Get(prefsSinceKey, DateTimeOffset.MinValue.ToUnixTimeSeconds());
+			var sinceEpochSeconds = LocalStateManager.Instance.NewestKeysResponseTimestamp.ToUnixTimeSeconds();
 			var url = $"{apiUrlBase.TrimEnd('/')}/keys?since={sinceEpochSeconds}";
 
 			var response = await http.GetAsync(url);
@@ -52,27 +55,15 @@ namespace ExposureNotification.App
 			var keys = JsonConvert.DeserializeObject<KeysResponse>(responseData);
 
 			// Save newest timestamp for next request
-			Preferences.Set(prefsSinceKey, keys.Timestamp);
+			LocalStateManager.Instance.NewestKeysResponseTimestamp = DateTimeOffset.FromUnixTimeSeconds(keys.Timestamp);
+			LocalStateManager.Save();
 
 			return keys.Keys;
 		}
 
-		const string prefsDiagnosisSubmissionDate = "prefs_diagnosis_submit_date";
-		const string prefsDiagnosisSubmissionUid = "prefs_diagnosis_submit_uid";
-
-		public static bool HasSubmittedDiagnosis
-			=> Preferences.Get(prefsDiagnosisSubmissionDate, DateTime.MinValue)
-				>= DateTime.UtcNow.AddDays(-14);
-
-		public static string DiagnosisUid
-		{
-			get => Preferences.Get(prefsDiagnosisSubmissionUid, (string)null);
-			set => Preferences.Set(prefsDiagnosisSubmissionUid, value);
-		}
-
 		public async Task UploadSelfExposureKeysToServer(IEnumerable<TemporaryExposureKey> temporaryExposureKeys)
 		{
-			var diagnosisUid = DiagnosisUid;
+			var diagnosisUid = LocalStateManager.Instance.LatestDiagnosis.DiagnosisUid;
 
 			if (string.IsNullOrEmpty(diagnosisUid))
 				throw new InvalidOperationException();
@@ -92,14 +83,11 @@ namespace ExposureNotification.App
 
 				response.EnsureSuccessStatusCode();
 
-				// Store the date we were diagnosed
-				Preferences.Set(prefsDiagnosisSubmissionDate, DateTime.UtcNow);
+				LocalStateManager.Instance.LatestDiagnosis.Shared = true;
+				LocalStateManager.Save();
 			}
 			catch
 			{
-				// Reset diagnosis status since we don't have one that was successfully submitted
-				// and then re-throw
-				Preferences.Set(prefsDiagnosisSubmissionDate, DateTime.UtcNow.AddDays(-100));
 				throw;
 			}
 		}
