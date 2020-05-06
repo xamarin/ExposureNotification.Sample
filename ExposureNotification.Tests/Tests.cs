@@ -163,8 +163,8 @@ namespace ExposureNotification.Tests
 					{
 						KeyData = rnd,
 						RollingStart = nowDate,
-						RollingDuration = TimeSpan.FromMinutes(10),
-						TransmissionRiskLevel = RiskLevel.Medium
+						RollingDuration = TimeSpan.FromMinutes(random.Next(5, 60)),
+						TransmissionRiskLevel = (RiskLevel)random.Next(1, 8)
 					});
 				}
 			};
