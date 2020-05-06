@@ -25,7 +25,7 @@ namespace ExposureNotification.Backend
 
 		readonly DbContextOptions dbContextOptions;
 
-		public async Task<KeysResponse> GetKeysAsync(long sinceEpochSeconds)
+		public async Task<KeysResponse> GetKeysAsync(long sinceEpochSeconds, int skip = 0, int take = int.MaxValue)
 		{
 			using (var ctx = new ExposureNotificationContext(dbContextOptions))
 			{
@@ -37,6 +37,9 @@ namespace ExposureNotification.Backend
 
 				var results = await ctx.TemporaryExposureKeys.AsQueryable()
 					.Where(dtk => dtk.TimestampSecondsSinceEpoch >= sinceEpochSeconds)
+					.OrderByDescending(dtk => dtk.TimestampSecondsSinceEpoch)
+					.Skip(skip)
+					.Take(take)
 					.ToListAsync().ConfigureAwait(false);
 
 				var newestTimestamp = results.OrderByDescending(dtk => dtk.TimestampSecondsSinceEpoch).FirstOrDefault()?.TimestampSecondsSinceEpoch;
@@ -47,6 +50,15 @@ namespace ExposureNotification.Backend
 					Timestamp = newestTimestamp ?? DateTimeOffset.MinValue.ToUnixTimeSeconds(),
 					Keys = keys
 				};
+			}
+		}
+
+		public async Task DeleteAllKeysAsync()
+		{
+			using (var ctx = new ExposureNotificationContext(dbContextOptions))
+			{
+				ctx.TemporaryExposureKeys.RemoveRange(ctx.TemporaryExposureKeys);
+				ctx.SaveChanges();
 			}
 		}
 
