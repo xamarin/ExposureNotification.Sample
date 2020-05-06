@@ -71,10 +71,16 @@ namespace Xamarin.ExposureNotifications
 		{
 			var s = await GetSessionAsync();
 
-			// TODO: Check max
-			var info = await s.GetExposureInfoAsync(100);
+			var exposures = new List<ENExposureInfo>();
 
-			return info.Exposures.Select(i =>
+			ENExposureDetectionSessionGetExposureInfoResult result;
+			do
+			{
+				result = await s.GetExposureInfoAsync(100);
+				exposures.AddRange(result.Exposures);
+			} while (!result.Done);
+
+			return exposures.Select(i =>
 				new ExposureInfo(
 					((DateTime)i.Date).ToLocalTime(),
 					TimeSpan.FromMinutes(i.Duration),
