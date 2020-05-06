@@ -79,7 +79,7 @@ namespace ExposureNotification.App
 				});
 
 				var http = new HttpClient();
-				var response = await http.PostAsync(url, new StringContent(json));
+				var response = await http.PutAsync(url, new StringContent(json));
 
 				response.EnsureSuccessStatusCode();
 
@@ -89,6 +89,26 @@ namespace ExposureNotification.App
 			catch
 			{
 				throw;
+			}
+		}
+
+		internal static async Task<bool> VerifyDiagnosisUid(string diagnosisUid)
+		{
+			var url = $"{apiUrlBase.TrimEnd('/')}/selfdiagnosis";
+
+			var http = new HttpClient();
+
+			try
+			{
+				var response = await http.PostAsync(url, new StringContent(diagnosisUid));
+
+				response.EnsureSuccessStatusCode();
+
+				return true;
+			}
+			catch
+			{
+				return false;
 			}
 		}
 

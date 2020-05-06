@@ -22,6 +22,16 @@ namespace ExposureNotification.App.ViewModels
 		public ICommand SubmitDiagnosisCommand
 			=> new Command(async () =>
 			{
+				UserDialogs.Instance.Loading("Verifying Diagnosis...");
+
+				// Check the diagnosis is valid on the server before asking the native api's for the keys
+				if (!await ExposureNotificationHandler.VerifyDiagnosisUid(DiagnosisUid))
+				{
+					UserDialogs.Instance.HideLoading();
+					await UserDialogs.Instance.AlertAsync("Your diagnosis cannot be verified at this time to be submitted.", "Verification Failed", "OK");
+					return;
+				}
+
 				UserDialogs.Instance.Loading("Submitting Diagnosis...");
 
 				try
