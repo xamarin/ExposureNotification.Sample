@@ -8,9 +8,6 @@
 	x:Class="ExposureNotification.App.Views.ExposureDetailsPage"
 	BackgroundColor="{DynamicResource BackgroundColor}"
 	Title="Possible Exposure Details">
-	<ContentPage.BindingContext>
-		<viewmodel:ExposureDetailsViewModel />
-	</ContentPage.BindingContext>
 	<ContentPage.ToolbarItems>
 		<ToolbarItem Command="{Binding CancelCommand}">
 			<ToolbarItem.IconImageSource>

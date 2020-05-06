@@ -34,7 +34,7 @@
 
 					<Label Text="Exposures in Past 14 Days" FontAttributes="Bold" FontSize="Subtitle" />
 
-					<CollectionView ItemsSource="{Binding ExposureInformation}" SelectionChanged="CollectionView_SelectionChanged">
+					<CollectionView ItemsSource="{Binding ExposureInformation}" SelectionChanged="CollectionView_SelectionChanged" SelectionMode="Single">
 						<CollectionView.ItemTemplate>
 							<DataTemplate>
 								<StackLayout Padding="0,5,0,5">

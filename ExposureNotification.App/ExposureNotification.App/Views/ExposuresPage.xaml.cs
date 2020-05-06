@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Xamarin.ExposureNotifications;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -17,14 +18,14 @@ namespace ExposureNotification.App.Views
 			InitializeComponent();
 		}
 
-		private void CollectionView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		async void CollectionView_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
 			var info = e.CurrentSelection.FirstOrDefault();
 
 			if (info != null && info is ExposureInfo exposureInfo)
-			{
-				Navigation.PushAsync(new ExposureDetailsPage());
-			}
+				await Navigation.PushModalAsync(new NavigationPage(new ExposureDetailsPage(exposureInfo)), true);
+			
+			(sender as CollectionView).SelectedItem = null;
 		}
 	}
 }
