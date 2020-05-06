@@ -20,9 +20,6 @@ namespace Xamarin.ExposureNotifications
 		static Task<IEnumerable<ExposureInfo>> PlatformGetExposureInformation()
 			=> throw new PlatformNotSupportedException();
 
-		static Task<ExposureDetectionSummary> PlatformGetExposureSummary()
-			=> throw new PlatformNotSupportedException();
-
 		// Call this when the user has confirmed diagnosis
 		static Task PlatformSubmitSelfDiagnosis()
 			=> throw new PlatformNotSupportedException();
