@@ -154,7 +154,6 @@ namespace ExposureNotification.Tests
 					break;
 			}
 
-			Assert.Equal<ulong>(192, latestIndex);
 			Assert.Equal(expectedCount, actualCount);
 		}
 
