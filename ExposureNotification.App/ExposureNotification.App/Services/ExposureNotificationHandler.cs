@@ -13,9 +13,11 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
 using Xamarin.ExposureNotifications;
+using Xamarin.Forms.Internals;
 
 namespace ExposureNotification.App
 {
+	[Preserve]
 	public class ExposureNotificationHandler : IExposureNotificationHandler
 	{
 		const string apiUrlBase = "http://localhost:7071/api/";
