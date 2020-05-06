@@ -49,7 +49,7 @@ namespace ExposureNotification.App.Services
 
 		public bool EnableNotifications { get; set; } = true;
 
-		public DateTimeOffset NewestKeysResponseTimestamp { get; set; } = DateTimeOffset.MinValue;
+		public ulong LatestKeysResponseIndex { get; set; } = 0;
 
 		public List<ExposureInfo> ExposureInformation { get; set; } = new List<ExposureInfo>();
 

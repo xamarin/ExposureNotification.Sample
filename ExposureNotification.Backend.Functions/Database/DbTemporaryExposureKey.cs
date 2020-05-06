@@ -1,13 +1,15 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Xamarin.ExposureNotifications;
 
 namespace ExposureNotification.Backend
 {
 	class DbTemporaryExposureKey
 	{
-		[Key]
-		public string Id { get; set; } = Guid.NewGuid().ToString();
+		[Key, Column(Order = 0)]
+		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+		public ulong Id { get; set; }
 
 		public string Base64KeyData { get; set; }
 
