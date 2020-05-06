@@ -9,12 +9,12 @@ using Xamarin.Forms.Xaml;
 
 namespace ExposureNotification.App.Views
 {
-	[XamlCompilation(XamlCompilationOptions.Compile)]
-	public partial class ProfilePage : ContentPage
-	{
-		public ProfilePage()
-		{
-			InitializeComponent();
-		}
-	}
+    [XamlCompilation(XamlCompilationOptions.Compile)]
+    public partial class NotifyOthersPage : ContentPage
+    {
+        public NotifyOthersPage()
+        {
+            InitializeComponent();
+        }
+    }
 }
