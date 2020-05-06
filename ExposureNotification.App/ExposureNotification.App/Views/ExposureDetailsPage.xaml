@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:viewmodel="clr-namespace:ExposureNotification.App.ViewModels"
+	mc:Ignorable="d"
+	x:Class="ExposureNotification.App.Views.ExposureDetailsPage"
+	BackgroundColor="{DynamicResource BackgroundColor}"
+	Title="Possible Exposure Details">
+	<ContentPage.BindingContext>
+		<viewmodel:ExposureDetailsViewModel />
+	</ContentPage.BindingContext>
+	<ContentPage.ToolbarItems>
+		<ToolbarItem Command="{Binding CancelCommand}">
+			<ToolbarItem.IconImageSource>
+				<FontImageSource Glyph="{StaticResource IconCancel}" FontFamily="FA-S" />
+			</ToolbarItem.IconImageSource>
+		</ToolbarItem>
+	</ContentPage.ToolbarItems>
+	<ContentPage.Content>
+		<StackLayout Style="{DynamicResource Container}">
+			<Frame Style="{DynamicResource CardFrame}">
+				<StackLayout>
+					<Label Text="[Actual copy to be provided by Public Health Authority]" />
+
+					<BoxView HeightRequest="2" BackgroundColor="{DynamicResource TextPrimaryColor}" />
+					
+					<Label FontAttributes="Bold" Text="The person's test result has been verified.  You were near this person on:" />
+					<Label Text="{Binding RollingStart}" FontAttributes="Bold" />
+
+
+					<Label FontAttributes="Bold" Text="Next steps: [Actual copy to be provided by Public Health Authority]." />
+					
+				</StackLayout>
+			</Frame>
+		</StackLayout>
+	</ContentPage.Content>
+</ContentPage>

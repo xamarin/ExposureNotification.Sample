@@ -21,8 +21,8 @@
 		</ToolbarItem>
 	</ContentPage.ToolbarItems>
 	<ScrollView>
-		<StackLayout Padding="20" Spacing="12">
-			<Frame>
+		<StackLayout Style="{DynamicResource Container}">
+			<Frame Style="{DynamicResource CardFrame}">
 				<StackLayout>
 					
 					<Label Text="[Insert text from local Health authority]" />

@@ -7,22 +7,38 @@
 	mc:Ignorable="d"
 	x:Class="ExposureNotification.App.Views.ExposuresPage"
 	BackgroundColor="{DynamicResource BackgroundColor}"
-	Title="Exposures">
+	Title="Possible Exposures">
 	<ContentPage.BindingContext>
 		<viewmodel:ExposuresViewModel />
 	</ContentPage.BindingContext>
 	<ContentPage.Content>
-		<StackLayout Padding="20" Spacing="12">
-			<Frame>
+		<StackLayout Style="{DynamicResource Container}">
+			<Frame Style="{DynamicResource CardFrame}">
+				<Grid RowSpacing="0" Padding="0" Margin="0,5,0,5" VerticalOptions="FillAndExpand">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="*" />
+						<ColumnDefinition Width="Auto" />
+					</Grid.ColumnDefinitions>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="*" />
+					</Grid.RowDefinitions>
+					
+					<Label Text="Exposure Notifications" Grid.Column="0" VerticalOptions="Center" />
+					<Switch IsToggled="{Binding Notifications}" VerticalOptions="Center" HorizontalOptions="End" />
+
+				</Grid>
+			</Frame>
+			
+			<Frame Style="{DynamicResource CardFrame}">
 				<StackLayout>
 
 					<Label Text="Exposures in Past 14 Days" FontAttributes="Bold" FontSize="Subtitle" />
 
-					<CollectionView ItemsSource="{Binding ExposureInformation}">
+					<CollectionView ItemsSource="{Binding ExposureInformation}" SelectionChanged="CollectionView_SelectionChanged">
 						<CollectionView.ItemTemplate>
 							<DataTemplate>
 								<StackLayout Padding="0,5,0,5">
-									<Frame Padding="10" BorderColor="#EAEAEA">
+									<Frame Padding="10" BorderColor="#EAEAEA" CornerRadius="10">
 										<Grid>
 											<Grid.ColumnDefinitions>
 												<ColumnDefinition Width="*" />
@@ -38,7 +54,7 @@
 
 											<Image Grid.Column="1" Grid.Row="0" Grid.RowSpan="2">
 												<Image.Source>
-													<FontImageSource FontFamily="FA-R" Glyph="{StaticResource IconRightArrow}" Color="{DynamicResource TextPrimaryColor}" />
+													<FontImageSource FontFamily="FA-R" Glyph="{StaticResource IconRightArrow}" Color="{DynamicResource TextPrimaryColor}" Size="18" />
 												</Image.Source>
 											</Image>
 										</Grid>
@@ -46,6 +62,16 @@
 								</StackLayout>
 							</DataTemplate>
 						</CollectionView.ItemTemplate>
+						<CollectionView.EmptyView>
+
+							
+							<StackLayout Orientation="Vertical">
+								<Label Margin="0,10,0,0" Text="No known exposures." />
+								<Label Margin="0,10,0,0" Text="You will be notified if you have been exposed to someone who reported a positive COVID-19 result." />
+							</StackLayout>
+								
+							
+						</CollectionView.EmptyView>
 					</CollectionView>
 
 				</StackLayout>

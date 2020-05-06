@@ -14,8 +14,8 @@
 	</ContentPage.BindingContext>
 
 	<ScrollView>
-		<StackLayout Padding="20" Spacing="12">
-			<Frame>
+		<StackLayout Style="{DynamicResource Container}">
+			<Frame Style="{DynamicResource CardFrame}">
 				<StackLayout>
 
 					<Label Text="Share A Positive Diagnosis" FontAttributes="Bold" FontSize="Subtitle" />
@@ -33,7 +33,7 @@
 					<Button
 						Margin="0,20,0,0"
 						Command="{Binding SharePositiveDiagnosisCommand}"
-						HorizontalOptions="CenterAndExpand"
+						HorizontalOptions="End"
 						IsEnabled="{Binding IsEnabled}"
 						Style="{DynamicResource ButtonRounded}"
 						Text="Share A Positive Diagnosis" />
