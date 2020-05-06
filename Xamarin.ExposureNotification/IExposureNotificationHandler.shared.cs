@@ -6,7 +6,7 @@ namespace Xamarin.ExposureNotifications
 {
 	public interface IExposureNotificationHandler
 	{
-		Configuration Configuration { get; }
+		Task<Configuration> GetConfigurationAsync();
 
 		// Go fetch the keys from your server
 		Task FetchExposureKeysFromServer(Func<IEnumerable<TemporaryExposureKey>, Task> addKeys);

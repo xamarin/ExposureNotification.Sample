@@ -20,7 +20,7 @@ namespace Xamarin.ExposureNotifications
 
 		static async Task PlatformStart(IExposureNotificationHandler handler)
 		{
-			var c = handler.Configuration;
+			var c = await handler.GetConfigurationAsync();
 
 			var config = new ExposureConfiguration.ExposureConfigurationBuilder()
 				.SetAttenuationScores(c.AttenuationScores)

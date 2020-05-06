@@ -27,7 +27,7 @@ namespace Xamarin.ExposureNotifications
 		{
 			if (session == null)
 			{
-				var c = Handler.Configuration;
+				var c = await Handler.GetConfigurationAsync();
 
 				session = new ENExposureDetectionSession();
 				session.Configuration = new ENExposureConfiguration

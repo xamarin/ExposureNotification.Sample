@@ -20,8 +20,8 @@ namespace ExposureNotification.App
 
 		static readonly HttpClient http = new HttpClient();
 
-		public Configuration Configuration
-			=> new Configuration();
+		public Task<Configuration> GetConfigurationAsync()
+			=> Task.FromResult(new Configuration());
 
 		public async Task ExposureDetected(ExposureDetectionSummary summary, Func<Task<IEnumerable<ExposureInfo>>> getDetailsFunc)
 		{
