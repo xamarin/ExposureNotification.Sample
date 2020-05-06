@@ -107,7 +107,7 @@ namespace ExposureNotification.Tests
 
 			await Storage.DeleteAllKeysAsync();
 
-			await Storage.AddDiagnosisUidsAsync("testkeys");
+			await Storage.AddDiagnosisUidsAsync(new[] { "testkeys" });
 
 			await Storage.SubmitPositiveDiagnosisAsync(
 				new ExposureNotificationStorage.SelfDiagnosisSubmissionRequest
