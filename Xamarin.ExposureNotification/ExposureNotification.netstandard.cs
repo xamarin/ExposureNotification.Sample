@@ -28,8 +28,11 @@ namespace Xamarin.ExposureNotifications
 			=> throw new PlatformNotSupportedException();
 
 		// Tells the local API when new diagnosis keys have been obtained from the server
-		static Task<ExposureDetectionSummary> PlatformAddDiagnosisKeys(IEnumerable<TemporaryExposureKey> diagnosisKeys)
+		static Task PlatformAddDiagnosisKeys(IEnumerable<TemporaryExposureKey> diagnosisKeys)
 			=> throw new PlatformNotSupportedException();
+		static Task<ExposureDetectionSummary> PlatformFinishAddDiagnosisKeys()
+			=> throw new PlatformNotSupportedException();
+
 
 		static Task<IEnumerable<TemporaryExposureKey>> PlatformGetTemporaryExposureKeys()
 			=> throw new PlatformNotSupportedException();

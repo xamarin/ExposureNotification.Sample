@@ -98,7 +98,7 @@ namespace Xamarin.ExposureNotifications
 		}
 
 		// Tells the local API when new diagnosis keys have been obtained from the server
-		static async Task<ExposureDetectionSummary> PlatformAddDiagnosisKeys(IEnumerable<TemporaryExposureKey> diagnosisKeys)
+		static async Task PlatformAddDiagnosisKeys(IEnumerable<TemporaryExposureKey> diagnosisKeys)
 		{
 			var s = await GetSessionAsync();
 
@@ -119,6 +119,11 @@ namespace Xamarin.ExposureNotifications
 						TransmissionRiskLevel = k.TransmissionRiskLevel.ToNative(),
 					}).ToArray());
 			}
+		}
+
+		static async Task<ExposureDetectionSummary> PlatformFinishAddDiagnosisKeys()
+		{
+			var s = await GetSessionAsync();
 
 			var summary = await s.FinishedDiagnosisKeysAsync();
 
