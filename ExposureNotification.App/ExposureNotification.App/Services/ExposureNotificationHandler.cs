@@ -23,13 +23,14 @@ namespace ExposureNotification.App
 		public Configuration Configuration
 			=> new Configuration();
 
-		public async Task ExposureDetected(ExposureDetectionSummary summary, Func<Task<IEnumerable<ExposureInfo>>> getDetailsFunc)
+		public async Task ExposureDetected(ExposureDetectionSummary summary, IAsyncEnumerable<ExposureInfo> details)
 		{
 			LocalStateManager.Instance.ExposureSummary = summary;
 
-			var details = await getDetailsFunc();
-
-			LocalStateManager.Instance.ExposureInformation.AddRange(details);
+			await foreach (var d in details)
+			{
+				LocalStateManager.Instance.ExposureInformation.Add(d);
+			}
 
 			LocalStateManager.Save();
 
@@ -39,7 +40,7 @@ namespace ExposureNotification.App
 			// Pop up a local notification
 		}
 
-		public async Task FetchExposureKeysFromServer(Func<IEnumerable<TemporaryExposureKey>, Task> addKeys)
+		public async IAsyncEnumerable<TemporaryExposureKey> FetchExposureKeysFromServer()
 		{
 			var newestKeyTimestamp = LocalStateManager.Instance.NewestKeysResponseTimestamp;
 
@@ -69,8 +70,8 @@ namespace ExposureNotification.App
 				if (keys.Keys == null || !keys.Keys.Any())
 					break;
 
-				// Call the callback with the batch of keys to add
-				await addKeys(keys.Keys);
+				foreach (var key in keys.Keys)
+					yield return key;
 
 				var keysTimestamp = DateTimeOffset.FromUnixTimeSeconds(keys.Timestamp);
 

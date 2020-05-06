@@ -29,7 +29,9 @@
 		<Compile Include="**\*.shared.cs" />
 		<Compile Include="**\*.shared.*.cs" />
 
-		<None Include="..\LICENSE.md"  Pack="True" PackagePath="LICENSE.md" />
+		<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="1.1.0" />
+
+		<None Include="..\LICENSE.md" Pack="True" PackagePath="LICENSE.md" />
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">

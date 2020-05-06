@@ -67,20 +67,25 @@ namespace Xamarin.ExposureNotifications
 		}
 
 		// Gets the contact info of anyone the user had contact with who was diagnosed
-		static async Task<IEnumerable<ExposureInfo>> PlatformGetExposureInformation()
+		static async IAsyncEnumerable<ExposureInfo> PlatformGetExposureInformation()
 		{
 			var s = await GetSessionAsync();
 
-			// TODO: Check max
-			var info = await s.GetExposureInfoAsync(100);
+			ENExposureDetectionSessionGetExposureInfoResult result;
+			do
+			{
+				// get a batch of 100
+				result = await s.GetExposureInfoAsync(100);
 
-			return info.Exposures.Select(i =>
-				new ExposureInfo(
-					((DateTime)i.Date).ToLocalTime(),
-					TimeSpan.FromMinutes(i.Duration),
-					i.AttenuationValue,
-					i.TotalRiskScore,
-					i.TransmissionRiskLevel.FromNative()));
+				// return them all
+				foreach (var i in result.Exposures)
+					yield return new ExposureInfo(
+						((DateTime)i.Date).ToLocalTime(),
+						TimeSpan.FromMinutes(i.Duration),
+						i.AttenuationValue,
+						i.TotalRiskScore,
+						i.TransmissionRiskLevel.FromNative());
+			} while (!result.Done);
 		}
 
 		// Call this when the user has confirmed diagnosis
@@ -133,13 +138,13 @@ namespace Xamarin.ExposureNotifications
 				summary.MaximumRiskScore);
 		}
 
-		static async Task<IEnumerable<TemporaryExposureKey>> PlatformGetTemporaryExposureKeys()
+		static async IAsyncEnumerable<TemporaryExposureKey> PlatformGetTemporaryExposureKeys()
 		{
 			var m = await GetManagerAsync();
 			var selfKeys = await m.GetDiagnosisKeysAsync();
 
-			return selfKeys.Select(k =>
-				new TemporaryExposureKey(k.KeyData.ToArray(), k.RollingStartNumber, new TimeSpan(), k.TransmissionRiskLevel.FromNative()));
+			foreach (var k in selfKeys)
+				yield return new TemporaryExposureKey(k.KeyData.ToArray(), k.RollingStartNumber, new TimeSpan(), k.TransmissionRiskLevel.FromNative());
 		}
 	}
 

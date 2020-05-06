@@ -69,9 +69,7 @@ namespace Xamarin.ExposureNotifications
 				if (summary != null && summary.MatchedKeyCount > 0)
 				{
 					// Invoke the custom implementation handler code with the summary info
-					await ExposureNotification.Handler.ExposureDetected(
-						summary,
-						() => ExposureNotification.GetExposureInformationAsync());
+					await ExposureNotification.Handler.ExposureDetected(summary, ExposureNotification.GetExposureInformationAsync());
 				}
 			}
 			else if (workIntent.Action == ExposureNotificationCallbackBroadcastReceiver.ActionRequestDiagnosisKeys)

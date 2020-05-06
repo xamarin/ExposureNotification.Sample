@@ -57,7 +57,7 @@ namespace Xamarin.ExposureNotifications
 			=> await PlatformStop();
 
 		// Gets the contact info of anyone the user had contact with who was diagnosed
-		internal static Task<IEnumerable<ExposureInfo>> GetExposureInformationAsync()
+		internal static IAsyncEnumerable<ExposureInfo> GetExposureInformationAsync()
 			=> PlatformGetExposureInformation();
 
 		// Tells the local API when new diagnosis keys have been obtained from the server
@@ -70,40 +70,34 @@ namespace Xamarin.ExposureNotifications
 		public static Task SubmitSelfDiagnosisAsync()
 			=> PlatformSubmitSelfDiagnosis();
 
-		internal static Task<IEnumerable<TemporaryExposureKey>> GetSelfTemporaryExposureKeysAsync()
+		internal static IAsyncEnumerable<TemporaryExposureKey> GetSelfTemporaryExposureKeysAsync()
 			=> PlatformGetTemporaryExposureKeys();
 
 		public static async Task<bool> UpdateKeysFromServer()
 		{
-			var hadUpdates = false;
+			var keys = Handler?.FetchExposureKeysFromServer();
 
-			await Handler?.FetchExposureKeysFromServer(async (keys) =>
+			var list = new List<TemporaryExposureKey>();
+			await foreach (var key in keys)
 			{
-				var updates = keys != null && keys.Any();
-				
-				if (updates)
-				{
-					hadUpdates = true;
+				list.Add(key);
+			}
 
-					await AddDiagnosisKeysAsync(keys);
-				}
-			});
-
-			if (hadUpdates)
+			if (list.Count > 0)
 			{
+				await AddDiagnosisKeysAsync(list);
+
 				var summary = await FinishAddDiagnosisKeysAsync();
 
 				// Check that the summary has any matches before notifying the callback
 				if (summary != null && summary.MatchedKeyCount > 0)
 				{
 					// This will run and invoke the handler in the background to deal with results
-					_ = Task.Run(() =>
-						  Handler.ExposureDetected(summary,
-							  () => GetExposureInformationAsync()));
+					_ = Task.Run(() => Handler.ExposureDetected(summary, GetExposureInformationAsync()));
 				}
 			}
 
-			return hadUpdates;
+			return list.Count > 0;
 		}
 	}
 
