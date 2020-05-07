@@ -81,7 +81,7 @@ namespace Xamarin.ExposureNotifications
 				sequence = sequence.Skip(batchSize);
 
 				// TODO: RollingDuration is missing
-
+				
 				await Instance.ProvideDiagnosisKeysAsync(
 					batch.Select(k => new global::Android.Gms.Nearby.ExposureNotification.TemporaryExposureKey.TemporaryExposureKeyBuilder()
 						.SetKeyData(k.KeyData)

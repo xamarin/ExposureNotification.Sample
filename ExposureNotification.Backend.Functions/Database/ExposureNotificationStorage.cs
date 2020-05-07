@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Xamarin.ExposureNotifications;
+using Xamarin.ExposureNotifications.Proto;
 
 namespace ExposureNotification.Backend
 {
@@ -29,11 +30,11 @@ namespace ExposureNotification.Backend
 		{
 			using (var ctx = new ExposureNotificationContext(dbContextOptions))
 			{
-				var oldest = DateTimeOffset.UtcNow.AddDays(-14).ToUnixTimeSeconds();
-				
+				var oldest = DateTimeOffset.UtcNow.AddDays(-14).ToUnixTimeMilliseconds();
+
 				var results = await ctx.TemporaryExposureKeys.AsQueryable()
 					.Where(dtk => dtk.Id > since
-						&& dtk.TimestampSecondsSinceEpoch >= oldest)
+						&& dtk.TimestampMsSinceEpoch >= oldest)
 					.OrderBy(dtk => dtk.Id)
 					.Skip(skip)
 					.Take(take)
@@ -49,6 +50,52 @@ namespace ExposureNotification.Backend
 					Latest = newestIndex ?? 0,
 					Keys = keys
 				};
+			}
+		}
+
+		public async Task<File> GetKeysFileAsync(long sinceMsSinceEpoch, int batchNum, string region = "")
+		{
+			if (batchNum < 1)
+				batchNum = 1;
+
+			using (var ctx = new ExposureNotificationContext(dbContextOptions))
+			{
+				var query = ctx.TemporaryExposureKeys
+					.Where(dtk => dtk.TimestampMsSinceEpoch >= sinceMsSinceEpoch)
+					.OrderByDescending(dtk => dtk.TimestampMsSinceEpoch);
+
+				// Get overall count for this query
+				var count = await query.CountAsync();
+
+				// Select only the batch we want
+				var batch = await query
+					.Skip((batchNum - 1) * Consts.MaxKeysPerFile)
+					.Take(Consts.MaxKeysPerFile)
+					.ToListAsync().ConfigureAwait(false);
+
+				var f = new File
+				{
+					Header = new Header
+					{
+						BatchNum = batchNum,
+						BatchSize = count,
+						StartTimestamp = batch.First().TimestampMsSinceEpoch,
+						EndTimestamp = batch.Last().TimestampMsSinceEpoch,
+						Region = region
+					}
+				};
+
+				f.Key.AddRange(batch.Select(k => new Key
+				{
+					KeyData = Google.Protobuf.ByteString.FromBase64(k.Base64KeyData),
+					RollingPeriod = (uint)k.RollingDuration,
+					RollingStartNumber = (uint)k.RollingStartSecondsSinceEpoch,
+					TransmissionRiskLevel = (int)k.TransmissionRiskLevel
+					// TODO: Determine if apple or google to map to appropriate
+					// transmisison level number
+				}).ToList());
+
+				return f;
 			}
 		}
 

@@ -29,7 +29,9 @@
 		<Compile Include="**\*.shared.cs" />
 		<Compile Include="**\*.shared.*.cs" />
 
-		<None Include="..\LICENSE.md"  Pack="True" PackagePath="LICENSE.md" />
+		<None Include="..\LICENSE.md" Pack="True" PackagePath="LICENSE.md" />
+
+		<PackageReference Include="Google.Protobuf" Version="3.11.4" />
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
