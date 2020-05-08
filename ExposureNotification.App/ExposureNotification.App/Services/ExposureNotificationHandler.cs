@@ -20,16 +20,17 @@ namespace ExposureNotification.App
 
 		static readonly HttpClient http = new HttpClient();
 
+		public string UserExplanation
+			=> "We need to make use of the keys to keep you healthy.";
+
 		public Task<Configuration> GetConfigurationAsync()
 			=> Task.FromResult(new Configuration());
 
-		public async Task ExposureDetected(ExposureDetectionSummary summary, Func<Task<IEnumerable<ExposureInfo>>> getDetailsFunc)
+		public async Task ExposureDetectedAsync(ExposureDetectionSummary summary, IEnumerable<ExposureInfo> exposureInfo)
 		{
 			LocalStateManager.Instance.ExposureSummary = summary;
 
-			var details = await getDetailsFunc();
-
-			LocalStateManager.Instance.ExposureInformation.AddRange(details);
+			LocalStateManager.Instance.ExposureInformation.AddRange(exposureInfo);
 
 			LocalStateManager.Save();
 
@@ -39,8 +40,10 @@ namespace ExposureNotification.App
 			// Pop up a local notification
 		}
 
-		public async Task FetchExposureKeysFromServer(Func<IEnumerable<TemporaryExposureKey>, Task> addKeys)
+		public async Task<IEnumerable<TemporaryExposureKey>> FetchExposureKeysFromServerAsync()
 		{
+			var allKeys = new List<TemporaryExposureKey>();
+
 			var latestKeysResponseIndex = LocalStateManager.Instance.LatestKeysResponseIndex;
 
 			var take = 1024;
@@ -72,7 +75,7 @@ namespace ExposureNotification.App
 				if (numKeys > 0)
 				{
 					// Call the callback with the batch of keys to add
-					await addKeys(keys.Keys);
+					allKeys.AddRange(keys.Keys);
 
 					var newLatestKeysResponseIndex = keys.Latest;
 
@@ -91,9 +94,11 @@ namespace ExposureNotification.App
 				checkForMore = numKeys >= take;
 
 			} while (checkForMore);
+
+			return allKeys;
 		}
 
-		public async Task UploadSelfExposureKeysToServer(IEnumerable<TemporaryExposureKey> temporaryExposureKeys)
+		public async Task UploadSelfExposureKeysToServerAsync(IEnumerable<TemporaryExposureKey> temporaryExposureKeys)
 		{
 			var diagnosisUid = LocalStateManager.Instance.LatestDiagnosis.DiagnosisUid;
 

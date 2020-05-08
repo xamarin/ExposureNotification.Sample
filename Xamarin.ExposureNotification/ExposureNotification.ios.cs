@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using ExposureNotifications;
 using Foundation;
+using Google.Protobuf;
 
 namespace Xamarin.ExposureNotifications
 {
 	public static partial class ExposureNotification
 	{
+		const int diagnosisFileMaxKeys = 18000;
+
 		static ENManager manager;
-		static ENExposureDetectionSession session;
 
 		static async Task<ENManager> GetManagerAsync()
 		{
@@ -23,32 +26,25 @@ namespace Xamarin.ExposureNotifications
 			return manager;
 		}
 
-		static async Task<ENExposureDetectionSession> GetSessionAsync()
+		static async Task<ENExposureConfiguration> GetConfigurationAsync()
 		{
-			if (session == null)
+			var c = await Handler.GetConfigurationAsync();
+
+			return new ENExposureConfiguration
 			{
-				var c = await Handler.GetConfigurationAsync();
-
-				session = new ENExposureDetectionSession();
-				session.Configuration = new ENExposureConfiguration
-				{
-					AttenuationScores = c.AttenuationScores,
-					DurationScores = c.DurationScores,
-					DaysSinceLastExposureScores = c.DaysSinceLastExposureScores,
-					TransmissionRiskScores = c.TransmissionRiskScores,
-					AttenuationWeight = c.AttenuationWeight,
-					DaysSinceLastExposureWeight = c.DaysSinceLastExposureWeight,
-					DurationWeight = c.DurationWeight,
-					TransmissionRiskWeight = c.TransmissionWeight,
-					MinimumRiskScore = (byte)c.MinimumRiskScore
-				};
-				await session.ActivateAsync();
-			}
-
-			return session;
+				AttenuationLevelValues = c.AttenuationScores,
+				DurationLevelValues = c.DurationScores,
+				DaysSinceLastExposureLevelValues = c.DaysSinceLastExposureScores,
+				TransmissionRiskLevelValues = c.TransmissionRiskScores,
+				AttenuationWeight = c.AttenuationWeight,
+				DaysSinceLastExposureWeight = c.DaysSinceLastExposureWeight,
+				DurationWeight = c.DurationWeight,
+				TransmissionRiskWeight = c.TransmissionWeight,
+				MinimumRiskScore = (byte)c.MinimumRiskScore
+			};
 		}
 
-		static async Task PlatformStart(IExposureNotificationHandler handler)
+		static async Task PlatformStart()
 		{
 			var m = await GetManagerAsync();
 			await m.SetExposureNotificationEnabledAsync(true);
@@ -66,77 +62,74 @@ namespace Xamarin.ExposureNotifications
 			return m.ExposureNotificationEnabled;
 		}
 
-		// Gets the contact info of anyone the user had contact with who was diagnosed
-		static async Task<IEnumerable<ExposureInfo>> PlatformGetExposureInformation()
-		{
-			var s = await GetSessionAsync();
-
-			var exposures = new List<ENExposureInfo>();
-
-			ENExposureDetectionSessionGetExposureInfoResult result;
-			do
-			{
-				result = await s.GetExposureInfoAsync(100);
-				exposures.AddRange(result.Exposures);
-			} while (!result.Done);
-
-			return exposures.Select(i =>
-				new ExposureInfo(
-					((DateTime)i.Date).ToLocalTime(),
-					TimeSpan.FromMinutes(i.Duration),
-					i.AttenuationValue,
-					i.TotalRiskScore,
-					i.TransmissionRiskLevel.FromNative()));
-		}
-
-		// Call this when the user has confirmed diagnosis
-		static async Task PlatformSubmitSelfDiagnosis()
-		{
-			var m = await GetManagerAsync();
-			var selfKeys = await m.GetDiagnosisKeysAsync();
-
-			await Handler.UploadSelfExposureKeysToServer(
-				selfKeys.Select(k => new TemporaryExposureKey(
-					k.KeyData.ToArray(),
-					k.RollingStartNumber,
-					TimeSpan.FromMinutes(k.RollingStartNumber),
-					k.TransmissionRiskLevel.FromNative())));
-		}
-
 		// Tells the local API when new diagnosis keys have been obtained from the server
-		static async Task PlatformAddDiagnosisKeys(IEnumerable<TemporaryExposureKey> diagnosisKeys)
+		static async Task<(ExposureDetectionSummary, IEnumerable<ExposureInfo>)> PlatformDetectExposuresAsync(IEnumerable<TemporaryExposureKey> diagnosisKeys)
 		{
-			var s = await GetSessionAsync();
+			// Get a temporary working directory
+			var dirs = NSSearchPath.GetDirectories(NSSearchPathDirectory.CachesDirectory, NSSearchPathDomain.User).FirstOrDefault();
+			var root = Path.Combine(dirs, "diagnosisKeys");
+			if (!Directory.Exists(root))
+				Directory.CreateDirectory(root);
 
-			// Batch up adding our items
-			var batchSize = (int)s.MaximumKeyCount;
-			var sequence = diagnosisKeys;
-
-			while (sequence.Any())
+			try
 			{
-				var batch = sequence.Take(batchSize);
-				sequence = sequence.Skip(batchSize);
+				var batchFiles = new List<NSUrl>();
 
-				await s.AddDiagnosisKeysAsync(diagnosisKeys.Select(k =>
-					new ENTemporaryExposureKey
+				// Batch up the keys and save into temporary files
+				var sequence = diagnosisKeys;
+				while (sequence.Any())
+				{
+					var batch = sequence.Take(diagnosisFileMaxKeys);
+					sequence = sequence.Skip(diagnosisFileMaxKeys);
+
+					var file = new Proto.File();
+					file.Key.AddRange(batch.Select(k => new Proto.Key
 					{
-						KeyData = NSData.FromArray(k.KeyData),
+						KeyData = ByteString.CopyFrom(k.KeyData),
 						RollingStartNumber = (uint)k.RollingStartLong,
+						RollingPeriod = (uint)(k.RollingDuration.TotalMinutes / 10.0),
 						TransmissionRiskLevel = k.TransmissionRiskLevel.ToNative(),
-					}).ToArray());
+					}));
+
+					var batchFilePath = Path.Combine(root, Guid.NewGuid().ToString());
+					using var stream = File.Create(batchFilePath);
+					using var coded = new CodedOutputStream(stream);
+					file.WriteTo(coded);
+
+					batchFiles.Add(NSUrl.FromFilename(batchFilePath));
+				}
+
+				// Submit to the API
+				var c = await GetConfigurationAsync();
+				var m = await GetManagerAsync();
+
+				var detectionSummary = await m.DetectExposuresAsync(c, batchFiles.ToArray());
+				var summary = new ExposureDetectionSummary(
+					(int)detectionSummary.DaysSinceLastExposure,
+					detectionSummary.MatchedKeyCount,
+					detectionSummary.MaximumRiskScore);
+
+				// Get the info
+				IEnumerable<ExposureInfo> info = Array.Empty<ExposureInfo>();
+				if (summary?.MatchedKeyCount > 0)
+				{
+					var exposures = await m.GetExposureInfoAsync(detectionSummary, Handler.UserExplanation);
+					info = exposures.Select(i => new ExposureInfo(
+						((DateTime)i.Date).ToLocalTime(),
+						TimeSpan.FromMinutes(i.Duration),
+						i.AttenuationValue,
+						i.TotalRiskScore,
+						i.TransmissionRiskLevel.FromNative()));
+				}
+
+				// Return everything
+				return (summary, info);
 			}
-		}
-
-		static async Task<ExposureDetectionSummary> PlatformFinishAddDiagnosisKeys()
-		{
-			var s = await GetSessionAsync();
-
-			var summary = await s.FinishedDiagnosisKeysAsync();
-
-			return new ExposureDetectionSummary(
-				(int)summary.DaysSinceLastExposure,
-				summary.MatchedKeyCount,
-				summary.MaximumRiskScore);
+			finally
+			{
+				// Clean up
+				Directory.Delete(root, true);
+			}
 		}
 
 		static async Task<IEnumerable<TemporaryExposureKey>> PlatformGetTemporaryExposureKeys()
@@ -144,39 +137,42 @@ namespace Xamarin.ExposureNotifications
 			var m = await GetManagerAsync();
 			var selfKeys = await m.GetDiagnosisKeysAsync();
 
-			return selfKeys.Select(k =>
-				new TemporaryExposureKey(k.KeyData.ToArray(), k.RollingStartNumber, new TimeSpan(), k.TransmissionRiskLevel.FromNative()));
+			return selfKeys.Select(k => new TemporaryExposureKey(
+				k.KeyData.ToArray(),
+				k.RollingStartNumber,
+				TimeSpan.FromMinutes(k.RollingPeriod * 10),
+				k.TransmissionRiskLevel.FromNative()));
 		}
 	}
 
 	static partial class Utils
 	{
-		public static RiskLevel FromNative(this ENRiskLevel riskLevel) =>
+		public static RiskLevel FromNative(this byte riskLevel) =>
 			riskLevel switch
 			{
-				ENRiskLevel.Lowest => RiskLevel.Lowest,
-				ENRiskLevel.Low => RiskLevel.Low,
-				ENRiskLevel.LowMedium => RiskLevel.MediumLow,
-				ENRiskLevel.Medium => RiskLevel.Medium,
-				ENRiskLevel.MediumHigh => RiskLevel.MediumHigh,
-				ENRiskLevel.High => RiskLevel.High,
-				ENRiskLevel.VeryHigh => RiskLevel.VeryHigh,
-				ENRiskLevel.Highest => RiskLevel.Highest,
+				1 => RiskLevel.Lowest,
+				2 => RiskLevel.Low,
+				3 => RiskLevel.MediumLow,
+				4 => RiskLevel.Medium,
+				5 => RiskLevel.MediumHigh,
+				6 => RiskLevel.High,
+				7 => RiskLevel.VeryHigh,
+				8 => RiskLevel.Highest,
 				_ => RiskLevel.Invalid,
 			};
 
-		public static ENRiskLevel ToNative(this RiskLevel riskLevel) =>
+		public static byte ToNative(this RiskLevel riskLevel) =>
 			riskLevel switch
 			{
-				RiskLevel.Lowest => ENRiskLevel.Lowest,
-				RiskLevel.Low => ENRiskLevel.Low,
-				RiskLevel.MediumLow => ENRiskLevel.LowMedium,
-				RiskLevel.Medium => ENRiskLevel.Medium,
-				RiskLevel.MediumHigh => ENRiskLevel.MediumHigh,
-				RiskLevel.High => ENRiskLevel.High,
-				RiskLevel.VeryHigh => ENRiskLevel.VeryHigh,
-				RiskLevel.Highest => ENRiskLevel.Highest,
-				_ => ENRiskLevel.Invalid,
+				RiskLevel.Lowest => 1,
+				RiskLevel.Low => 2,
+				RiskLevel.MediumLow => 3,
+				RiskLevel.Medium => 4,
+				RiskLevel.MediumHigh => 5,
+				RiskLevel.High => 6,
+				RiskLevel.VeryHigh => 7,
+				RiskLevel.Highest => 8,
+				_ => 0,
 			};
 	}
 }
