@@ -16,8 +16,6 @@ namespace Xamarin.ExposureNotifications
 {
 	public static partial class ExposureNotification
 	{
-		const int diagnosisFileMaxKeys = 18000;
-
 		static IExposureNotificationClient instance;
 
 		static IExposureNotificationClient Instance
@@ -50,52 +48,14 @@ namespace Xamarin.ExposureNotifications
 			=> await Instance.IsEnabledAsync();
 
 		// Tells the local API when new diagnosis keys have been obtained from the server
-		static async Task PlatformDetectExposuresAsync(IEnumerable<TemporaryExposureKey> diagnosisKeys)
+		static async Task PlatformDetectExposuresAsync(IEnumerable<string> keyFiles)
 		{
 			var config = await GetConfigurationAsync();
 
-			// Get a temporary working directory
-			var tempFiles = new List<Java.IO.File>();
-
-			try
-			{
-				// Batch up the keys and save into temporary files
-				var sequence = diagnosisKeys;
-				while (sequence.Any())
-				{
-					var batch = sequence.Take(diagnosisFileMaxKeys);
-					sequence = sequence.Skip(diagnosisFileMaxKeys);
-
-					var file = new Proto.File();
-					file.Key.AddRange(batch.Select(k => new Proto.Key
-					{
-						KeyData = ByteString.CopyFrom(k.KeyData),
-						RollingStartNumber = (uint)k.RollingStartLong,
-						RollingPeriod = (uint)(k.RollingDuration.TotalMinutes / 10.0),
-						TransmissionRiskLevel = k.TransmissionRiskLevel.ToNative(),
-					}));
-
-					var batchFilePath = Java.IO.File.CreateTempFile("diagnosiskeys-", "dat");
-					batchFilePath.DeleteOnExit();
-
-					using var stream = System.IO.File.OpenWrite(batchFilePath.AbsolutePath);
-					using var coded = new CodedOutputStream(stream);
-					file.WriteTo(coded);
-
-					tempFiles.Add(batchFilePath);
-				}
-
-				await Instance.ProvideDiagnosisKeysAsync(tempFiles, config, Guid.NewGuid().ToString());
-			}
-			finally
-			{
-				// Clean up
-				foreach (var f in tempFiles)
-				{
-					try { f.Delete(); }
-					catch { }
-				}
-			}
+			await Instance.ProvideDiagnosisKeysAsync(
+				keyFiles.Select(f => new Java.IO.File(f)).ToList(),
+				config,
+				Guid.NewGuid().ToString());
 		}
 
 		static async Task<IEnumerable<TemporaryExposureKey>> PlatformGetTemporaryExposureKeys()

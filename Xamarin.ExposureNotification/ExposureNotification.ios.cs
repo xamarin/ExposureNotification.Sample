@@ -11,8 +11,6 @@ namespace Xamarin.ExposureNotifications
 {
 	public static partial class ExposureNotification
 	{
-		const int diagnosisFileMaxKeys = 18000;
-
 		static ENManager manager;
 
 		static async Task<ENManager> GetManagerAsync()
@@ -63,73 +61,36 @@ namespace Xamarin.ExposureNotifications
 		}
 
 		// Tells the local API when new diagnosis keys have been obtained from the server
-		static async Task<(ExposureDetectionSummary, IEnumerable<ExposureInfo>)> PlatformDetectExposuresAsync(IEnumerable<TemporaryExposureKey> diagnosisKeys)
+		static async Task<(ExposureDetectionSummary, IEnumerable<ExposureInfo>)> PlatformDetectExposuresAsync(IEnumerable<string> keyFiles)
 		{
-			// Get a temporary working directory
-			var dirs = NSSearchPath.GetDirectories(NSSearchPathDirectory.CachesDirectory, NSSearchPathDomain.User).FirstOrDefault();
-			var root = Path.Combine(dirs, "diagnosisKeys");
-			if (!Directory.Exists(root))
-				Directory.CreateDirectory(root);
+			// Submit to the API
+			var c = await GetConfigurationAsync();
+			var m = await GetManagerAsync();
 
-			try
+			var detectionSummary = await m.DetectExposuresAsync(
+				c,
+				keyFiles.Select(k => new NSUrl(k, false)).ToArray());
+
+			var summary = new ExposureDetectionSummary(
+				(int)detectionSummary.DaysSinceLastExposure,
+				detectionSummary.MatchedKeyCount,
+				detectionSummary.MaximumRiskScore);
+
+			// Get the info
+			IEnumerable<ExposureInfo> info = Array.Empty<ExposureInfo>();
+			if (summary?.MatchedKeyCount > 0)
 			{
-				var batchFiles = new List<NSUrl>();
-
-				// Batch up the keys and save into temporary files
-				var sequence = diagnosisKeys;
-				while (sequence.Any())
-				{
-					var batch = sequence.Take(diagnosisFileMaxKeys);
-					sequence = sequence.Skip(diagnosisFileMaxKeys);
-
-					var file = new Proto.File();
-					file.Key.AddRange(batch.Select(k => new Proto.Key
-					{
-						KeyData = ByteString.CopyFrom(k.KeyData),
-						RollingStartNumber = (uint)k.RollingStartLong,
-						RollingPeriod = (uint)(k.RollingDuration.TotalMinutes / 10.0),
-						TransmissionRiskLevel = k.TransmissionRiskLevel.ToNative(),
-					}));
-
-					var batchFilePath = Path.Combine(root, Guid.NewGuid().ToString());
-					using var stream = File.Create(batchFilePath);
-					using var coded = new CodedOutputStream(stream);
-					file.WriteTo(coded);
-
-					batchFiles.Add(NSUrl.FromFilename(batchFilePath));
-				}
-
-				// Submit to the API
-				var c = await GetConfigurationAsync();
-				var m = await GetManagerAsync();
-
-				var detectionSummary = await m.DetectExposuresAsync(c, batchFiles.ToArray());
-				var summary = new ExposureDetectionSummary(
-					(int)detectionSummary.DaysSinceLastExposure,
-					detectionSummary.MatchedKeyCount,
-					detectionSummary.MaximumRiskScore);
-
-				// Get the info
-				IEnumerable<ExposureInfo> info = Array.Empty<ExposureInfo>();
-				if (summary?.MatchedKeyCount > 0)
-				{
-					var exposures = await m.GetExposureInfoAsync(detectionSummary, Handler.UserExplanation);
-					info = exposures.Select(i => new ExposureInfo(
-						((DateTime)i.Date).ToLocalTime(),
-						TimeSpan.FromMinutes(i.Duration),
-						i.AttenuationValue,
-						i.TotalRiskScore,
-						i.TransmissionRiskLevel.FromNative()));
-				}
-
-				// Return everything
-				return (summary, info);
+				var exposures = await m.GetExposureInfoAsync(detectionSummary, Handler.UserExplanation);
+				info = exposures.Select(i => new ExposureInfo(
+					((DateTime)i.Date).ToLocalTime(),
+					TimeSpan.FromMinutes(i.Duration),
+					i.AttenuationValue,
+					i.TotalRiskScore,
+					i.TransmissionRiskLevel.FromNative()));
 			}
-			finally
-			{
-				// Clean up
-				Directory.Delete(root, true);
-			}
+
+			// Return everything
+			return (summary, info);
 		}
 
 		static async Task<IEnumerable<TemporaryExposureKey>> PlatformGetTemporaryExposureKeys()
