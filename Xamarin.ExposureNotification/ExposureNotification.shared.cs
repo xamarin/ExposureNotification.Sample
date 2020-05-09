@@ -70,17 +70,18 @@ namespace Xamarin.ExposureNotifications
 			if (keys?.Any() != true)
 				return false;
 
-			var (summary, info) = await DetectExposuresAsync(keys);
+			// On iOS we need to check this ourselves and invoke the handler
+			// on Android this will happen in the broadcast receiver
+#if __IOS__
+			var (summary, info) = await PlatformDetectExposuresAsync(keys);
 
 			// Check that the summary has any matches before notifying the callback
 			if (summary?.MatchedKeyCount > 0)
 				await Handler.ExposureDetectedAsync(summary, info);
+#endif
 
 			return true;
 		}
-
-		internal static Task<(ExposureDetectionSummary, IEnumerable<ExposureInfo>)> DetectExposuresAsync(IEnumerable<TemporaryExposureKey> diagnosisKeys)
-			=> PlatformDetectExposuresAsync(diagnosisKeys);
 
 		internal static Task<IEnumerable<TemporaryExposureKey>> GetSelfTemporaryExposureKeysAsync()
 			=> PlatformGetTemporaryExposureKeys();

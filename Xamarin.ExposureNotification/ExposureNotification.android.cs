@@ -8,6 +8,7 @@ using Android.Gms.Nearby.ExposureNotification;
 using Nearby = Android.Gms.Nearby.NearbyClass;
 using AndroidRiskLevel = Android.Gms.Nearby.ExposureNotification.RiskLevel;
 using TemporaryExposureKeyBuilder = Android.Gms.Nearby.ExposureNotification.TemporaryExposureKey.TemporaryExposureKeyBuilder;
+using Google.Protobuf;
 
 [assembly: UsesPermission(Android.Manifest.Permission.Bluetooth)]
 
@@ -15,16 +16,18 @@ namespace Xamarin.ExposureNotifications
 {
 	public static partial class ExposureNotification
 	{
+		const int diagnosisFileMaxKeys = 18000;
+
 		static IExposureNotificationClient instance;
 
 		static IExposureNotificationClient Instance
 			=> instance ??= Nearby.GetExposureNotificationClient(Application.Context);
 
-		static async Task PlatformStart()
+		static async Task<ExposureConfiguration> GetConfigurationAsync()
 		{
 			var c = await Handler.GetConfigurationAsync();
 
-			var config = new ExposureConfiguration.ExposureConfigurationBuilder()
+			return new ExposureConfiguration.ExposureConfigurationBuilder()
 				.SetAttenuationScores(c.AttenuationScores)
 				.SetDurationScores(c.DurationScores)
 				.SetDaysSinceLastExposureScores(c.DaysSinceLastExposureScores)
@@ -35,9 +38,10 @@ namespace Xamarin.ExposureNotifications
 				.SetTransmissionRiskWeight(c.TransmissionWeight)
 				.SetMinimumRiskScore(c.MinimumRiskScore)
 				.Build();
-
-			await Instance.StartAsync(config);
 		}
+
+		static Task PlatformStart()
+			=> Instance.StartAsync();
 
 		static Task PlatformStop()
 			=> Instance.StopAsync();
@@ -46,34 +50,52 @@ namespace Xamarin.ExposureNotifications
 			=> await Instance.IsEnabledAsync();
 
 		// Tells the local API when new diagnosis keys have been obtained from the server
-		static async Task<(ExposureDetectionSummary, IEnumerable<ExposureInfo>)> PlatformDetectExposuresAsync(IEnumerable<TemporaryExposureKey> diagnosisKeys)
+		static async Task PlatformDetectExposuresAsync(IEnumerable<TemporaryExposureKey> diagnosisKeys)
 		{
-			var batchSize = await Instance.GetMaxDiagnosisKeyCountAsync();
+			var config = await GetConfigurationAsync();
 
-			// Batch up the keys
-			var sequence = diagnosisKeys;
-			while (sequence.Any())
+			// Get a temporary working directory
+			var tempFiles = new List<Java.IO.File>();
+
+			try
 			{
-				var batch = sequence.Take(batchSize);
-				sequence = sequence.Skip(batchSize);
+				// Batch up the keys and save into temporary files
+				var sequence = diagnosisKeys;
+				while (sequence.Any())
+				{
+					var batch = sequence.Take(diagnosisFileMaxKeys);
+					sequence = sequence.Skip(diagnosisFileMaxKeys);
 
-				// TODO: RollingDuration is missing
+					var file = new Proto.File();
+					file.Key.AddRange(batch.Select(k => new Proto.Key
+					{
+						KeyData = ByteString.CopyFrom(k.KeyData),
+						RollingStartNumber = (uint)k.RollingStartLong,
+						RollingPeriod = (uint)(k.RollingDuration.TotalMinutes / 10.0),
+						TransmissionRiskLevel = k.TransmissionRiskLevel.ToNative(),
+					}));
 
-				await Instance.ProvideDiagnosisKeysAsync(
-					batch.Select(k => new TemporaryExposureKeyBuilder()
-						.SetKeyData(k.KeyData)
-						.SetRollingStartIntervalNumber((int)k.RollingStartLong)
-						.SetTransmissionRiskLevel(k.TransmissionRiskLevel.ToNative())
-						.Build()).ToList());
+					var batchFilePath = Java.IO.File.CreateTempFile("diagnosiskeys-", "dat");
+					batchFilePath.DeleteOnExit();
+
+					using var stream = System.IO.File.OpenWrite(batchFilePath.AbsolutePath);
+					using var coded = new CodedOutputStream(stream);
+					file.WriteTo(coded);
+
+					tempFiles.Add(batchFilePath);
+				}
+
+				await Instance.ProvideDiagnosisKeysAsync(tempFiles, config, Guid.NewGuid().ToString());
 			}
-
-			var summary = await PlatformGetExposureSummaryAsync();
-
-			IEnumerable<ExposureInfo> info = Array.Empty<ExposureInfo>();
-			if (summary?.MatchedKeyCount > 0)
-				info = await PlatformGetExposureInformationAsync();
-
-			return (summary, info);
+			finally
+			{
+				// Clean up
+				foreach (var f in tempFiles)
+				{
+					try { f.Delete(); }
+					catch { }
+				}
+			}
 		}
 
 		static async Task<IEnumerable<TemporaryExposureKey>> PlatformGetTemporaryExposureKeys()
@@ -88,9 +110,9 @@ namespace Xamarin.ExposureNotifications
 					k.TransmissionRiskLevel.FromNative()));
 		}
 
-		internal static async Task<IEnumerable<ExposureInfo>> PlatformGetExposureInformationAsync()
+		internal static async Task<IEnumerable<ExposureInfo>> PlatformGetExposureInformationAsync(string token)
 		{
-			var exposures = await Instance.GetExposureInformationAsync();
+			var exposures = await Instance.GetExposureInformationAsync(token);
 			var info = exposures.Select(d => new ExposureInfo(
 				DateTimeOffset.UnixEpoch.AddMilliseconds(d.DateMillisSinceEpoch).UtcDateTime,
 				TimeSpan.FromMinutes(d.DurationMinutes),
@@ -100,9 +122,9 @@ namespace Xamarin.ExposureNotifications
 			return info;
 		}
 
-		internal static async Task<ExposureDetectionSummary> PlatformGetExposureSummaryAsync()
+		internal static async Task<ExposureDetectionSummary> PlatformGetExposureSummaryAsync(string token)
 		{
-			var summary = await Instance.GetExposureSummaryAsync();
+			var summary = await Instance.GetExposureSummaryAsync(token);
 
 			// TODO: Reevaluate byte usage here
 			return new ExposureDetectionSummary(

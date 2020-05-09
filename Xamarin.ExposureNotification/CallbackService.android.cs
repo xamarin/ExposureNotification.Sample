@@ -25,12 +25,14 @@ namespace Xamarin.ExposureNotifications
 
 		protected override async void OnHandleWork(Intent workIntent)
 		{
-			var summary = await ExposureNotification.PlatformGetExposureSummaryAsync();
+			var token = workIntent.GetStringExtra(global::Android.Gms.Nearby.ExposureNotification.ExposureNotificationClient.ExtraToken);
+
+			var summary = await ExposureNotification.PlatformGetExposureSummaryAsync(token);
 
 			// Invoke the custom implementation handler code with the summary info
 			if (summary?.MatchedKeyCount > 0)
 			{
-				var info = await ExposureNotification.PlatformGetExposureInformationAsync();
+				var info = await ExposureNotification.PlatformGetExposureInformationAsync(token);
 
 				await ExposureNotification.Handler.ExposureDetectedAsync(summary, info);
 			}
