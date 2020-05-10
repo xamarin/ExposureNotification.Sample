@@ -1,12 +1,13 @@
 ﻿using Android.App;
 using Android.Content;
+using Android.Gms.Nearby.ExposureNotification;
 using Android.Runtime;
 using AndroidX.Core.App;
 
 namespace Xamarin.ExposureNotifications
 {
 	[BroadcastReceiver(Permission = "com.google.android.gms.nearby.exposurenotification.EXPOSURE_CALLBACK")]
-	[IntentFilter(new[] { global::Android.Gms.Nearby.ExposureNotification.ExposureNotificationClient.ActionExposureStateUpdated })]
+	[IntentFilter(new[] { ExposureNotificationClient.ActionExposureStateUpdated })]
 	[Preserve]
 	class ExposureNotificationCallbackBroadcastReceiver : BroadcastReceiver
 	{
@@ -25,7 +26,7 @@ namespace Xamarin.ExposureNotifications
 
 		protected override async void OnHandleWork(Intent workIntent)
 		{
-			var token = workIntent.GetStringExtra(global::Android.Gms.Nearby.ExposureNotification.ExposureNotificationClient.ExtraToken);
+			var token = workIntent.GetStringExtra(ExposureNotificationClient.ExtraToken);
 
 			var summary = await ExposureNotification.PlatformGetExposureSummaryAsync(token);
 

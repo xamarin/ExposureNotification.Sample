@@ -40,17 +40,14 @@ namespace ExposureNotification.App
 			// Pop up a local notification
 		}
 
-		public async Task<IEnumerable<TemporaryExposureKey>> FetchExposureKeysFromServerAsync()
+		public async Task FetchExposureKeysFromServerAsync(Func<IEnumerable<TemporaryExposureKey>, Task> processKeyBatchDelegate)
 		{
-			var allKeys = new List<TemporaryExposureKey>();
-
 			var latestKeysResponseIndex = LocalStateManager.Instance.LatestKeysResponseIndex;
 
 			var take = 1024;
 			var skip = 0;
 
-			var checkForMore = false;
-
+			bool checkForMore;
 			do
 			{
 				// Get the newest date we have keys from and request since then
@@ -75,7 +72,7 @@ namespace ExposureNotification.App
 				if (numKeys > 0)
 				{
 					// Call the callback with the batch of keys to add
-					allKeys.AddRange(keys.Keys);
+					await processKeyBatchDelegate(keys.Keys);
 
 					var newLatestKeysResponseIndex = keys.Latest;
 
@@ -94,8 +91,6 @@ namespace ExposureNotification.App
 				checkForMore = numKeys >= take;
 
 			} while (checkForMore);
-
-			return allKeys;
 		}
 
 		public async Task UploadSelfExposureKeysToServerAsync(IEnumerable<TemporaryExposureKey> temporaryExposureKeys)

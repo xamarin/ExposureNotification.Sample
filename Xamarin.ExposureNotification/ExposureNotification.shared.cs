@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Android.Gms.Common.Apis;
 using Google.Protobuf;
+using Xamarin.Essentials;
 
 namespace Xamarin.ExposureNotifications
 {
@@ -89,14 +90,14 @@ namespace Xamarin.ExposureNotifications
 						KeyData = ByteString.CopyFrom(k.KeyData),
 						RollingStartNumber = (uint)k.RollingStartLong,
 						RollingPeriod = (uint)(k.RollingDuration.TotalMinutes / 10.0),
-						TransmissionRiskLevel = k.TransmissionRiskLevel.ToNative(),
+						TransmissionRiskLevel = (int)k.TransmissionRiskLevel,
 					}));
 
-					var batchFile = System.IO.Path.Combine(
-							Essentials.FileSystem.CacheDirectory,
-							Guid.NewGuid().ToString());
+					var batchFile = Path.Combine(
+						FileSystem.CacheDirectory,
+						Guid.NewGuid().ToString());
 
-					using var stream = System.IO.File.Create(batchFile);
+					using var stream = File.Create(batchFile);
 					using var coded = new CodedOutputStream(stream);
 					file.WriteTo(coded);
 
@@ -126,9 +127,12 @@ namespace Xamarin.ExposureNotifications
 			{
 				try
 				{
-					System.IO.File.Delete(file);
+					File.Delete(file);
 				}
-				catch { }
+				catch
+				{
+					// no-op
+				}
 			}
 
 			return true;
