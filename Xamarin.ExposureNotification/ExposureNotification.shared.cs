@@ -10,7 +10,7 @@ namespace Xamarin.ExposureNotifications
 {
 	public static partial class ExposureNotification
 	{
-		const int diagnosisFileMaxKeys = 18000;
+		const int diagnosisFileMaxKeys = 18_000;
 
 		static IExposureNotificationHandler handler;
 

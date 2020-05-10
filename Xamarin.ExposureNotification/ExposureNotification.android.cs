@@ -7,8 +7,6 @@ using Android.Gms.Nearby.ExposureNotification;
 
 using Nearby = Android.Gms.Nearby.NearbyClass;
 using AndroidRiskLevel = Android.Gms.Nearby.ExposureNotification.RiskLevel;
-using TemporaryExposureKeyBuilder = Android.Gms.Nearby.ExposureNotification.TemporaryExposureKey.TemporaryExposureKeyBuilder;
-using Google.Protobuf;
 
 [assembly: UsesPermission(Android.Manifest.Permission.Bluetooth)]
 

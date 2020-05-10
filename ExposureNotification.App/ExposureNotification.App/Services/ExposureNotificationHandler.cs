@@ -1,12 +1,10 @@
-﻿using ExposureNotification.App.Services;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Xamarin.Essentials;
+using ExposureNotification.App.Services;
+using Newtonsoft.Json;
 using Xamarin.ExposureNotifications;
 using Xamarin.Forms;
 using Xamarin.Forms.Internals;
@@ -20,12 +18,15 @@ namespace ExposureNotification.App
 
 		static readonly HttpClient http = new HttpClient();
 
+		// this string should be localized
 		public string UserExplanation
 			=> "We need to make use of the keys to keep you healthy.";
 
+		// this configuration should be obtained from a server and it should be cached locally/in memory as it may be called multiple times
 		public Task<Configuration> GetConfigurationAsync()
 			=> Task.FromResult(new Configuration());
 
+		// this will be called when a potential exposure has been detected
 		public async Task ExposureDetectedAsync(ExposureDetectionSummary summary, IEnumerable<ExposureInfo> exposureInfo)
 		{
 			LocalStateManager.Instance.ExposureSummary = summary;
@@ -40,6 +41,7 @@ namespace ExposureNotification.App
 			// Pop up a local notification
 		}
 
+		// this will be called when they keys need to be collected from the server
 		public async Task FetchExposureKeysFromServerAsync(Func<IEnumerable<TemporaryExposureKey>, Task> processKeyBatchDelegate)
 		{
 			var latestKeysResponseIndex = LocalStateManager.Instance.LatestKeysResponseIndex;
@@ -93,6 +95,7 @@ namespace ExposureNotification.App
 			} while (checkForMore);
 		}
 
+		// this will be called when the user is submitting a diagnosis and the local keys need to go to the server
 		public async Task UploadSelfExposureKeysToServerAsync(IEnumerable<TemporaryExposureKey> temporaryExposureKeys)
 		{
 			var diagnosisUid = LocalStateManager.Instance.LatestDiagnosis.DiagnosisUid;
