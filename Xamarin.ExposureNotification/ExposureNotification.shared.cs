@@ -10,8 +10,6 @@ namespace Xamarin.ExposureNotifications
 {
 	public static partial class ExposureNotification
 	{
-		const int diagnosisFileMaxKeys = 18_000;
-
 		static IExposureNotificationHandler handler;
 
 		internal static IExposureNotificationHandler Handler
@@ -70,70 +68,24 @@ namespace Xamarin.ExposureNotifications
 		// Call this when the app needs to update the local keys
 		public static async Task<bool> UpdateKeysFromServer()
 		{
-			var batchFiles = new List<string>();
+			using var batches = new TemporaryExposureKeyBatches();
 
-			await Handler?.FetchExposureKeysFromServerAsync(keys =>
-			{
-				if (keys?.Any() != true)
-					return Task.CompletedTask;
+			await Handler?.FetchExposureKeysFromServerAsync(batches);
 
-				// Batch up the keys and save into temporary files
-				var sequence = keys;
-				while (sequence.Any())
-				{
-					var batch = sequence.Take(diagnosisFileMaxKeys);
-					sequence = sequence.Skip(diagnosisFileMaxKeys);
-
-					var file = new Proto.File();
-					file.Key.AddRange(batch.Select(k => new Proto.Key
-					{
-						KeyData = ByteString.CopyFrom(k.KeyData),
-						RollingStartNumber = (uint)k.RollingStartLong,
-						RollingPeriod = (uint)(k.RollingDuration.TotalMinutes / 10.0),
-						TransmissionRiskLevel = (int)k.TransmissionRiskLevel,
-					}));
-
-					var batchFile = Path.Combine(
-						FileSystem.CacheDirectory,
-						Guid.NewGuid().ToString());
-
-					using var stream = File.Create(batchFile);
-					using var coded = new CodedOutputStream(stream);
-					file.WriteTo(coded);
-
-					batchFiles.Add(batchFile);
-				}
-
-				return Task.CompletedTask;
-			});
-
-			if (!batchFiles.Any())
+			if (!batches.Files.Any())
 				return false;
 
 #if __IOS__
 			// On iOS we need to check this ourselves and invoke the handler
-			var (summary, info) = await PlatformDetectExposuresAsync(batchFiles);
+			var (summary, info) = await PlatformDetectExposuresAsync(batches.Files);
 
 			// Check that the summary has any matches before notifying the callback
 			if (summary?.MatchedKeyCount > 0)
 				await Handler.ExposureDetectedAsync(summary, info);
 #elif __ANDROID__
 			// on Android this will happen in the broadcast receiver
-			await PlatformDetectExposuresAsync(batchFiles);
+			await PlatformDetectExposuresAsync(batches.Files);
 #endif
-
-			// Try and delete all the files we processed
-			foreach (var file in batchFiles)
-			{
-				try
-				{
-					File.Delete(file);
-				}
-				catch
-				{
-					// no-op
-				}
-			}
 
 			return true;
 		}

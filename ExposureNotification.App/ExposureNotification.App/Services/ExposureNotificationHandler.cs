@@ -42,7 +42,7 @@ namespace ExposureNotification.App
 		}
 
 		// this will be called when they keys need to be collected from the server
-		public async Task FetchExposureKeysFromServerAsync(Func<IEnumerable<TemporaryExposureKey>, Task> processKeyBatchDelegate)
+		public async Task FetchExposureKeysFromServerAsync(ITemporaryExposureKeyBatches batches)
 		{
 			var latestKeysResponseIndex = LocalStateManager.Instance.LatestKeysResponseIndex;
 
@@ -74,7 +74,7 @@ namespace ExposureNotification.App
 				if (numKeys > 0)
 				{
 					// Call the callback with the batch of keys to add
-					await processKeyBatchDelegate(keys.Keys);
+					await batches.AddBatchAsync(keys.Keys);
 
 					var newLatestKeysResponseIndex = keys.Latest;
 
