@@ -78,7 +78,7 @@ namespace Xamarin.ExposureNotifications
 					return Task.CompletedTask;
 
 				// Batch up the keys and save into temporary files
-				IEnumerable<TemporaryExposureKey> sequence = keys;
+				var sequence = keys;
 				while (sequence.Any())
 				{
 					var batch = sequence.Take(diagnosisFileMaxKeys);
