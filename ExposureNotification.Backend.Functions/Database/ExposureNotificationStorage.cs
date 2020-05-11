@@ -1,11 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using System.Xml;
 using Xamarin.ExposureNotifications;
+using Xamarin.ExposureNotifications.Proto;
 
 namespace ExposureNotification.Backend
 {
@@ -25,32 +29,16 @@ namespace ExposureNotification.Backend
 
 		readonly DbContextOptions dbContextOptions;
 
-		public async Task<KeysResponse> GetKeysAsync(ulong since, int skip = 0, int take = 1000)
-		{
+		public Task<List<TemporaryExposureKey>> GetAllKeysAsync()
+        {
 			using (var ctx = new ExposureNotificationContext(dbContextOptions))
 			{
-				var oldest = DateTimeOffset.UtcNow.AddDays(-14).ToUnixTimeSeconds();
-				
-				var results = await ctx.TemporaryExposureKeys.AsQueryable()
-					.Where(dtk => dtk.Id > since
-						&& dtk.TimestampSecondsSinceEpoch >= oldest)
-					.OrderBy(dtk => dtk.Id)
-					.Skip(skip)
-					.Take(take)
-					.ToListAsync().ConfigureAwait(false);
-
-				var newestIndex = results
-					.LastOrDefault()?.Id;
-
-				var keys = results.Select(dtk => dtk.ToKey());
-
-				return new KeysResponse
-				{
-					Latest = newestIndex ?? 0,
-					Keys = keys
-				};
+				return ctx.TemporaryExposureKeys
+					.Select(k => k.ToKey())
+					.ToListAsync();
 			}
 		}
+			
 
 		public void DeleteAllKeysAsync()
 		{
@@ -116,19 +104,54 @@ namespace ExposureNotification.Backend
 			}
 		}
 
+		public async Task<int> GetNextBatchAsync(int batchNumber, string region, Func<File, Task> processBatch)
+		{
+			region ??= DbTemporaryExposureKey.DefaultRegion;
+
+			var keyCount = 0;
+
+			using (var ctx = new ExposureNotificationContext(dbContextOptions))
+			using (var transaction = ctx.Database.BeginTransaction())
+			{
+				var keys = await ctx.TemporaryExposureKeys
+					.Where(k => k.Region == region)
+					.OrderBy(k => k.TimestampMsSinceEpoch)
+					.Take(TemporaryExposureKeyBatches.MaxKeysPerFile)
+					.ToListAsync();
+
+				var exposureKeys = keys.Select(k => k.ToProtoKey());
+
+				keyCount = exposureKeys.Count();
+
+				var f = new File
+				{
+					Header = new Header
+					{
+						BatchNum = batchNumber,
+						BatchSize = keyCount,
+						StartTimestamp = keys.First().TimestampMsSinceEpoch,
+						EndTimestamp = keys.Last().TimestampMsSinceEpoch,
+						Region = region
+					}
+				};
+				f.Key.AddRange(exposureKeys);
+
+				await processBatch(f);
+
+				ctx.TemporaryExposureKeys.RemoveRange(keys);
+
+				await ctx.SaveChangesAsync();
+
+				await transaction.CommitAsync();
+			}
+
+			return keyCount;
+		}
+
 		public class SelfDiagnosisSubmissionRequest
 		{
 			[JsonProperty("diagnosisUid")]
 			public string DiagnosisUid { get; set; }
-
-			[JsonProperty("keys")]
-			public IEnumerable<TemporaryExposureKey> Keys { get; set; }
-		}
-
-		public class KeysResponse
-		{
-			[JsonProperty("latest")]
-			public ulong Latest { get; set; }
 
 			[JsonProperty("keys")]
 			public IEnumerable<TemporaryExposureKey> Keys { get; set; }
