@@ -1,19 +1,25 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Google.Protobuf;
 using Xamarin.ExposureNotifications;
+using Xamarin.ExposureNotifications.Proto;
 
 namespace ExposureNotification.Backend
 {
 	class DbTemporaryExposureKey
 	{
+		public const string DefaultRegion = "default";
+
 		[Key, Column(Order = 0)]
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public ulong Id { get; set; }
 
+		public string Region { get; set; } = DefaultRegion;
+
 		public string Base64KeyData { get; set; }
 
-		public long TimestampSecondsSinceEpoch { get; set; }
+		public long TimestampMsSinceEpoch { get; set; }
 
 		public long RollingStartSecondsSinceEpoch { get; set; }
 
@@ -32,10 +38,19 @@ namespace ExposureNotification.Backend
 			=> new DbTemporaryExposureKey
 			{
 				Base64KeyData = Convert.ToBase64String(key.KeyData),
-				TimestampSecondsSinceEpoch = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+				TimestampMsSinceEpoch = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
 				RollingStartSecondsSinceEpoch = key.RollingStart.ToUnixTimeSeconds(),
 				RollingDuration = (int)key.RollingDuration.TotalMinutes,
 				TransmissionRiskLevel = (int)key.TransmissionRiskLevel
+			};
+
+		public Key ToProtoKey()
+			=> new Key
+			{
+				KeyData = ByteString.FromBase64(Base64KeyData),
+				RollingStartNumber = (uint)RollingStartSecondsSinceEpoch,
+				RollingPeriod = (uint)RollingDuration,
+				TransmissionRiskLevel = TransmissionRiskLevel
 			};
 	}
 }
