@@ -22,14 +22,17 @@
 		<RepositoryUrl>https://github.com/xamarin/xamarin.exposurenotification</RepositoryUrl>
 		<PackageLicenseFile>LICENSE.md</PackageLicenseFile>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageProjectUrl>https://go.microsoft.com/fwlink/?linkid=2129007</PackageProjectUrl>
+		<PackageProjectUrl>https://go.microsoft.com/fwlink/?linkid=2129007</PackageProjectUrl>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<Compile Include="**\*.shared.cs" />
 		<Compile Include="**\*.shared.*.cs" />
 
-		<None Include="..\LICENSE.md"  Pack="True" PackagePath="LICENSE.md" />
+		<None Include="..\LICENSE.md" Pack="True" PackagePath="LICENSE.md" />
+
+		<PackageReference Include="Google.Protobuf" Version="3.11.4" />
+		<PackageReference Include="Xamarin.Essentials" Version="1.5.3.1" />
 	</ItemGroup>
 
 	<ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard')) ">
@@ -43,7 +46,7 @@
 
 		<PackageReference Include="Xamarin.GooglePlayServices.Basement" Version="117.1.0-preview01" />
 		<PackageReference Include="Xamarin.GooglePlayServices.Tasks" Version="117.0.0-preview01" />
-		<PackageReference Include="Xamarin.GooglePlayServices.Nearby.ExposureNotification" Version="18.0.2-eap.2" />
+		<PackageReference Include="Xamarin.GooglePlayServices.Nearby.ExposureNotification" Version="18.0.2-eap.3" />
 		<PackageReference Include="Xamarin.AndroidX.Core" Version="1.2.0" />
 	</ItemGroup>
 
@@ -51,7 +54,7 @@
 		<Compile Include="*.ios.cs" />
 		<Compile Include="*.ios.*.cs" />
 
-		<PackageReference Include="Xamarin.iOS.ExposureNotification" Version="1.0.0-beta1" />
+		<PackageReference Include="Xamarin.iOS.ExposureNotification" Version="1.0.0-beta2" />
 	</ItemGroup>
 
 </Project>

@@ -1,12 +1,10 @@
-﻿using ExposureNotification.App.Services;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Xamarin.Essentials;
+using ExposureNotification.App.Services;
+using Newtonsoft.Json;
 using Xamarin.ExposureNotifications;
 using Xamarin.Forms;
 using Xamarin.Forms.Internals;
@@ -20,16 +18,20 @@ namespace ExposureNotification.App
 
 		static readonly HttpClient http = new HttpClient();
 
+		// this string should be localized
+		public string UserExplanation
+			=> "We need to make use of the keys to keep you healthy.";
+
+		// this configuration should be obtained from a server and it should be cached locally/in memory as it may be called multiple times
 		public Task<Configuration> GetConfigurationAsync()
 			=> Task.FromResult(new Configuration());
 
-		public async Task ExposureDetected(ExposureDetectionSummary summary, Func<Task<IEnumerable<ExposureInfo>>> getDetailsFunc)
+		// this will be called when a potential exposure has been detected
+		public async Task ExposureDetectedAsync(ExposureDetectionSummary summary, IEnumerable<ExposureInfo> exposureInfo)
 		{
 			LocalStateManager.Instance.ExposureSummary = summary;
 
-			var details = await getDetailsFunc();
-
-			LocalStateManager.Instance.ExposureInformation.AddRange(details);
+			LocalStateManager.Instance.ExposureInformation.AddRange(exposureInfo);
 
 			LocalStateManager.Save();
 
@@ -39,15 +41,15 @@ namespace ExposureNotification.App
 			// Pop up a local notification
 		}
 
-		public async Task FetchExposureKeysFromServer(Func<IEnumerable<TemporaryExposureKey>, Task> addKeys)
+		// this will be called when they keys need to be collected from the server
+		public async Task FetchExposureKeysFromServerAsync(ITemporaryExposureKeyBatches batches)
 		{
 			var latestKeysResponseIndex = LocalStateManager.Instance.LatestKeysResponseIndex;
 
 			var take = 1024;
 			var skip = 0;
 
-			var checkForMore = false;
-
+			bool checkForMore;
 			do
 			{
 				// Get the newest date we have keys from and request since then
@@ -72,7 +74,7 @@ namespace ExposureNotification.App
 				if (numKeys > 0)
 				{
 					// Call the callback with the batch of keys to add
-					await addKeys(keys.Keys);
+					await batches.AddBatchAsync(keys.Keys);
 
 					var newLatestKeysResponseIndex = keys.Latest;
 
@@ -93,7 +95,8 @@ namespace ExposureNotification.App
 			} while (checkForMore);
 		}
 
-		public async Task UploadSelfExposureKeysToServer(IEnumerable<TemporaryExposureKey> temporaryExposureKeys)
+		// this will be called when the user is submitting a diagnosis and the local keys need to go to the server
+		public async Task UploadSelfExposureKeysToServerAsync(IEnumerable<TemporaryExposureKey> temporaryExposureKeys)
 		{
 			var diagnosisUid = LocalStateManager.Instance.LatestDiagnosis.DiagnosisUid;
 

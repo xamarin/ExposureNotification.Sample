@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Android.App;
 using Android.Gms.Nearby.ExposureNotification;
+
 using Nearby = Android.Gms.Nearby.NearbyClass;
 using AndroidRiskLevel = Android.Gms.Nearby.ExposureNotification.RiskLevel;
 
@@ -18,11 +19,11 @@ namespace Xamarin.ExposureNotifications
 		static IExposureNotificationClient Instance
 			=> instance ??= Nearby.GetExposureNotificationClient(Application.Context);
 
-		static async Task PlatformStart(IExposureNotificationHandler handler)
+		static async Task<ExposureConfiguration> GetConfigurationAsync()
 		{
-			var c = await handler.GetConfigurationAsync();
+			var c = await Handler.GetConfigurationAsync();
 
-			var config = new ExposureConfiguration.ExposureConfigurationBuilder()
+			return new ExposureConfiguration.ExposureConfigurationBuilder()
 				.SetAttenuationScores(c.AttenuationScores)
 				.SetDurationScores(c.DurationScores)
 				.SetDaysSinceLastExposureScores(c.DaysSinceLastExposureScores)
@@ -33,9 +34,10 @@ namespace Xamarin.ExposureNotifications
 				.SetTransmissionRiskWeight(c.TransmissionWeight)
 				.SetMinimumRiskScore(c.MinimumRiskScore)
 				.Build();
-
-			await Instance.StartAsync(config);
 		}
+
+		static Task PlatformStart()
+			=> Instance.StartAsync();
 
 		static Task PlatformStop()
 			=> Instance.StopAsync();
@@ -43,60 +45,15 @@ namespace Xamarin.ExposureNotifications
 		static async Task<bool> PlatformIsEnabled()
 			=> await Instance.IsEnabledAsync();
 
-		// Gets the contact info of anyone the user had contact with who was diagnosed
-		static async Task<IEnumerable<ExposureInfo>> PlatformGetExposureInformation()
-		{
-			var details = await Instance.GetExposureInformationAsync();
-
-			return details.Select(d => new ExposureInfo(
-				DateTimeOffset.UnixEpoch.AddMilliseconds(d.DateMillisSinceEpoch).UtcDateTime,
-				TimeSpan.FromMinutes(d.DurationMinutes),
-				d.AttenuationValue,
-				d.TotalRiskScore,
-				d.TransmissionRiskLevel.FromNative()));
-		}
-
-		// Call this when the user has confirmed diagnosis
-		static async Task PlatformSubmitSelfDiagnosis()
-		{
-			var selfKeys = await Instance.GetTemporaryExposureKeyHistoryAsync();
-
-			await Handler.UploadSelfExposureKeysToServer(
-				selfKeys.Select(k => new TemporaryExposureKey(
-					k.GetKeyData(),
-					k.RollingStartIntervalNumber,
-					TimeSpan.Zero, // TODO: TimeSpan.FromMinutes(k.RollingDuration),
-					k.TransmissionRiskLevel.FromNative())));
-		}
-
 		// Tells the local API when new diagnosis keys have been obtained from the server
-		static async Task PlatformAddDiagnosisKeys(IEnumerable<TemporaryExposureKey> diagnosisKeys)
+		static async Task PlatformDetectExposuresAsync(IEnumerable<string> keyFiles)
 		{
-			var batchSize = await Instance.GetMaxDiagnosisKeyCountAsync();
-			var sequence = diagnosisKeys;
+			var config = await GetConfigurationAsync();
 
-			while (sequence.Any())
-			{
-				var batch = sequence.Take(batchSize);
-				sequence = sequence.Skip(batchSize);
-
-				// TODO: RollingDuration is missing
-
-				await Instance.ProvideDiagnosisKeysAsync(
-					batch.Select(k => new global::Android.Gms.Nearby.ExposureNotification.TemporaryExposureKey.TemporaryExposureKeyBuilder()
-						.SetKeyData(k.KeyData)
-						.SetRollingStartIntervalNumber((int)k.RollingStartLong)
-						.SetTransmissionRiskLevel(k.TransmissionRiskLevel.ToNative())
-						.Build()).ToList());
-			}
-		}
-
-		static async Task<ExposureDetectionSummary> PlatformFinishAddDiagnosisKeys()
-		{
-			var summary = await Instance.GetExposureSummaryAsync();
-
-			// TODO: Reevaluate byte usage here
-			return new ExposureDetectionSummary(summary.DaysSinceLastExposure, (ulong)summary.MatchedKeyCount, (byte)summary.MaximumRiskScore);
+			await Instance.ProvideDiagnosisKeysAsync(
+				keyFiles.Select(f => new Java.IO.File(f)).ToList(),
+				config,
+				Guid.NewGuid().ToString());
 		}
 
 		static async Task<IEnumerable<TemporaryExposureKey>> PlatformGetTemporaryExposureKeys()
@@ -111,12 +68,27 @@ namespace Xamarin.ExposureNotifications
 					k.TransmissionRiskLevel.FromNative()));
 		}
 
-		internal static async Task<ExposureDetectionSummary> AndroidGetExposureSummary()
+		internal static async Task<IEnumerable<ExposureInfo>> PlatformGetExposureInformationAsync(string token)
 		{
-			var s = await Instance.GetExposureSummaryAsync();
+			var exposures = await Instance.GetExposureInformationAsync(token);
+			var info = exposures.Select(d => new ExposureInfo(
+				DateTimeOffset.UnixEpoch.AddMilliseconds(d.DateMillisSinceEpoch).UtcDateTime,
+				TimeSpan.FromMinutes(d.DurationMinutes),
+				d.AttenuationValue,
+				d.TotalRiskScore,
+				d.TransmissionRiskLevel.FromNative()));
+			return info;
+		}
 
-			// TODO: Verify risk score byte 
-			return new ExposureDetectionSummary(s.DaysSinceLastExposure, (ulong)s.MatchedKeyCount, (byte)s.MaximumRiskScore);
+		internal static async Task<ExposureDetectionSummary> PlatformGetExposureSummaryAsync(string token)
+		{
+			var summary = await Instance.GetExposureSummaryAsync(token);
+
+			// TODO: Reevaluate byte usage here
+			return new ExposureDetectionSummary(
+				summary.DaysSinceLastExposure,
+				(ulong)summary.MatchedKeyCount,
+				(byte)summary.MaximumRiskScore);
 		}
 	}
 

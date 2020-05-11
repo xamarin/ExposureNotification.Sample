@@ -6,11 +6,14 @@ using System.Collections.Generic;
 using System.Linq;
 using Xamarin.ExposureNotifications;
 using ExposureNotification.Backend;
+using System.IO;
 
 namespace ExposureNotification.Tests
 {
 	public class Tests
 	{
+		static string cacheRoot = Path.Combine(Path.GetTempPath(), "ExposureNotification.Tests");
+
 		public Tests()
 		{
 			Storage = new ExposureNotificationStorage(
@@ -182,6 +185,74 @@ namespace ExposureNotification.Tests
 			};
 
 			return tracingKeys;
+		}
+
+		[Fact]
+		public async Task Batcher_Batches_Max_18000_Test()
+		{
+			// create 30K keys
+			var keys = Enumerable.Range(1, 50_000).Select(id => new TemporaryExposureKey(BitConverter.GetBytes(id), DateTimeOffset.Now, TimeSpan.Zero, RiskLevel.Medium));
+
+			using var batcher = new TemporaryExposureKeyBatches(cacheRoot);
+
+			await batcher.AddBatchAsync(keys);
+
+			Assert.True(batcher.HasFiles);
+			Assert.Equal(3, batcher.Files.Count);
+		}
+
+		[Fact]
+		public async Task Batcher_Batches_Max_18000_From_Single_Batch_Test()
+		{
+			// create 10K keys
+			var keys = Enumerable.Range(1, 10_000).Select(id => new TemporaryExposureKey(BitConverter.GetBytes(id), DateTimeOffset.Now, TimeSpan.Zero, RiskLevel.Medium));
+
+			using var batcher = new TemporaryExposureKeyBatches(cacheRoot);
+
+			await batcher.AddBatchAsync(keys);
+
+			Assert.True(batcher.HasFiles);
+			Assert.Single(batcher.Files);
+		}
+
+		[Fact]
+		public async Task Batcher_Batches_Max_18000_From_Smaller_Batches_Test()
+		{
+			// create 10K keys
+			var keys = Enumerable.Range(1, 10_000).Select(id => new TemporaryExposureKey(BitConverter.GetBytes(id), DateTimeOffset.Now, TimeSpan.Zero, RiskLevel.Medium));
+
+			using var batcher = new TemporaryExposureKeyBatches(cacheRoot);
+
+			for (var i = 0; i < 6; i++)
+			{
+				await batcher.AddBatchAsync(keys);
+			}
+
+			Assert.True(batcher.HasFiles);
+			Assert.Equal(6, batcher.Files.Count);
+		}
+
+		[Fact]
+		public async Task Batcher_Batches_Min_0_Test()
+		{
+			// create 0 keys
+			var keys = Enumerable.Range(1, 0).Select(id => new TemporaryExposureKey(BitConverter.GetBytes(id), DateTimeOffset.Now, TimeSpan.Zero, RiskLevel.Medium));
+
+			using var batcher = new TemporaryExposureKeyBatches(cacheRoot);
+
+			await batcher.AddBatchAsync(keys);
+
+			Assert.False(batcher.HasFiles);
+			Assert.Empty(batcher.Files);
+		}
+
+		[Fact]
+		public void Empty_Batcher_Test()
+		{
+			using var batcher = new TemporaryExposureKeyBatches(cacheRoot);
+
+			Assert.False(batcher.HasFiles);
+			Assert.Empty(batcher.Files);
 		}
 	}
 }

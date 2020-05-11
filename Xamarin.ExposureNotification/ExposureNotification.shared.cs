@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
+using Google.Protobuf;
+using Xamarin.Essentials;
 
 namespace Xamarin.ExposureNotifications
 {
@@ -47,64 +48,50 @@ namespace Xamarin.ExposureNotifications
 			}
 		}
 
-		public static Task<bool> IsEnabledAsync()
-			=> PlatformIsEnabled();
-
 		public static async Task StartAsync()
-			=> await PlatformStart(Handler);
+			=> await PlatformStart();
 
 		public static async Task StopAsync()
 			=> await PlatformStop();
 
-		// Gets the contact info of anyone the user had contact with who was diagnosed
-		internal static Task<IEnumerable<ExposureInfo>> GetExposureInformationAsync()
-			=> PlatformGetExposureInformation();
+		public static Task<bool> IsEnabledAsync()
+			=> PlatformIsEnabled();
 
-		// Tells the local API when new diagnosis keys have been obtained from the server
-		internal static Task AddDiagnosisKeysAsync(IEnumerable<TemporaryExposureKey> diagnosisKeys)
-			=> PlatformAddDiagnosisKeys(diagnosisKeys);
+		// Call this when the user has confirmed diagnosis
+		public static async Task SubmitSelfDiagnosisAsync()
+		{
+			var selfKeys = await GetSelfTemporaryExposureKeysAsync();
 
-		internal static Task<ExposureDetectionSummary> FinishAddDiagnosisKeysAsync()
-			=> PlatformFinishAddDiagnosisKeys();
+			await Handler.UploadSelfExposureKeysToServerAsync(selfKeys);
+		}
 
-		public static Task SubmitSelfDiagnosisAsync()
-			=> PlatformSubmitSelfDiagnosis();
+		// Call this when the app needs to update the local keys
+		public static async Task<bool> UpdateKeysFromServer()
+		{
+			using var batches = new TemporaryExposureKeyBatches();
+
+			await Handler?.FetchExposureKeysFromServerAsync(batches);
+
+			if (!batches.Files.Any())
+				return false;
+
+#if __IOS__
+			// On iOS we need to check this ourselves and invoke the handler
+			var (summary, info) = await PlatformDetectExposuresAsync(batches.Files);
+
+			// Check that the summary has any matches before notifying the callback
+			if (summary?.MatchedKeyCount > 0)
+				await Handler.ExposureDetectedAsync(summary, info);
+#elif __ANDROID__
+			// on Android this will happen in the broadcast receiver
+			await PlatformDetectExposuresAsync(batches.Files);
+#endif
+
+			return true;
+		}
 
 		internal static Task<IEnumerable<TemporaryExposureKey>> GetSelfTemporaryExposureKeysAsync()
 			=> PlatformGetTemporaryExposureKeys();
-
-		public static async Task<bool> UpdateKeysFromServer()
-		{
-			var hadUpdates = false;
-
-			await Handler?.FetchExposureKeysFromServer(async (keys) =>
-			{
-				var updates = keys != null && keys.Any();
-				
-				if (updates)
-				{
-					hadUpdates = true;
-
-					await AddDiagnosisKeysAsync(keys);
-				}
-			});
-
-			if (hadUpdates)
-			{
-				var summary = await FinishAddDiagnosisKeysAsync();
-
-				// Check that the summary has any matches before notifying the callback
-				if (summary != null && summary.MatchedKeyCount > 0)
-				{
-					// This will run and invoke the handler in the background to deal with results
-					_ = Task.Run(() =>
-						  Handler.ExposureDetected(summary,
-							  () => GetExposureInformationAsync()));
-				}
-			}
-
-			return hadUpdates;
-		}
 	}
 
 	public class Configuration
