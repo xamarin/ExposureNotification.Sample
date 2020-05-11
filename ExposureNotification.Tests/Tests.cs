@@ -7,7 +7,6 @@ using System.Linq;
 using Xamarin.ExposureNotifications;
 using ExposureNotification.Backend;
 using System.IO;
-using Xamarin.ExposureNotifications.Proto;
 
 namespace ExposureNotification.Tests
 {

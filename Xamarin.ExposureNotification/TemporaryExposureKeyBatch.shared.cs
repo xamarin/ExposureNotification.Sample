@@ -9,11 +9,11 @@ using pb = global::Google.Protobuf;
 using pbc = global::Google.Protobuf.Collections;
 using pbr = global::Google.Protobuf.Reflection;
 using scg = global::System.Collections.Generic;
-namespace Xamarin.ExposureNotifications.Proto
+namespace Xamarin.ExposureNotifications
 {
 
     /// <summary>Holder for reflection information generated from file.proto</summary>
-    public static partial class FileReflection
+    public static partial class TemporaryExposureKeyBatchReflection
     {
 
         #region Descriptor
@@ -24,7 +24,7 @@ namespace Xamarin.ExposureNotifications.Proto
         }
         private static pbr::FileDescriptor descriptor;
 
-        static FileReflection()
+        static TemporaryExposureKeyBatchReflection()
         {
             byte[] descriptorData = global::System.Convert.FromBase64String(
                 string.Concat(
@@ -39,26 +39,26 @@ namespace Xamarin.ExposureNotifications.Proto
             descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
                 new pbr::FileDescriptor[] { },
                 new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Xamarin.ExposureNotifications.Proto.File), global::Xamarin.ExposureNotifications.Proto.File.Parser, new[]{ "Header", "Key" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Xamarin.ExposureNotifications.Proto.Header), global::Xamarin.ExposureNotifications.Proto.Header.Parser, new[]{ "StartTimestamp", "EndTimestamp", "Region", "BatchNum", "BatchSize" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Xamarin.ExposureNotifications.Proto.Key), global::Xamarin.ExposureNotifications.Proto.Key.Parser, new[]{ "KeyData", "RollingStartNumber", "RollingPeriod", "TransmissionRiskLevel" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Xamarin.ExposureNotifications.TemporaryExposureKeyBatch), global::Xamarin.ExposureNotifications.TemporaryExposureKeyBatch.Parser, new[]{ "Header", "Key" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Xamarin.ExposureNotifications.TemporaryExposureKeyBatchHeader), global::Xamarin.ExposureNotifications.TemporaryExposureKeyBatchHeader.Parser, new[]{ "StartTimestamp", "EndTimestamp", "Region", "BatchNum", "BatchSize" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Xamarin.ExposureNotifications.TemporaryExposureKeyBatchKey), global::Xamarin.ExposureNotifications.TemporaryExposureKeyBatchKey.Parser, new[]{ "KeyData", "RollingStartNumber", "RollingPeriod", "TransmissionRiskLevel" }, null, null, null, null)
                 }));
         }
         #endregion
 
     }
     #region Messages
-    public sealed partial class File : pb::IMessage<File>
+    public sealed partial class TemporaryExposureKeyBatch : pb::IMessage<TemporaryExposureKeyBatch>
     {
-        private static readonly pb::MessageParser<File> _parser = new pb::MessageParser<File>(() => new File());
+        private static readonly pb::MessageParser<TemporaryExposureKeyBatch> _parser = new pb::MessageParser<TemporaryExposureKeyBatch>(() => new TemporaryExposureKeyBatch());
         private pb::UnknownFieldSet _unknownFields;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        public static pb::MessageParser<File> Parser { get { return _parser; } }
+        public static pb::MessageParser<TemporaryExposureKeyBatch> Parser { get { return _parser; } }
 
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
         public static pbr::MessageDescriptor Descriptor
         {
-            get { return global::Xamarin.ExposureNotifications.Proto.FileReflection.Descriptor.MessageTypes[0]; }
+            get { return global::Xamarin.ExposureNotifications.TemporaryExposureKeyBatchReflection.Descriptor.MessageTypes[0]; }
         }
 
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -68,7 +68,7 @@ namespace Xamarin.ExposureNotifications.Proto
         }
 
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        public File()
+        public TemporaryExposureKeyBatch()
         {
             OnConstruction();
         }
@@ -76,7 +76,7 @@ namespace Xamarin.ExposureNotifications.Proto
         partial void OnConstruction();
 
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        public File(File other) : this()
+        public TemporaryExposureKeyBatch(TemporaryExposureKeyBatch other) : this()
         {
             header_ = other.HasHeader ? other.header_.Clone() : null;
             key_ = other.key_.Clone();
@@ -84,16 +84,16 @@ namespace Xamarin.ExposureNotifications.Proto
         }
 
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        public File Clone()
+        public TemporaryExposureKeyBatch Clone()
         {
-            return new File(this);
+            return new TemporaryExposureKeyBatch(this);
         }
 
         /// <summary>Field number for the "header" field.</summary>
         public const int HeaderFieldNumber = 1;
-        private global::Xamarin.ExposureNotifications.Proto.Header header_;
+        private global::Xamarin.ExposureNotifications.TemporaryExposureKeyBatchHeader header_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        public global::Xamarin.ExposureNotifications.Proto.Header Header
+        public global::Xamarin.ExposureNotifications.TemporaryExposureKeyBatchHeader Header
         {
             get { return header_; }
             set
@@ -116,11 +116,11 @@ namespace Xamarin.ExposureNotifications.Proto
 
         /// <summary>Field number for the "key" field.</summary>
         public const int KeyFieldNumber = 2;
-        private static readonly pb::FieldCodec<global::Xamarin.ExposureNotifications.Proto.Key> _repeated_key_codec
-            = pb::FieldCodec.ForMessage(18, global::Xamarin.ExposureNotifications.Proto.Key.Parser);
-        private readonly pbc::RepeatedField<global::Xamarin.ExposureNotifications.Proto.Key> key_ = new pbc::RepeatedField<global::Xamarin.ExposureNotifications.Proto.Key>();
+        private static readonly pb::FieldCodec<global::Xamarin.ExposureNotifications.TemporaryExposureKeyBatchKey> _repeated_key_codec
+            = pb::FieldCodec.ForMessage(18, global::Xamarin.ExposureNotifications.TemporaryExposureKeyBatchKey.Parser);
+        private readonly pbc::RepeatedField<global::Xamarin.ExposureNotifications.TemporaryExposureKeyBatchKey> key_ = new pbc::RepeatedField<global::Xamarin.ExposureNotifications.TemporaryExposureKeyBatchKey>();
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        public pbc::RepeatedField<global::Xamarin.ExposureNotifications.Proto.Key> Key
+        public pbc::RepeatedField<global::Xamarin.ExposureNotifications.TemporaryExposureKeyBatchKey> Key
         {
             get { return key_; }
         }
@@ -128,11 +128,11 @@ namespace Xamarin.ExposureNotifications.Proto
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
         public override bool Equals(object other)
         {
-            return Equals(other as File);
+            return Equals(other as TemporaryExposureKeyBatch);
         }
 
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        public bool Equals(File other)
+        public bool Equals(TemporaryExposureKeyBatch other)
         {
             if (ReferenceEquals(other, null))
             {
@@ -198,7 +198,7 @@ namespace Xamarin.ExposureNotifications.Proto
         }
 
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        public void MergeFrom(File other)
+        public void MergeFrom(TemporaryExposureKeyBatch other)
         {
             if (other == null)
             {
@@ -208,7 +208,7 @@ namespace Xamarin.ExposureNotifications.Proto
             {
                 if (!HasHeader)
                 {
-                    Header = new global::Xamarin.ExposureNotifications.Proto.Header();
+                    Header = new global::Xamarin.ExposureNotifications.TemporaryExposureKeyBatchHeader();
                 }
                 Header.MergeFrom(other.Header);
             }
@@ -231,7 +231,7 @@ namespace Xamarin.ExposureNotifications.Proto
                         {
                             if (!HasHeader)
                             {
-                                Header = new global::Xamarin.ExposureNotifications.Proto.Header();
+                                Header = new global::Xamarin.ExposureNotifications.TemporaryExposureKeyBatchHeader();
                             }
                             input.ReadMessage(Header);
                             break;
@@ -247,18 +247,18 @@ namespace Xamarin.ExposureNotifications.Proto
 
     }
 
-    public sealed partial class Header : pb::IMessage<Header>
+    public sealed partial class TemporaryExposureKeyBatchHeader : pb::IMessage<TemporaryExposureKeyBatchHeader>
     {
-        private static readonly pb::MessageParser<Header> _parser = new pb::MessageParser<Header>(() => new Header());
+        private static readonly pb::MessageParser<TemporaryExposureKeyBatchHeader> _parser = new pb::MessageParser<TemporaryExposureKeyBatchHeader>(() => new TemporaryExposureKeyBatchHeader());
         private pb::UnknownFieldSet _unknownFields;
         private int _hasBits0;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        public static pb::MessageParser<Header> Parser { get { return _parser; } }
+        public static pb::MessageParser<TemporaryExposureKeyBatchHeader> Parser { get { return _parser; } }
 
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
         public static pbr::MessageDescriptor Descriptor
         {
-            get { return global::Xamarin.ExposureNotifications.Proto.FileReflection.Descriptor.MessageTypes[1]; }
+            get { return global::Xamarin.ExposureNotifications.TemporaryExposureKeyBatchReflection.Descriptor.MessageTypes[1]; }
         }
 
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -268,7 +268,7 @@ namespace Xamarin.ExposureNotifications.Proto
         }
 
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        public Header()
+        public TemporaryExposureKeyBatchHeader()
         {
             OnConstruction();
         }
@@ -276,7 +276,7 @@ namespace Xamarin.ExposureNotifications.Proto
         partial void OnConstruction();
 
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        public Header(Header other) : this()
+        public TemporaryExposureKeyBatchHeader(TemporaryExposureKeyBatchHeader other) : this()
         {
             _hasBits0 = other._hasBits0;
             startTimestamp_ = other.startTimestamp_;
@@ -288,9 +288,9 @@ namespace Xamarin.ExposureNotifications.Proto
         }
 
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        public Header Clone()
+        public TemporaryExposureKeyBatchHeader Clone()
         {
-            return new Header(this);
+            return new TemporaryExposureKeyBatchHeader(this);
         }
 
         /// <summary>Field number for the "startTimestamp" field.</summary>
@@ -444,11 +444,11 @@ namespace Xamarin.ExposureNotifications.Proto
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
         public override bool Equals(object other)
         {
-            return Equals(other as Header);
+            return Equals(other as TemporaryExposureKeyBatchHeader);
         }
 
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        public bool Equals(Header other)
+        public bool Equals(TemporaryExposureKeyBatchHeader other)
         {
             if (ReferenceEquals(other, null))
             {
@@ -554,7 +554,7 @@ namespace Xamarin.ExposureNotifications.Proto
         }
 
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        public void MergeFrom(Header other)
+        public void MergeFrom(TemporaryExposureKeyBatchHeader other)
         {
             if (other == null)
             {
@@ -625,18 +625,18 @@ namespace Xamarin.ExposureNotifications.Proto
 
     }
 
-    public sealed partial class Key : pb::IMessage<Key>
+    public sealed partial class TemporaryExposureKeyBatchKey : pb::IMessage<TemporaryExposureKeyBatchKey>
     {
-        private static readonly pb::MessageParser<Key> _parser = new pb::MessageParser<Key>(() => new Key());
+        private static readonly pb::MessageParser<TemporaryExposureKeyBatchKey> _parser = new pb::MessageParser<TemporaryExposureKeyBatchKey>(() => new TemporaryExposureKeyBatchKey());
         private pb::UnknownFieldSet _unknownFields;
         private int _hasBits0;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        public static pb::MessageParser<Key> Parser { get { return _parser; } }
+        public static pb::MessageParser<TemporaryExposureKeyBatchKey> Parser { get { return _parser; } }
 
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
         public static pbr::MessageDescriptor Descriptor
         {
-            get { return global::Xamarin.ExposureNotifications.Proto.FileReflection.Descriptor.MessageTypes[2]; }
+            get { return global::Xamarin.ExposureNotifications.TemporaryExposureKeyBatchReflection.Descriptor.MessageTypes[2]; }
         }
 
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -646,7 +646,7 @@ namespace Xamarin.ExposureNotifications.Proto
         }
 
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        public Key()
+        public TemporaryExposureKeyBatchKey()
         {
             OnConstruction();
         }
@@ -654,7 +654,7 @@ namespace Xamarin.ExposureNotifications.Proto
         partial void OnConstruction();
 
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        public Key(Key other) : this()
+        public TemporaryExposureKeyBatchKey(TemporaryExposureKeyBatchKey other) : this()
         {
             _hasBits0 = other._hasBits0;
             keyData_ = other.keyData_;
@@ -665,9 +665,9 @@ namespace Xamarin.ExposureNotifications.Proto
         }
 
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        public Key Clone()
+        public TemporaryExposureKeyBatchKey Clone()
         {
-            return new Key(this);
+            return new TemporaryExposureKeyBatchKey(this);
         }
 
         /// <summary>Field number for the "keyData" field.</summary>
@@ -796,11 +796,11 @@ namespace Xamarin.ExposureNotifications.Proto
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
         public override bool Equals(object other)
         {
-            return Equals(other as Key);
+            return Equals(other as TemporaryExposureKeyBatchKey);
         }
 
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        public bool Equals(Key other)
+        public bool Equals(TemporaryExposureKeyBatchKey other)
         {
             if (ReferenceEquals(other, null))
             {
@@ -895,7 +895,7 @@ namespace Xamarin.ExposureNotifications.Proto
         }
 
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        public void MergeFrom(Key other)
+        public void MergeFrom(TemporaryExposureKeyBatchKey other)
         {
             if (other == null)
             {
