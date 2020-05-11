@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using ExposureNotification.App.Services;
 using Newtonsoft.Json;
 using Xamarin.ExposureNotifications;
+using Xamarin.ExposureNotifications.Proto;
 using Xamarin.Forms;
 using Xamarin.Forms.Internals;
 
@@ -14,7 +15,12 @@ namespace ExposureNotification.App
 	[Preserve]
 	public class ExposureNotificationHandler : IExposureNotificationHandler
 	{
+		public const string DefaultRegion = "default";
+
 		const string apiUrlBase = "http://localhost:7071/api/";
+		const string apiUrlBlobStorageBase = "https://exposurenotifications.blob.core.windows.net/";
+		const string blobStorageContainerNamePrefix = "";
+
 
 		static readonly HttpClient http = new HttpClient();
 
@@ -44,54 +50,61 @@ namespace ExposureNotification.App
 		// this will be called when they keys need to be collected from the server
 		public async Task FetchExposureKeysFromServerAsync(ITemporaryExposureKeyBatches batches)
 		{
-			var latestKeysResponseIndex = LocalStateManager.Instance.LatestKeysResponseIndex;
+			// This is "default" by default
+			var region = LocalStateManager.Instance.Region ?? DefaultRegion;
 
-			var take = 1024;
-			var skip = 0;
-
-			bool checkForMore;
+			var checkForMore = true;
 			do
 			{
-				// Get the newest date we have keys from and request since then
-				// or if no date stored, only return as much as the past 14 days of keys
-				var url = $"{apiUrlBase.TrimEnd('/')}/keys?since={latestKeysResponseIndex}&skip={skip}&take={take}";
-
-				var response = await http.GetAsync(url);
-
-				response.EnsureSuccessStatusCode();
-
-				var responseData = await response.Content.ReadAsStringAsync();
-
-				if (string.IsNullOrEmpty(responseData))
-					break;
-
-				// Response contains the timestamp in seconds since epoch, and the list of keys
-				var keys = JsonConvert.DeserializeObject<KeysResponse>(responseData);
-
-				var numKeys = keys?.Keys?.Count() ?? 0;
-
-				// See if keys were returned on this call
-				if (numKeys > 0)
+				try
 				{
-					// Call the callback with the batch of keys to add
-					await batches.AddBatchAsync(keys.Keys);
+					// Find next batch number
+					var batchNumber = LocalStateManager.Instance.ServerBatchNumber + 1;
 
-					var newLatestKeysResponseIndex = keys.Latest;
+					// Build the blob storage url for the given batch file we are on next
+					var url = $"{apiUrlBlobStorageBase}/{blobStorageContainerNamePrefix}{region}/{batchNumber}.dat";
 
-					if (newLatestKeysResponseIndex > LocalStateManager.Instance.LatestKeysResponseIndex)
+					var response = await http.GetAsync(url);
+
+					// If we get a 404, there are no newer batch files available to download
+					if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
 					{
-						LocalStateManager.Instance.LatestKeysResponseIndex = newLatestKeysResponseIndex;
-						LocalStateManager.Save();
+						checkForMore = false;
+						break;
 					}
 
-					// Increment our skip starting point for the next batch
-					skip += take;
+					response.EnsureSuccessStatusCode();
+
+					// Skip batch files which are older than 14 days
+					if (response.Content.Headers.LastModified.HasValue)
+					{
+						if (response.Content.Headers.LastModified < DateTimeOffset.UtcNow.AddDays(-14))
+						{
+							LocalStateManager.Instance.ServerBatchNumber = batchNumber;
+							LocalStateManager.Save();
+							checkForMore = true;
+							continue;
+						}
+					}
+
+					// Read the batch file stream
+					using var responseStream = await response.Content.ReadAsStreamAsync();
+
+					// Parse into a Proto.File
+					var batchFile = File.Parser.ParseFrom(responseStream);
+
+					// Submit to the batch processor
+					await batches.AddBatchAsync(batchFile);
+
+					// Update the number we are on
+					LocalStateManager.Instance.ServerBatchNumber = batchNumber;
+					LocalStateManager.Save();
 				}
-
-				// If we got back more or the same amount of our requested take, there may be
-				// more left on the server to request again
-				checkForMore = numKeys >= take;
-
+				catch (Exception ex)
+				{
+					Console.WriteLine(ex);
+					checkForMore = false;
+				}
 			} while (checkForMore);
 		}
 
@@ -151,15 +164,6 @@ namespace ExposureNotification.App
 		{
 			[JsonProperty("diagnosisUid")]
 			public string DiagnosisUid { get; set; }
-
-			[JsonProperty("keys")]
-			public IEnumerable<TemporaryExposureKey> Keys { get; set; }
-		}
-
-		class KeysResponse
-		{
-			[JsonProperty("latest")]
-			public ulong Latest { get; set; }
 
 			[JsonProperty("keys")]
 			public IEnumerable<TemporaryExposureKey> Keys { get; set; }

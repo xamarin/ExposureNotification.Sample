@@ -22,6 +22,6 @@ namespace Xamarin.ExposureNotifications
 	{
 		Task AddBatchAsync(IEnumerable<TemporaryExposureKey> keys);
 
-		Task AddBatchAsync(IEnumerable<Proto.File> files);
+		Task AddBatchAsync(Proto.File file);
 	}
 }
