@@ -40,8 +40,8 @@ namespace Xamarin.ExposureNotifications
 				var batch = sequence.Take(MaxKeysPerFile);
 				sequence = sequence.Skip(MaxKeysPerFile);
 
-				var file = new Proto.File();
-				file.Key.AddRange(batch.Select(k => new Proto.Key
+				var file = new TemporaryExposureKeyBatch();
+				file.Key.AddRange(batch.Select(k => new TemporaryExposureKeyBatchKey
 				{
 					KeyData = ByteString.CopyFrom(k.KeyData),
 					RollingStartNumber = (uint)k.RollingStartLong,
@@ -53,7 +53,7 @@ namespace Xamarin.ExposureNotifications
 			}
 		}
 
-		public Task AddBatchAsync(Proto.File file)
+		public Task AddBatchAsync(TemporaryExposureKeyBatch file)
 		{
 			if (file == null || file.Key == null || file.Key.Count <= 0)
 				return Task.CompletedTask;

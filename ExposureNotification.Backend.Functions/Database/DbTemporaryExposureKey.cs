@@ -3,7 +3,6 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Google.Protobuf;
 using Xamarin.ExposureNotifications;
-using Xamarin.ExposureNotifications.Proto;
 
 namespace ExposureNotification.Backend
 {
@@ -44,8 +43,8 @@ namespace ExposureNotification.Backend
 				TransmissionRiskLevel = (int)key.TransmissionRiskLevel
 			};
 
-		public Key ToProtoKey()
-			=> new Key
+		public TemporaryExposureKeyBatchKey ToProtoKey()
+			=> new TemporaryExposureKeyBatchKey
 			{
 				KeyData = ByteString.FromBase64(Base64KeyData),
 				RollingStartNumber = (uint)RollingStartSecondsSinceEpoch,

@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using ExposureNotification.App.Services;
 using Newtonsoft.Json;
 using Xamarin.ExposureNotifications;
-using Xamarin.ExposureNotifications.Proto;
 using Xamarin.Forms;
 using Xamarin.Forms.Internals;
 
@@ -91,7 +90,7 @@ namespace ExposureNotification.App
 					using var responseStream = await response.Content.ReadAsStreamAsync();
 
 					// Parse into a Proto.File
-					var batchFile = File.Parser.ParseFrom(responseStream);
+					var batchFile = TemporaryExposureKeyBatch.Parser.ParseFrom(responseStream);
 
 					// Submit to the batch processor
 					await batches.AddBatchAsync(batchFile);

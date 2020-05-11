@@ -9,7 +9,6 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Xml;
 using Xamarin.ExposureNotifications;
-using Xamarin.ExposureNotifications.Proto;
 
 namespace ExposureNotification.Backend
 {
@@ -104,7 +103,7 @@ namespace ExposureNotification.Backend
 			}
 		}
 
-		public async Task<int> GetNextBatchAsync(int batchNumber, string region, Func<File, Task> processBatch)
+		public async Task<int> GetNextBatchAsync(int batchNumber, string region, Func<TemporaryExposureKeyBatch, Task> processBatch)
 		{
 			region ??= DbTemporaryExposureKey.DefaultRegion;
 
@@ -123,9 +122,9 @@ namespace ExposureNotification.Backend
 
 				keyCount = exposureKeys.Count();
 
-				var f = new File
+				var f = new TemporaryExposureKeyBatch
 				{
-					Header = new Header
+					Header = new TemporaryExposureKeyBatchHeader
 					{
 						BatchNum = batchNumber,
 						BatchSize = keyCount,
