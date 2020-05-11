@@ -7,6 +7,7 @@ using System.Linq;
 using Xamarin.ExposureNotifications;
 using ExposureNotification.Backend;
 using System.IO;
+using Xamarin.ExposureNotifications.Proto;
 
 namespace ExposureNotification.Tests
 {
@@ -76,22 +77,7 @@ namespace ExposureNotification.Tests
 				Keys = keys
 			});
 
-			var allKeys = new List<TemporaryExposureKey>();
-
-			var skip = 0;
-			var take = 10;
-
-			while (true)
-			{
-				var r = await Storage.GetKeysAsync(0, skip, take);
-
-				if (!r.Keys.Any())
-					break;
-
-				allKeys.AddRange(r.Keys);
-
-				skip += take;
-			}
+			var allKeys = await Storage.GetAllKeysAsync();
 
 			var keyToEnsureExists = keys.Skip(keys.Count / 2).First();
 
@@ -131,33 +117,10 @@ namespace ExposureNotification.Tests
 					Keys = keys
 				});
 
-			var actualCount = 0L;
 
-			var skip = 0;
-			var take = 10;
-			ulong latestIndex = 0;
+			var allKeys = await Storage.GetAllKeysAsync();
 
-			while (true)
-			{
-				var keyBatch = await Storage.GetKeysAsync(
-					0,
-					skip,
-					take);
-
-				skip += take;
-
-				var batchCount = keyBatch.Keys.Count();
-
-				if (keyBatch.Latest > latestIndex)
-					latestIndex = keyBatch.Latest;
-
-				actualCount += batchCount;
-
-				if (batchCount <= 0)
-					break;
-			}
-
-			Assert.Equal(expectedCount, actualCount);
+			Assert.Equal(expectedCount, allKeys.Count);
 		}
 
 		List<TemporaryExposureKey> GenerateTemporaryExposureKeys(int daysBack)
