@@ -54,13 +54,13 @@ namespace Xamarin.ExposureNotifications
 		}
 
 		public static Task StartAsync()
-			=> MockApi != null ? MockApi.StartAsync() : PlatformStart();
+			=> nativeImplementation != null ? nativeImplementation.StartAsync() : PlatformStart();
 
 		public static Task StopAsync()
-			=> MockApi != null ? MockApi.StopAsync() : PlatformStop();
+			=> nativeImplementation != null ? nativeImplementation.StopAsync() : PlatformStop();
 
 		public static Task<bool> IsEnabledAsync()
-			=> MockApi != null ? MockApi.IsEnabledAsync() : PlatformIsEnabled();
+			=> nativeImplementation != null ? nativeImplementation.IsEnabledAsync() : PlatformIsEnabled();
 
 		// Call this when the user has confirmed diagnosis
 		public static async Task SubmitSelfDiagnosisAsync()
@@ -80,9 +80,9 @@ namespace Xamarin.ExposureNotifications
 			if (!batches.Files.Any())
 				return false;
 
-			if (MockApi != null)
+			if (nativeImplementation != null)
 			{
-				var r = await MockApi.DetectExposuresAsync(batches);
+				var r = await nativeImplementation.DetectExposuresAsync(batches);
 
 				var hasMatches = (r.summary?.MatchedKeyCount ?? 0) > 0;
 
@@ -108,7 +108,7 @@ namespace Xamarin.ExposureNotifications
 		}
 
 		internal static Task<IEnumerable<TemporaryExposureKey>> GetSelfTemporaryExposureKeysAsync()
-			=> MockApi != null ? MockApi.GetSelfTemporaryExposureKeysAsync() : PlatformGetTemporaryExposureKeys();
+			=> nativeImplementation != null ? nativeImplementation.GetSelfTemporaryExposureKeysAsync() : PlatformGetTemporaryExposureKeys();
 	}
 
 	public class Configuration
