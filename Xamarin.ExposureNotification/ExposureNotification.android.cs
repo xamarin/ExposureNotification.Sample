@@ -8,7 +8,6 @@ using Android.Gms.Nearby.ExposureNotification;
 using Nearby = Android.Gms.Nearby.NearbyClass;
 using AndroidRiskLevel = Android.Gms.Nearby.ExposureNotification.RiskLevel;
 using AndroidX.Work;
-using Android.OS;
 
 [assembly: UsesPermission(Android.Manifest.Permission.Bluetooth)]
 
@@ -47,19 +46,37 @@ namespace Xamarin.ExposureNotifications
 		static async Task<bool> PlatformIsEnabled()
 			=> await Instance.IsEnabledAsync();
 
+		public static void ConfigureBackgroundWorkRequest(Action<PeriodicWorkRequest.Builder> requestBuilder, TimeSpan repeatInterval)
+		{
+			if (requestBuilder == null)
+				throw new ArgumentNullException(nameof(requestBuilder));
+			if (repeatInterval == null)
+				throw new ArgumentNullException(nameof(repeatInterval));
+
+			bgRequestBuilder = requestBuilder;
+			bgRepeatInterval = repeatInterval;
+		}
+
+		static Action<PeriodicWorkRequest.Builder> bgRequestBuilder = b =>
+			b.SetConstraints(new Constraints.Builder()
+				.SetRequiresBatteryNotLow(true)
+				.SetRequiresDeviceIdle(true)
+				.SetRequiredNetworkType(NetworkType.Connected)
+				.Build());
+
+		static TimeSpan bgRepeatInterval = TimeSpan.FromHours(6);
+
 		static Task PlatformScheduleFetch()
 		{
 			var workManager = WorkManager.GetInstance(Essentials.Platform.AppContext);
 
-			var workRequest = new PeriodicWorkRequest.Builder(
+			var workRequestBuilder = new PeriodicWorkRequest.Builder(
 				typeof(BackgroundFetchWorker),
-				TimeSpan.FromHours(6))
-					.SetConstraints(new Constraints.Builder()
-						.SetRequiresBatteryNotLow(true)
-						.SetRequiresDeviceIdle(true)
-						.SetRequiredNetworkType(NetworkType.Connected)
-						.Build())
-					.Build();
+				bgRepeatInterval);
+
+			bgRequestBuilder.Invoke(workRequestBuilder);
+			
+			var workRequest = workRequestBuilder.Build();
 
 			workManager.EnqueueUniquePeriodicWork("exposurenotification",
 				ExistingPeriodicWorkPolicy.Replace,
