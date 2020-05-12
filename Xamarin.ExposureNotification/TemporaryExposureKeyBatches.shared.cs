@@ -10,7 +10,7 @@ namespace Xamarin.ExposureNotifications
 {
 	public class TemporaryExposureKeyBatches : ITemporaryExposureKeyBatches, IDisposable
 	{
-		public const int MaxKeysPerFile = 18_000;
+		public const int MaxKeysPerFile = 17_000;
 
 		readonly string cacheRoot;
 

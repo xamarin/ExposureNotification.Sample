@@ -150,7 +150,7 @@ namespace ExposureNotification.Tests
 		}
 
 		[Fact]
-		public async Task Batcher_Batches_Max_18000_Test()
+		public async Task Batcher_Batches_Max_17000_Test()
 		{
 			// create 30K keys
 			var keys = Enumerable.Range(1, 50_000).Select(id => new TemporaryExposureKey(BitConverter.GetBytes(id), DateTimeOffset.Now, TimeSpan.Zero, RiskLevel.Medium));
@@ -164,7 +164,7 @@ namespace ExposureNotification.Tests
 		}
 
 		[Fact]
-		public async Task Batcher_Batches_Max_18000_From_Single_Batch_Test()
+		public async Task Batcher_Batches_Max_17000_From_Single_Batch_Test()
 		{
 			// create 10K keys
 			var keys = Enumerable.Range(1, 10_000).Select(id => new TemporaryExposureKey(BitConverter.GetBytes(id), DateTimeOffset.Now, TimeSpan.Zero, RiskLevel.Medium));
@@ -178,7 +178,7 @@ namespace ExposureNotification.Tests
 		}
 
 		[Fact]
-		public async Task Batcher_Batches_Max_18000_From_Smaller_Batches_Test()
+		public async Task Batcher_Batches_Max_17000_From_Smaller_Batches_Test()
 		{
 			// create 10K keys
 			var keys = Enumerable.Range(1, 10_000).Select(id => new TemporaryExposureKey(BitConverter.GetBytes(id), DateTimeOffset.Now, TimeSpan.Zero, RiskLevel.Medium));
