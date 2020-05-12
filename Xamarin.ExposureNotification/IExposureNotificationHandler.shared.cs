@@ -25,7 +25,7 @@ namespace Xamarin.ExposureNotifications
 		Task AddBatchAsync(Proto.File file);
 	}
 
-	public interface IMockExposureNotificationApi
+	public interface INativeImplementation
 	{
 		Task StartAsync();
 		Task StopAsync();

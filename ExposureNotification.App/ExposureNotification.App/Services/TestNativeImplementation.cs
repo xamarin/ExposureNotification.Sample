@@ -7,7 +7,7 @@ using Xamarin.Essentials;
 
 namespace ExposureNotification.App.Services
 {
-	public class MockApi : IMockExposureNotificationApi
+	public class TestNativeImplementation : INativeImplementation
 	{
 		static readonly Random random = new Random();
 

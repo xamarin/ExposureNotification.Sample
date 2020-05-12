@@ -10,7 +10,10 @@ namespace Xamarin.ExposureNotifications
 {
 	public static partial class ExposureNotification
 	{
-		public static IMockExposureNotificationApi MockApi { get; set; }
+		static INativeImplementation nativeImplementation;
+
+		public static void OverrideNativeImplementation(INativeImplementation nativeImplementation)
+			=> ExposureNotification.nativeImplementation = nativeImplementation;
 
 		static IExposureNotificationHandler handler;
 
