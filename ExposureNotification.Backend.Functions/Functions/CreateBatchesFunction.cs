@@ -47,9 +47,12 @@ namespace ExposureNotification.Backend.Functions
 					if (blob is CloudBlockBlob blockBlob)
 					{
 						// Batch number is stored as metadata (but also is the filename)
-						if (int.TryParse(blockBlob.Metadata[batchNumberMetadataKey], out var bn)
-							&& bn > nextBatchNumber)
-							nextBatchNumber = bn;
+						if (int.TryParse(blockBlob.Metadata[batchNumberMetadataKey], out var bn))
+						{
+							var potentialNext = bn + 1;
+							if (potentialNext > nextBatchNumber)
+								nextBatchNumber = potentialNext;
+						}
 					}
 				}
 
