@@ -10,6 +10,11 @@ namespace Xamarin.ExposureNotifications
 {
 	public static partial class ExposureNotification
 	{
+		static INativeImplementation nativeImplementation;
+
+		public static void OverrideNativeImplementation(INativeImplementation nativeImplementation)
+			=> ExposureNotification.nativeImplementation = nativeImplementation;
+
 		static IExposureNotificationHandler handler;
 
 		internal static IExposureNotificationHandler Handler
@@ -48,14 +53,14 @@ namespace Xamarin.ExposureNotifications
 			}
 		}
 
-		public static async Task StartAsync()
-			=> await PlatformStart();
+		public static Task StartAsync()
+			=> nativeImplementation != null ? nativeImplementation.StartAsync() : PlatformStart();
 
-		public static async Task StopAsync()
-			=> await PlatformStop();
+		public static Task StopAsync()
+			=> nativeImplementation != null ? nativeImplementation.StopAsync() : PlatformStop();
 
 		public static Task<bool> IsEnabledAsync()
-			=> PlatformIsEnabled();
+			=> nativeImplementation != null ? nativeImplementation.IsEnabledAsync() : PlatformIsEnabled();
 
 		// Call this when the user has confirmed diagnosis
 		public static async Task SubmitSelfDiagnosisAsync()
@@ -75,6 +80,18 @@ namespace Xamarin.ExposureNotifications
 			if (!batches.Files.Any())
 				return false;
 
+			if (nativeImplementation != null)
+			{
+				var r = await nativeImplementation.DetectExposuresAsync(batches);
+
+				var hasMatches = (r.summary?.MatchedKeyCount ?? 0) > 0;
+
+				if (hasMatches)
+					await Handler.ExposureDetectedAsync(r.summary, r.info);
+
+				return true;
+			}
+
 #if __IOS__
 			// On iOS we need to check this ourselves and invoke the handler
 			var (summary, info) = await PlatformDetectExposuresAsync(batches.Files);
@@ -91,7 +108,7 @@ namespace Xamarin.ExposureNotifications
 		}
 
 		internal static Task<IEnumerable<TemporaryExposureKey>> GetSelfTemporaryExposureKeysAsync()
-			=> PlatformGetTemporaryExposureKeys();
+			=> nativeImplementation != null ? nativeImplementation.GetSelfTemporaryExposureKeysAsync() : PlatformGetTemporaryExposureKeys();
 	}
 
 	public class Configuration

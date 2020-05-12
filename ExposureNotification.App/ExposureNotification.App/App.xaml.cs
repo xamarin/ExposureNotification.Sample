@@ -10,6 +10,13 @@ namespace ExposureNotification.App
 		{
 			InitializeComponent();
 
+#if DEBUG
+			// For debug mode, set the mock api provider to interact
+			// with some fake data
+			Xamarin.ExposureNotifications.ExposureNotification.OverrideNativeImplementation(
+				new Services.TestNativeImplementation());
+#endif
+
 			MainPage = new AppShell();
 		}
 
