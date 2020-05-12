@@ -19,7 +19,7 @@ namespace ExposureNotification.Backend.Functions
 
 		// Every 6 hours
 		[FunctionName("CreateBatchesFunction")]
-		public static async Task Run([TimerTrigger("* * */6 * * *")]TimerInfo myTimer, ILogger log)
+		public static async Task Run([TimerTrigger("0 0 */6 * * *")]TimerInfo myTimer, ILogger log)
 		{
 			var cloudStorageAccount = CloudStorageAccount.Parse(Startup.BlobStorageConnectionString);
 			var cloudBlobClient = cloudStorageAccount.CreateCloudBlobClient();
