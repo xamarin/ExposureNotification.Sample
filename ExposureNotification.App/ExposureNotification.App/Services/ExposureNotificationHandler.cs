@@ -147,7 +147,7 @@ namespace ExposureNotification.App
 
 			try
 			{
-				var response = await http.PostAsync(url, new StringContent(diagnosisUid));
+				var response = await http.PostAsync(url, new StringContent("{\"diagnosisUid\":\"" + diagnosisUid + "\"}"));
 
 				response.EnsureSuccessStatusCode();
 
