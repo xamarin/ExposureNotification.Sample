@@ -47,7 +47,7 @@ namespace Xamarin.ExposureNotifications
 		static async Task<bool> PlatformIsEnabled()
 			=> await Instance.IsEnabledAsync();
 
-		static async Task PlatformScheduleFetch()
+		static Task PlatformScheduleFetch()
 		{
 			var workManager = WorkManager.GetInstance(Essentials.Platform.AppContext);
 
@@ -64,6 +64,8 @@ namespace Xamarin.ExposureNotifications
 			workManager.EnqueueUniquePeriodicWork("exposurenotification",
 				ExistingPeriodicWorkPolicy.Replace,
 				workRequest);
+
+			return Task.CompletedTask;
 		}
 
 		// Tells the local API when new diagnosis keys have been obtained from the server
