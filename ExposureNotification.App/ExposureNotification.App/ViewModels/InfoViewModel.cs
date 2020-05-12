@@ -12,23 +12,23 @@ namespace ExposureNotification.App.ViewModels
 	{
 		public InfoViewModel()
 		{
-			//Xamarin.ExposureNotifications.ExposureNotification.IsEnabledAsync()
-			//	.ContinueWith(t =>
-			//	{
-			//		IsEnabled = t.Result;
-			//	});
+			Xamarin.ExposureNotifications.ExposureNotification.IsEnabledAsync()
+				.ContinueWith(t =>
+				{
+					IsEnabled = t.Result;
+				});
 		}
 
 		public bool IsEnabled
-        {
+		{
 			get => LocalStateManager.Instance.LastIsEnabled;
 			set
-            {
+			{
 				LocalStateManager.Instance.LastIsEnabled = value;
 				LocalStateManager.Save();
 				NotifyPropertyChanged(nameof(IsEnabled));
-            }
-        }
+			}
+		}
 
 		public bool IsWelcomed
 		{
@@ -50,6 +50,8 @@ namespace ExposureNotification.App.ViewModels
 					await Xamarin.ExposureNotifications.ExposureNotification.StopAsync();
 				else
 					await Xamarin.ExposureNotifications.ExposureNotification.StartAsync();
+
+				IsEnabled = enabled;
 			});
 
 		public ICommand GetStartedCommand
