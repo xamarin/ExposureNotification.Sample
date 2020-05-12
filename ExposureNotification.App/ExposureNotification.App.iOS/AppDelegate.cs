@@ -35,15 +35,6 @@ namespace ExposureNotification.App.iOS
 			return base.FinishedLaunching(app, options);
 		}
 
-		public override void PerformFetch(UIApplication application, Action<UIBackgroundFetchResult> completionHandler)
-		{
-			// Get updated keys from server
-			Xamarin.ExposureNotifications.ExposureNotification.UpdateKeysFromServer()
-				.ContinueWith(t =>
-					completionHandler(t.IsFaulted ? UIBackgroundFetchResult.Failed
-						: t.Result ? UIBackgroundFetchResult.NewData : UIBackgroundFetchResult.NoData));
-		}
-
 		public override void WillEnterForeground(UIApplication uiApplication)
 		{
 			Plugin.LocalNotification.NotificationCenter.ResetApplicationIconBadgeNumber(uiApplication);
