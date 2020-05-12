@@ -24,4 +24,13 @@ namespace Xamarin.ExposureNotifications
 
 		Task AddBatchAsync(Proto.File file);
 	}
+
+	public interface IMockExposureNotificationApi
+	{
+		Task StartAsync();
+		Task StopAsync();
+		Task<bool> IsEnabledAsync();
+		Task<(ExposureDetectionSummary summary, IEnumerable<ExposureInfo> info)> DetectExposuresAsync(TemporaryExposureKeyBatches batches);
+		Task<IEnumerable<TemporaryExposureKey>> GetSelfTemporaryExposureKeysAsync();
+	}
 }

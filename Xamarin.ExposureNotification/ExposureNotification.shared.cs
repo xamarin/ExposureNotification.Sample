@@ -10,6 +10,8 @@ namespace Xamarin.ExposureNotifications
 {
 	public static partial class ExposureNotification
 	{
+		public static IMockExposureNotificationApi MockApi { get; set; }
+
 		static IExposureNotificationHandler handler;
 
 		internal static IExposureNotificationHandler Handler
@@ -48,14 +50,14 @@ namespace Xamarin.ExposureNotifications
 			}
 		}
 
-		public static async Task StartAsync()
-			=> await PlatformStart();
+		public static Task StartAsync()
+			=> MockApi != null ? MockApi.StartAsync() : PlatformStart();
 
-		public static async Task StopAsync()
-			=> await PlatformStop();
+		public static Task StopAsync()
+			=> MockApi != null ? MockApi.StopAsync() : PlatformStop();
 
 		public static Task<bool> IsEnabledAsync()
-			=> PlatformIsEnabled();
+			=> MockApi != null ? MockApi.IsEnabledAsync() : PlatformIsEnabled();
 
 		// Call this when the user has confirmed diagnosis
 		public static async Task SubmitSelfDiagnosisAsync()
@@ -75,6 +77,18 @@ namespace Xamarin.ExposureNotifications
 			if (!batches.Files.Any())
 				return false;
 
+			if (MockApi != null)
+			{
+				var (summary, info) = await MockApi.DetectExposuresAsync(batches);
+
+				var hasMatches = (summary?.MatchedKeyCount ?? 0) > 0;
+
+				if (hasMatches)
+					await Handler.ExposureDetectedAsync(summary, info);
+
+				return true;
+			}
+
 #if __IOS__
 			// On iOS we need to check this ourselves and invoke the handler
 			var (summary, info) = await PlatformDetectExposuresAsync(batches.Files);
@@ -91,7 +105,7 @@ namespace Xamarin.ExposureNotifications
 		}
 
 		internal static Task<IEnumerable<TemporaryExposureKey>> GetSelfTemporaryExposureKeysAsync()
-			=> PlatformGetTemporaryExposureKeys();
+			=> MockApi != null ? MockApi.GetSelfTemporaryExposureKeysAsync() : PlatformGetTemporaryExposureKeys();
 	}
 
 	public class Configuration
