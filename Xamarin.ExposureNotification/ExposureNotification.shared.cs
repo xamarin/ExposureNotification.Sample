@@ -53,6 +53,9 @@ namespace Xamarin.ExposureNotifications
 			}
 		}
 
+		public static Task Init()
+			=> PlatformScheduleFetch();
+
 		public static Task StartAsync()
 			=> nativeImplementation != null ? nativeImplementation.StartAsync() : PlatformStart();
 

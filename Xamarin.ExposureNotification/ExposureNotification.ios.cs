@@ -60,6 +60,11 @@ namespace Xamarin.ExposureNotifications
 			return m.ExposureNotificationEnabled;
 		}
 
+		static async Task PlatformScheduleFetch()
+		{
+
+		}
+
 		// Tells the local API when new diagnosis keys have been obtained from the server
 		static async Task<(ExposureDetectionSummary, IEnumerable<ExposureInfo>)> PlatformDetectExposuresAsync(IEnumerable<string> keyFiles)
 		{

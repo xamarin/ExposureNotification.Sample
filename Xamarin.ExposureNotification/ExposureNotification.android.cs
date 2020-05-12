@@ -7,6 +7,8 @@ using Android.Gms.Nearby.ExposureNotification;
 
 using Nearby = Android.Gms.Nearby.NearbyClass;
 using AndroidRiskLevel = Android.Gms.Nearby.ExposureNotification.RiskLevel;
+using AndroidX.Work;
+using Android.OS;
 
 [assembly: UsesPermission(Android.Manifest.Permission.Bluetooth)]
 
@@ -44,6 +46,25 @@ namespace Xamarin.ExposureNotifications
 
 		static async Task<bool> PlatformIsEnabled()
 			=> await Instance.IsEnabledAsync();
+
+		static async Task PlatformScheduleFetch()
+		{
+			var workManager = WorkManager.GetInstance(Essentials.Platform.AppContext);
+
+			var workRequest = new PeriodicWorkRequest.Builder(
+				typeof(BackgroundFetchWorker),
+				TimeSpan.FromHours(6))
+					.SetConstraints(new Constraints.Builder()
+						.SetRequiresBatteryNotLow(true)
+						.SetRequiresDeviceIdle(true)
+						.SetRequiredNetworkType(NetworkType.Connected)
+						.Build())
+					.Build();
+
+			workManager.EnqueueUniquePeriodicWork("exposurenotification",
+				ExistingPeriodicWorkPolicy.Replace,
+				workRequest);
+		}
 
 		// Tells the local API when new diagnosis keys have been obtained from the server
 		static async Task PlatformDetectExposuresAsync(IEnumerable<string> keyFiles)
@@ -90,6 +111,31 @@ namespace Xamarin.ExposureNotifications
 				(ulong)summary.MatchedKeyCount,
 				(byte)summary.MaximumRiskScore);
 		}
+	}
+
+	public class BackgroundFetchWorker : Worker
+	{
+		public BackgroundFetchWorker(global::Android.Content.Context context, WorkerParameters workerParameters)
+			: base(context, workerParameters)
+		{
+		}
+
+		public override Result DoWork()
+		{
+			try
+			{
+				DoAsyncWork();
+				return Result.InvokeSuccess();
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine(ex);
+				return Result.InvokeRetry();
+			}
+		}
+
+		async void DoAsyncWork()
+			=> await ExposureNotification.UpdateKeysFromServer();
 	}
 
 	static partial class Utils
