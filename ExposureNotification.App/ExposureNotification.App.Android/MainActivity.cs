@@ -7,6 +7,8 @@ using Android.Views;
 using Android.Widget;
 using Android.OS;
 using Acr.UserDialogs;
+using Plugin.LocalNotification;
+using Android.Content;
 
 namespace ExposureNotification.App.Droid
 {
@@ -26,13 +28,26 @@ namespace ExposureNotification.App.Droid
 
 			UserDialogs.Init(this);
 
+
+			NotificationCenter.CreateNotificationChannel();
+
 			LoadApplication(new App());
+
+			NotificationCenter.NotifyNotificationTapped(base.Intent);
 		}
+
 		public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
 		{
 			Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
 
 			base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+		}
+
+		protected override void OnNewIntent(Intent intent)
+		{
+			NotificationCenter.NotifyNotificationTapped(intent);
+
+			base.OnNewIntent(intent);
 		}
 	}
 }

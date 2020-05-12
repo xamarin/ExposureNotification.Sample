@@ -1,4 +1,5 @@
 ﻿using System;
+using Plugin.LocalNotification;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -16,8 +17,14 @@ namespace ExposureNotification.App
 			Xamarin.ExposureNotifications.ExposureNotification.OverrideNativeImplementation(
 				new Services.TestNativeImplementation());
 #endif
+			// Local Notification tap event listener
+			NotificationCenter.Current.NotificationTapped += Current_NotificationTapped; ;
 
 			MainPage = new AppShell();
+		}
+
+		private void Current_NotificationTapped(NotificationTappedEventArgs e)
+		{
 		}
 
 		protected override void OnStart()

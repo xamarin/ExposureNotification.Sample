@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using ExposureNotification.App.Services;
 using Newtonsoft.Json;
+using Plugin.LocalNotification;
 using Xamarin.ExposureNotifications;
 using Xamarin.Forms;
 using Xamarin.Forms.Internals;
@@ -32,7 +33,7 @@ namespace ExposureNotification.App
 			=> Task.FromResult(new Configuration());
 
 		// this will be called when a potential exposure has been detected
-		public async Task ExposureDetectedAsync(ExposureDetectionSummary summary, IEnumerable<ExposureInfo> exposureInfo)
+		public Task ExposureDetectedAsync(ExposureDetectionSummary summary, IEnumerable<ExposureInfo> exposureInfo)
 		{
 			LocalStateManager.Instance.ExposureSummary = summary;
 
@@ -42,8 +43,15 @@ namespace ExposureNotification.App
 
 			MessagingCenter.Instance.Send(this, "exposure_info_changed");
 
-			// TODO: Save this info and alert the user
-			// Pop up a local notification
+			var notification = new NotificationRequest
+			{
+				NotificationId = 100,
+				Title = "Possible COVID-19 Exposure",
+				Description = "It is possible you have been exposed to someone who was a confirmed diagnosis of COVID-19.  Tap for more details."
+			};
+			NotificationCenter.Current.Show(notification);
+
+			return Task.CompletedTask;
 		}
 
 		// this will be called when they keys need to be collected from the server

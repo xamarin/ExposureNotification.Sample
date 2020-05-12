@@ -65,6 +65,8 @@
     <PackageReference Include="Xamarin.Forms.Visual.Material">
       <Version>4.6.0.726</Version>
     </PackageReference>
+    <PackageReference Include="Plugin.LocalNotification" Version="5.0.3" />
+    <PackageReference Include="Xamarin.AndroidX.Work.Runtime" Version="2.3.4.1" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MainActivity.cs" />

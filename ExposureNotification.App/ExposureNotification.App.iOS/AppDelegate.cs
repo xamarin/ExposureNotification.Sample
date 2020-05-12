@@ -24,6 +24,10 @@ namespace ExposureNotification.App.iOS
 		public override bool FinishedLaunching(UIApplication app, NSDictionary options)
 		{
 			global::Xamarin.Forms.Forms.Init();
+
+
+			Plugin.LocalNotification.NotificationCenter.AskPermission();
+
 			LoadApplication(new App());
 
 			UIApplication.SharedApplication.SetMinimumBackgroundFetchInterval(UIApplication.BackgroundFetchIntervalMinimum);
@@ -38,6 +42,11 @@ namespace ExposureNotification.App.iOS
 				.ContinueWith(t =>
 					completionHandler(t.IsFaulted ? UIBackgroundFetchResult.Failed
 						: t.Result ? UIBackgroundFetchResult.NewData : UIBackgroundFetchResult.NoData));
+		}
+
+		public override void WillEnterForeground(UIApplication uiApplication)
+		{
+			Plugin.LocalNotification.NotificationCenter.ResetApplicationIconBadgeNumber(uiApplication);
 		}
 	}
 }
