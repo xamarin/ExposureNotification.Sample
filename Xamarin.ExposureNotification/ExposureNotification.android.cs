@@ -137,7 +137,10 @@ namespace Xamarin.ExposureNotifications
 		}
 
 		async void DoAsyncWork()
-			=> await ExposureNotification.UpdateKeysFromServer();
+		{
+			if (await ExposureNotification.IsEnabledAsync())
+				await ExposureNotification.UpdateKeysFromServer();
+		}
 	}
 
 	static partial class Utils

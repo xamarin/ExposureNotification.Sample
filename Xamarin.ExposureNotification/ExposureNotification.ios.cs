@@ -80,21 +80,24 @@ namespace Xamarin.ExposureNotifications
 
 			BGTaskScheduler.Shared.Register(id, null, async t =>
 			{
-				var cancelSrc = new CancellationTokenSource();
-				t.ExpirationHandler = cancelSrc.Cancel;
-
-				Exception ex = null;
-				try
+				if (await PlatformIsEnabled())
 				{
-					await ExposureNotification.UpdateKeysFromServer();
-					t.SetTaskCompleted(true);
-				}
-				catch (Exception e)
-				{
-					ex = e;
-				}
+					var cancelSrc = new CancellationTokenSource();
+					t.ExpirationHandler = cancelSrc.Cancel;
 
-				t.SetTaskCompleted(ex != null);
+					Exception ex = null;
+					try
+					{
+						await ExposureNotification.UpdateKeysFromServer();
+						t.SetTaskCompleted(true);
+					}
+					catch (Exception e)
+					{
+						ex = e;
+					}
+
+					t.SetTaskCompleted(ex != null);
+				}
 
 				scheduleBgTask();
 			});
