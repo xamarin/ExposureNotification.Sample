@@ -11,8 +11,9 @@ namespace ExposureNotification.Backend
 		public const string DefaultRegion = "default";
 
 		[Key, Column(Order = 0)]
-		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-		public ulong Id { get; set; }
+		public string Id { get; set; } = Guid.NewGuid().ToString();
+
+		public bool Processed { get; set; } = false;
 
 		public string Region { get; set; } = DefaultRegion;
 
