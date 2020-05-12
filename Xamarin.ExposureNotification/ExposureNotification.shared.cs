@@ -79,12 +79,12 @@ namespace Xamarin.ExposureNotifications
 
 			if (MockApi != null)
 			{
-				var (summary, info) = await MockApi.DetectExposuresAsync(batches);
+				var r = await MockApi.DetectExposuresAsync(batches);
 
-				var hasMatches = (summary?.MatchedKeyCount ?? 0) > 0;
+				var hasMatches = (r.summary?.MatchedKeyCount ?? 0) > 0;
 
 				if (hasMatches)
-					await Handler.ExposureDetectedAsync(summary, info);
+					await Handler.ExposureDetectedAsync(r.summary, r.info);
 
 				return true;
 			}
