@@ -143,7 +143,7 @@ namespace Xamarin.ExposureNotifications
 		{
 			try
 			{
-				DoAsyncWork();
+				Task.Run(() => DoAsyncWork()).GetAwaiter().GetResult();
 				return Result.InvokeSuccess();
 			}
 			catch (Exception ex)
@@ -153,7 +153,7 @@ namespace Xamarin.ExposureNotifications
 			}
 		}
 
-		async void DoAsyncWork()
+		async Task DoAsyncWork()
 		{
 			if (await ExposureNotification.IsEnabledAsync())
 				await ExposureNotification.UpdateKeysFromServer();
