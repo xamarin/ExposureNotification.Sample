@@ -105,7 +105,7 @@ namespace ExposureNotification.Backend
 				if (dbDiag == null || dbDiag.KeyCount > maxKeysPerDiagnosisFile)
 					throw new InvalidOperationException();
 
-				var dbKeys = diagnosis.Keys.Select(k => DbTemporaryExposureKey.FromKey(k)).ToList();
+				var dbKeys = diagnosis.Keys.Select(k => DbTemporaryExposureKey.FromKey(k, diagnosis.TestDate)).ToList();
 
 				// Add the new keys to the db
 				foreach (var dbk in dbKeys)
@@ -149,8 +149,8 @@ namespace ExposureNotification.Backend
 					{
 						BatchNum = batchNumber,
 						BatchSize = keyCount,
-						StartTimestamp = keys.First().TimestampMsSinceEpoch,
-						EndTimestamp = keys.Last().TimestampMsSinceEpoch,
+						StartTimestamp = keys.First().TestDateMsSinceEpoch,
+						EndTimestamp = keys.Last().TestDateMsSinceEpoch,
 						Region = region
 					}
 				};
@@ -182,6 +182,9 @@ namespace ExposureNotification.Backend
 		{
 			[JsonProperty("diagnosisUid")]
 			public string DiagnosisUid { get; set; }
+
+			[JsonProperty("testDate")]
+			public long TestDate { get; set; }
 
 			[JsonProperty("keys")]
 			public IEnumerable<TemporaryExposureKey> Keys { get; set; }
