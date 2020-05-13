@@ -84,9 +84,12 @@ namespace ExposureNotification.App.ViewModels
 		public ICommand ManualTriggerKeyFetch
 			=> new Command(async () =>
 			{
-				await Xamarin.ExposureNotifications.ExposureNotification.UpdateKeysFromServer();
-				
-				await UserDialogs.Instance.AlertAsync("Fetching...");
+				using (UserDialogs.Instance.Loading("Fetching..."))
+				{
+					await Xamarin.ExposureNotifications.ExposureNotification.UpdateKeysFromServer();
+
+					NotifyPropertyChanged(nameof(CurrentBatchFileIndex));
+				}
 			});
 
 	}
