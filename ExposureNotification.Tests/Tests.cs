@@ -63,25 +63,25 @@ namespace ExposureNotification.Tests
 				Assert.False(await Storage.CheckIfDiagnosisUidExistsAsync(d));
 		}
 
-		[Fact]
-		public async Task Submit_Diagnosis_Test()
-		{
-			var keys = GenerateTemporaryExposureKeys(14);
+		//[Fact]
+		//public async Task Submit_Diagnosis_Test()
+		//{
+		//	var keys = GenerateTemporaryExposureKeys(14);
 
-			await Storage.AddDiagnosisUidsAsync(new[] { "posuid1" });
+		//	await Storage.AddDiagnosisUidsAsync(new[] { "posuid1" });
 
-			await Storage.SubmitPositiveDiagnosisAsync(new ExposureNotificationStorage.SelfDiagnosisSubmissionRequest
-			{
-				DiagnosisUid = "posuid1",
-				Keys = keys
-			});
+		//	await Storage.SubmitPositiveDiagnosisAsync(new ExposureNotificationStorage.SelfDiagnosisSubmissionRequest
+		//	{
+		//		DiagnosisUid = "posuid1",
+		//		Keys = keys
+		//	});
 
-			var allKeys = await Storage.GetAllKeysAsync();
+		//	var allKeys = await Storage.GetAllKeysAsync();
 
-			var keyToEnsureExists = keys.Skip(keys.Count / 2).First();
+		//	var keyToEnsureExists = keys.Skip(keys.Count / 2).First();
 
-			Assert.Contains(allKeys, p => p.KeyData.SequenceEqual(keyToEnsureExists.KeyData));
-		}
+		//	Assert.Contains(allKeys, p => p.KeyData.SequenceEqual(keyToEnsureExists.KeyData));
+		//}
 
 		[Fact]
 		public async Task Submit_Diagnosis_Fails_Test()
@@ -98,29 +98,29 @@ namespace ExposureNotification.Tests
 			});
 		}
 
-		[Fact]
-		public async Task Page_Keys_Test()
-		{
-			var keys = GenerateTemporaryExposureKeys(1);
+		//[Fact]
+		//public async Task Page_Keys_Test()
+		//{
+		//	var keys = GenerateTemporaryExposureKeys(1);
 
-			var expectedCount = keys.Count();
+		//	var expectedCount = keys.Count();
 
-			Storage.DeleteAllKeysAsync();
+		//	Storage.DeleteAllKeysAsync();
 
-			await Storage.AddDiagnosisUidsAsync(new[] { "testkeys" });
+		//	await Storage.AddDiagnosisUidsAsync(new[] { "testkeys" });
 
-			await Storage.SubmitPositiveDiagnosisAsync(
-				new ExposureNotificationStorage.SelfDiagnosisSubmissionRequest
-				{
-					DiagnosisUid = "testkeys",
-					Keys = keys
-				});
+		//	await Storage.SubmitPositiveDiagnosisAsync(
+		//		new ExposureNotificationStorage.SelfDiagnosisSubmissionRequest
+		//		{
+		//			DiagnosisUid = "testkeys",
+		//			Keys = keys
+		//		});
 
 
-			var allKeys = await Storage.GetAllKeysAsync();
+		//	var allKeys = await Storage.GetAllKeysAsync();
 
-			Assert.Equal(expectedCount, allKeys.Count);
-		}
+		//	Assert.Equal(expectedCount, allKeys.Count);
+		//}
 
 		List<TemporaryExposureKey> GenerateTemporaryExposureKeys(int daysBack)
 		{
