@@ -19,6 +19,10 @@ namespace ExposureNotification.App
 		{
 			InitializeComponent();
 
+#if DEBUG
+			tabDeveloper.IsEnabled = true;
+#endif
+
 			Routing.RegisterRoute("exposuredetails", typeof(ExposureDetailsPage));
 
 			if (LocalStateManager.Instance.LastIsEnabled)

@@ -50,5 +50,12 @@
 			<ShellContent ContentTemplate="{DataTemplate view:NotifyOthersPage}"/>
 		</Tab>
 
+		<Tab Title="Developer" Route="developer" IsEnabled="False" x:Name="tabDeveloper">
+			<Tab.Icon>
+				<FontImageSource FontFamily="FA-R" Glyph="{StaticResource IconGem}"/>
+			</Tab.Icon>
+			<ShellContent ContentTemplate="{DataTemplate view:DeveloperPage}"/>
+		</Tab>
+
 	</TabBar>
 </Shell>
