@@ -1,14 +1,10 @@
-﻿﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage
-	x:Class="ExposureNotification.App.Views.NotifyOthersPage"
-	xmlns="http://xamarin.com/schemas/2014/forms"
-	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-	xmlns:d="http://xamarin.com/schemas/2014/forms/design"
-	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-	xmlns:viewmodel="clr-namespace:ExposureNotification.App.ViewModels"
-	Title="Notify Others"
-	BackgroundColor="{StaticResource BackgroundColor}"
-	mc:Ignorable="d">
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage x:Class="ExposureNotification.App.Views.NotifyOthersPage" 
+	xmlns="http://xamarin.com/schemas/2014/forms" 
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+	xmlns:d="http://xamarin.com/schemas/2014/forms/design" 
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+	xmlns:viewmodel="clr-namespace:ExposureNotification.App.ViewModels" Title="Notify Others" BackgroundColor="{StaticResource BackgroundColor}" mc:Ignorable="d">
 	<ContentPage.BindingContext>
 		<viewmodel:NotifyOthersViewModel />
 	</ContentPage.BindingContext>
@@ -30,13 +26,7 @@
 
 
 
-					<Button
-						Margin="0,20,0,0"
-						Command="{Binding SharePositiveDiagnosisCommand}"
-						HorizontalOptions="End"
-						IsEnabled="{Binding IsEnabled}"
-						Style="{DynamicResource ButtonRounded}"
-						Text="Share A Positive Diagnosis" />
+					<Button Margin="0,20,0,0" Command="{Binding SharePositiveDiagnosisCommand}" HorizontalOptions="End" IsEnabled="{Binding IsEnabled}" Style="{DynamicResource ButtonRounded}" Text="Share A Positive Diagnosis" />
 
 				</StackLayout>
 			</Frame>

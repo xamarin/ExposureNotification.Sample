@@ -1,5 +1,7 @@
-﻿using System.Windows.Input;
+﻿using System;
+using System.Windows.Input;
 using ExposureNotification.App.Resources;
+using ExposureNotification.App.Services;
 using ExposureNotification.App.Views;
 using Xamarin.Essentials;
 using Xamarin.Forms;

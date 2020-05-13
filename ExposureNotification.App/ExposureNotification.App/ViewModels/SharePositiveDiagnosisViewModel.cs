@@ -51,26 +51,25 @@ namespace ExposureNotification.App.ViewModels
 					if (string.IsNullOrEmpty(DiagnosisUid))
 					{
 						dialog.Hide();
+						await UserDialogs.Instance.AlertAsync("Please provide a valid Diagnosis ID", "Invalid Diagnosis ID", "OK");
+						return;
+					}
 
-						if (!DiagnosisTimestamp.HasValue || DiagnosisTimestamp.Value > DateTime.Now)
-						{
-							await UserDialogs.Instance.AlertAsync("Please provide a valid Test Date", "Invalid Test Date", "OK");
-							return;
-						}
-
-						// Set the submitted UID
-						LocalStateManager.Instance.AddDiagnosis(DiagnosisUid, new DateTimeOffset(DiagnosisTimestamp.Value));
-						LocalStateManager.Save();
+					if (!DiagnosisTimestamp.HasValue || DiagnosisTimestamp.Value > DateTime.Now)
+					{
+						await UserDialogs.Instance.AlertAsync("Please provide a valid Test Date", "Invalid Test Date", "OK");
+						return;
+					}
 
 					// Set the submitted UID
-					LocalStateManager.Instance.LatestDiagnosis.DiagnosisUid = DiagnosisUid;
-					LocalStateManager.Instance.LatestDiagnosis.DiagnosisDate = DiagnosisTimestamp ?? DateTime.UtcNow;
+					LocalStateManager.Instance.AddDiagnosis(DiagnosisUid, new DateTimeOffset(DiagnosisTimestamp.Value));
 					LocalStateManager.Save();
 
 					// Submit our diagnosis
 					await Xamarin.ExposureNotifications.ExposureNotification.SubmitSelfDiagnosisAsync();
 
 					dialog.Hide();
+
 					await UserDialogs.Instance.AlertAsync("Diagnosis Submitted", "Complete", "OK");
 
 					await Navigation.PopModalAsync(true);
