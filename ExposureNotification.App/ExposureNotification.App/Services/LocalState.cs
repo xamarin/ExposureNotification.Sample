@@ -48,7 +48,7 @@ namespace ExposureNotification.App.Services
 
 		public bool EnableNotifications { get; set; } = true;
 
-		public ulong ServerBatchNumber { get; set; } = 1;
+		public ulong ServerBatchNumber { get; set; } = 0;
 
 		public string Region { get; set; } = ExposureNotificationHandler.DefaultRegion;
 

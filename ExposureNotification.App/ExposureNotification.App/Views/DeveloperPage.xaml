@@ -33,11 +33,25 @@
 							Style="{DynamicResource ButtonRounded}"
 							Text="Reset Last Enabled State" />
 
+					</StackLayout>
+				</Frame>
+
+
+				<Frame Style="{DynamicResource CardFrame}">
+					<StackLayout Spacing="20">
+						<Label Text="Notify Others" FontAttributes="Bold" FontSize="Subtitle" />
+						
 						<Button
 							Command="{Binding ResetSelfDiagnosis}"
 							HorizontalOptions="CenterAndExpand"
 							Style="{DynamicResource ButtonRounded}"
 							Text="Reset Self Diagnosis" />
+					</StackLayout>
+				</Frame>
+
+				<Frame Style="{DynamicResource CardFrame}">
+					<StackLayout Spacing="20">
+						<Label Text="Exposures" FontAttributes="Bold" FontSize="Subtitle" />
 
 						<Button
 							Command="{Binding ResetExposures}"
@@ -50,6 +64,31 @@
 							HorizontalOptions="CenterAndExpand"
 							Style="{DynamicResource ButtonRounded}"
 							Text="Add Exposures" />
+					</StackLayout>
+				</Frame>
+
+				<Frame Style="{DynamicResource CardFrame}">
+					<StackLayout Spacing="20">
+						<Label Text="Batch File Index" FontAttributes="Bold" FontSize="Subtitle" />
+
+						<StackLayout Orientation="Horizontal" HorizontalOptions="Center">
+							<Label Text="Latest Batch File Processed: " />
+							<Label Text="{Binding CurrentBatchFileIndex}" FontAttributes="Bold" />
+						</StackLayout>
+
+						<Button
+							Command="{Binding ResetBatchFileIndex}"
+							HorizontalOptions="CenterAndExpand"
+							Style="{DynamicResource ButtonRounded}"
+							Text="Reset Batch File Index" />
+
+
+						<Button
+							Command="{Binding ManualTriggerKeyFetch}"
+							HorizontalOptions="CenterAndExpand"
+							Style="{DynamicResource ButtonRounded}"
+							Text="Trigger Key Fetch" />
+
 					</StackLayout>
 				</Frame>
 			</StackLayout>

@@ -14,6 +14,9 @@ namespace ExposureNotification.App.ViewModels
 			=> Xamarin.ExposureNotifications.ExposureNotification.OverridesNativeImplementation
 				? "TEST" : "LIVE";
 
+		public string CurrentBatchFileIndex
+			=> LocalStateManager.Instance.ServerBatchNumber.ToString();
+
 		public ICommand ResetSelfDiagnosis
 			=> new Command(async () =>
 			{
@@ -26,7 +29,8 @@ namespace ExposureNotification.App.ViewModels
 		public ICommand ResetExposures
 			=> new Command(async () =>
 			{
-				LocalStateManager.Instance.ExposureInformation.Clear();
+				await Device.InvokeOnMainThreadAsync(() => LocalStateManager.Instance.ExposureInformation.Clear());
+
 				LocalStateManager.Instance.ExposureSummary = null;
 				LocalStateManager.Save();
 				await UserDialogs.Instance.AlertAsync("Exposures Cleared!");
@@ -66,6 +70,23 @@ namespace ExposureNotification.App.ViewModels
 					LocalStateManager.Save();
 				}
 				await UserDialogs.Instance.AlertAsync("Last known enabled state reset!");
+			});
+
+		public ICommand ResetBatchFileIndex
+			=> new Command(async () =>
+			{
+				LocalStateManager.Instance.ServerBatchNumber = 0;
+				LocalStateManager.Save();
+				NotifyPropertyChanged(nameof(CurrentBatchFileIndex));
+				await UserDialogs.Instance.AlertAsync("Reset Batch file index!");
+			});
+
+		public ICommand ManualTriggerKeyFetch
+			=> new Command(async () =>
+			{
+				await Xamarin.ExposureNotifications.ExposureNotification.UpdateKeysFromServer();
+				
+				await UserDialogs.Instance.AlertAsync("Fetching...");
 			});
 
 	}
