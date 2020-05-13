@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using ExposureNotification.App.Services;
@@ -32,15 +31,18 @@ namespace ExposureNotification.App
 			=> Task.FromResult(new Configuration());
 
 		// this will be called when a potential exposure has been detected
-		public Task ExposureDetectedAsync(ExposureDetectionSummary summary, IEnumerable<ExposureInfo> exposureInfo)
+		public async Task ExposureDetectedAsync(ExposureDetectionSummary summary, IEnumerable<ExposureInfo> exposureInfo)
 		{
 			LocalStateManager.Instance.ExposureSummary = summary;
 
-			LocalStateManager.Instance.ExposureInformation.AddRange(exposureInfo);
+			// Add these on main thread in case the UI is visible so it can update
+			await Device.InvokeOnMainThreadAsync(() =>
+			{
+				foreach (var i in exposureInfo)
+					LocalStateManager.Instance.ExposureInformation.Add(i);
+			});
 
 			LocalStateManager.Save();
-
-			MessagingCenter.Instance.Send(this, "exposure_info_changed");
 
 			var notification = new NotificationRequest
 			{
@@ -48,9 +50,8 @@ namespace ExposureNotification.App
 				Title = "Possible COVID-19 Exposure",
 				Description = "It is possible you have been exposed to someone who was a confirmed diagnosis of COVID-19.  Tap for more details."
 			};
-			NotificationCenter.Current.Show(notification);
 
-			return Task.CompletedTask;
+			NotificationCenter.Current.Show(notification);
 		}
 
 		// this will be called when they keys need to be collected from the server
@@ -117,9 +118,9 @@ namespace ExposureNotification.App
 		// this will be called when the user is submitting a diagnosis and the local keys need to go to the server
 		public async Task UploadSelfExposureKeysToServerAsync(IEnumerable<TemporaryExposureKey> temporaryExposureKeys)
 		{
-			var diagnosisUid = LocalStateManager.Instance.LatestDiagnosis.DiagnosisUid;
+			var pendingDiagnosis = LocalStateManager.Instance.PendingDiagnosis;
 
-			if (string.IsNullOrEmpty(diagnosisUid))
+			if (pendingDiagnosis == null || string.IsNullOrEmpty(pendingDiagnosis.DiagnosisUid))
 				throw new InvalidOperationException();
 
 			try
@@ -128,7 +129,8 @@ namespace ExposureNotification.App
 
 				var json = JsonConvert.SerializeObject(new SelfDiagnosisSubmissionRequest
 				{
-					DiagnosisUid = diagnosisUid,
+					DiagnosisUid = pendingDiagnosis.DiagnosisUid,
+					TestDate = pendingDiagnosis.DiagnosisDate.ToUnixTimeMilliseconds(),
 					Keys = temporaryExposureKeys
 				});
 
@@ -137,7 +139,8 @@ namespace ExposureNotification.App
 
 				response.EnsureSuccessStatusCode();
 
-				LocalStateManager.Instance.LatestDiagnosis.Shared = true;
+				// Update pending status
+				pendingDiagnosis.Shared = true;
 				LocalStateManager.Save();
 			}
 			catch
@@ -171,6 +174,9 @@ namespace ExposureNotification.App
 		{
 			[JsonProperty("diagnosisUid")]
 			public string DiagnosisUid { get; set; }
+
+			[JsonProperty("testDate")]
+			public long TestDate { get; set; }
 
 			[JsonProperty("keys")]
 			public IEnumerable<TemporaryExposureKey> Keys { get; set; }

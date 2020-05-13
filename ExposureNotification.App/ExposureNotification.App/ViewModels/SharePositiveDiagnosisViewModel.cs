@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Windows.Input;
 using Acr.UserDialogs;
-using ExposureNotification.App.Resources;
 using ExposureNotification.App.Services;
 using Xamarin.Forms;
 
@@ -13,26 +10,31 @@ namespace ExposureNotification.App.ViewModels
 	{
 		public string DiagnosisUid { get; set; }
 
-		public DateTime? DiagnosisTimestamp { get; set; }
+		public DateTime? DiagnosisTimestamp { get; set; } = DateTime.Now;
 
 		public ICommand CancelCommand
-			=> new Command(async () =>
-				await Navigation.PopModalAsync(true));
+			=> new Command(() => Navigation.PopModalAsync(true));
 
 		public ICommand SubmitDiagnosisCommand
 			=> new Command(async () =>
 			{
-				UserDialogs.Instance.Loading("Verifying Diagnosis...");
+				using var dialog = UserDialogs.Instance.Loading("Verifying Diagnosis...");
 
-				// Check the diagnosis is valid on the server before asking the native api's for the keys
-				if (!await ExposureNotificationHandler.VerifyDiagnosisUid(DiagnosisUid))
+				try
 				{
-					UserDialogs.Instance.HideLoading();
+					// Check the diagnosis is valid on the server before asking the native api's for the keys
+					if (!await ExposureNotificationHandler.VerifyDiagnosisUid(DiagnosisUid))
+						throw new Exception();
+				}
+				catch
+				{
+					dialog.Hide();
+
 					await UserDialogs.Instance.AlertAsync("Your diagnosis cannot be verified at this time to be submitted.", "Verification Failed", "OK");
 					return;
 				}
 
-				UserDialogs.Instance.Loading("Submitting Diagnosis...");
+				dialog.Title = "Submitting Diagnosis...";
 
 				try
 				{
@@ -40,32 +42,43 @@ namespace ExposureNotification.App.ViewModels
 
 					if (!enabled)
 					{
+						dialog.Hide();
+
 						await UserDialogs.Instance.AlertAsync("Please enable Exposure Notifications before submitting a diagnosis.", "Exposure Notifications Disabled", "OK");
 						return;
 					}
 
 					if (string.IsNullOrEmpty(DiagnosisUid))
 					{
-						await UserDialogs.Instance.AlertAsync("Please provide a Diagnosis Identifier", "Diagnosis Identifier Required", "OK");
+						dialog.Hide();
+						await UserDialogs.Instance.AlertAsync("Please provide a valid Diagnosis ID", "Invalid Diagnosis ID", "OK");
+						return;
+					}
+
+					if (!DiagnosisTimestamp.HasValue || DiagnosisTimestamp.Value > DateTime.Now)
+					{
+						await UserDialogs.Instance.AlertAsync("Please provide a valid Test Date", "Invalid Test Date", "OK");
 						return;
 					}
 
 					// Set the submitted UID
-					LocalStateManager.Instance.LatestDiagnosis.DiagnosisUid = DiagnosisUid;
-					LocalStateManager.Instance.LatestDiagnosis.DiagnosisDate = DiagnosisTimestamp ?? DateTime.UtcNow;
+					LocalStateManager.Instance.AddDiagnosis(DiagnosisUid, new DateTimeOffset(DiagnosisTimestamp.Value));
 					LocalStateManager.Save();
 
 					// Submit our diagnosis
 					await Xamarin.ExposureNotifications.ExposureNotification.SubmitSelfDiagnosisAsync();
 
-					UserDialogs.Instance.HideLoading();
+					dialog.Hide();
+
 					await UserDialogs.Instance.AlertAsync("Diagnosis Submitted", "Complete", "OK");
 
 					await Navigation.PopModalAsync(true);
 				}
-				catch
+				catch (Exception ex)
 				{
-					UserDialogs.Instance.HideLoading();
+					Console.WriteLine(ex);
+
+					dialog.Hide();
 					UserDialogs.Instance.Alert("Please try again later.", "Failed", "OK");
 				}
 			});

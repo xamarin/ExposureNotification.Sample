@@ -6,6 +6,7 @@
 	xmlns:view="clr-namespace:ExposureNotification.App.Views"
 	mc:Ignorable="d"
 	Visual="Material"
+	FlyoutBehavior="Disabled"
 	x:Class="ExposureNotification.App.AppShell">
 	<Shell.Resources>
 		<ResourceDictionary>
@@ -24,7 +25,8 @@
 		</ResourceDictionary>
 	</Shell.Resources>
 
-
+	<ShellContent ContentTemplate="{DataTemplate view:WelcomePage}" Route="welcome" />
+	
 	<!-- Your Pages -->
 	<TabBar x:Name="TabBar">
 		<Tab Title="Info" Route="info">
@@ -46,6 +48,13 @@
 				<FontImageSource FontFamily="FA-R" Glyph="{StaticResource IconFlag}"/>
 			</Tab.Icon>
 			<ShellContent ContentTemplate="{DataTemplate view:NotifyOthersPage}"/>
+		</Tab>
+
+		<Tab Title="Developer" Route="developer" IsEnabled="False" x:Name="tabDeveloper">
+			<Tab.Icon>
+				<FontImageSource FontFamily="FA-R" Glyph="{StaticResource IconGem}"/>
+			</Tab.Icon>
+			<ShellContent ContentTemplate="{DataTemplate view:DeveloperPage}"/>
 		</Tab>
 
 	</TabBar>

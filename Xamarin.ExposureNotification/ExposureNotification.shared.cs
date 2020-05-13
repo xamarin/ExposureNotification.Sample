@@ -17,6 +17,9 @@ namespace Xamarin.ExposureNotifications
 
 		static IExposureNotificationHandler handler;
 
+		public static bool OverridesNativeImplementation
+			=> ExposureNotification.nativeImplementation != null;
+
 		internal static IExposureNotificationHandler Handler
 		{
 			get

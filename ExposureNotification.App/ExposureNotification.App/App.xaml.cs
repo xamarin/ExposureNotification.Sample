@@ -1,7 +1,5 @@
-﻿using System;
-using Plugin.LocalNotification;
+﻿using Plugin.LocalNotification;
 using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
 
 namespace ExposureNotification.App
 {
@@ -18,7 +16,7 @@ namespace ExposureNotification.App
 				new Services.TestNativeImplementation());
 #endif
 			// Local Notification tap event listener
-			NotificationCenter.Current.NotificationTapped += Current_NotificationTapped; ;
+			NotificationCenter.Current.NotificationTapped += OnNotificationTapped;
 
 			// Initialize the library which schedules background tasks, etc
 			Xamarin.ExposureNotifications.ExposureNotification.Init();
@@ -26,9 +24,8 @@ namespace ExposureNotification.App
 			MainPage = new AppShell();
 		}
 
-		private void Current_NotificationTapped(NotificationTappedEventArgs e)
-		{
-		}
+		void OnNotificationTapped(NotificationTappedEventArgs e)
+			=> Shell.Current?.GoToAsync("//exposures", false);
 
 		protected override void OnStart()
 		{

@@ -42,6 +42,7 @@
 		<x:String x:Key="IconCancel">&#xf00d;</x:String>
 		<x:String x:Key="IconRightArrow">&#xf35a;</x:String>
 		<x:String x:Key="IconStar">&#xf005;</x:String>
+		<x:String x:Key="IconGem">&#xf3a5;</x:String>
 
 		<Style x:Key="CardFrame" TargetType="Frame">
 			<Setter Property="CornerRadius" Value="10" />

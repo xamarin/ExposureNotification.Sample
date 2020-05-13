@@ -2,9 +2,9 @@
 
 namespace ExposureNotification.App.Views
 {
-	public partial class SharePositiveDiagnosisPage : ContentPage
+	public partial class WelcomePage : ContentPage
 	{
-		public SharePositiveDiagnosisPage()
+		public WelcomePage()
 		{
 			InitializeComponent();
 		}

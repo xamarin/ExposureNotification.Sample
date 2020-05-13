@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ExposureNotification.App.Services;
 using ExposureNotification.App.ViewModels;
 using ExposureNotification.App.Views;
 using Xamarin.Essentials;
@@ -18,7 +19,14 @@ namespace ExposureNotification.App
 		{
 			InitializeComponent();
 
+#if DEBUG
+			tabDeveloper.IsEnabled = true;
+#endif
+
 			Routing.RegisterRoute("exposuredetails", typeof(ExposureDetailsPage));
+
+			if (LocalStateManager.Instance.LastIsEnabled)
+				GoToAsync(new ShellNavigationState("//info"), false);
 		}
 	}
 }

@@ -1,18 +1,18 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage
-	x:Class="ExposureNotification.App.Views.SharePositiveDiagnosisPage"
-	xmlns="http://xamarin.com/schemas/2014/forms"
+﻿<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
 	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-	xmlns:d="http://xamarin.com/schemas/2014/forms/design"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:d="http://xamarin.com/schemas/2014/forms/design"
 	xmlns:viewmodel="clr-namespace:ExposureNotification.App.ViewModels"
+	mc:Ignorable="d"
+	x:Class="ExposureNotification.App.Views.SharePositiveDiagnosisPage"
 	Title="Share a Positive Diagnosis"
 	Visual="Material"
-	BackgroundColor="{StaticResource BackgroundColor}"
-	mc:Ignorable="d">
+	BackgroundColor="{StaticResource BackgroundColor}">
+
 	<ContentPage.BindingContext>
 		<viewmodel:SharePositiveDiagnosisViewModel />
 	</ContentPage.BindingContext>
+
 	<ContentPage.ToolbarItems>
 		<ToolbarItem Command="{Binding CancelCommand}">
 			<ToolbarItem.IconImageSource>
@@ -20,11 +20,12 @@
 			</ToolbarItem.IconImageSource>
 		</ToolbarItem>
 	</ContentPage.ToolbarItems>
+
 	<ScrollView>
 		<StackLayout Style="{DynamicResource Container}">
 			<Frame Style="{DynamicResource CardFrame}">
 				<StackLayout>
-					
+
 					<Label Text="[Insert text from local Health authority]" />
 
 					<Label Margin="0,12,0,0" Text="Only those who have been exposed will receive a notification." />
@@ -53,4 +54,5 @@
 			</Frame>
 		</StackLayout>
 	</ScrollView>
+
 </ContentPage>

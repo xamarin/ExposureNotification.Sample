@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Text;
+﻿using System.ComponentModel;
 using Xamarin.Forms;
 
 namespace ExposureNotification.App.ViewModels
@@ -13,6 +10,9 @@ namespace ExposureNotification.App.ViewModels
 
 		protected void NotifyPropertyChanged(string propertyName)
 			=> PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+		public void NotifyAllProperties()
+			=> NotifyPropertyChanged(null);
 
 		public event PropertyChangedEventHandler PropertyChanged;
 	}
