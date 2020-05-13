@@ -24,12 +24,21 @@ namespace ExposureNotification.App.ViewModels
 			{
 				UserDialogs.Instance.Loading("Verifying Diagnosis...");
 
-				// Check the diagnosis is valid on the server before asking the native api's for the keys
-				if (!await ExposureNotificationHandler.VerifyDiagnosisUid(DiagnosisUid))
+				try
 				{
-					UserDialogs.Instance.HideLoading();
+					// Check the diagnosis is valid on the server before asking the native api's for the keys
+					if (!await ExposureNotificationHandler.VerifyDiagnosisUid(DiagnosisUid))
+						throw new Exception();
+				}
+				catch
+				{
+					await Device.InvokeOnMainThreadAsync(() => UserDialogs.Instance.HideLoading());
 					await UserDialogs.Instance.AlertAsync("Your diagnosis cannot be verified at this time to be submitted.", "Verification Failed", "OK");
 					return;
+				}
+				finally
+				{
+					await Device.InvokeOnMainThreadAsync(() => UserDialogs.Instance.HideLoading());
 				}
 
 				UserDialogs.Instance.Loading("Submitting Diagnosis...");
@@ -58,15 +67,20 @@ namespace ExposureNotification.App.ViewModels
 					// Submit our diagnosis
 					await Xamarin.ExposureNotifications.ExposureNotification.SubmitSelfDiagnosisAsync();
 
-					UserDialogs.Instance.HideLoading();
 					await UserDialogs.Instance.AlertAsync("Diagnosis Submitted", "Complete", "OK");
 
 					await Navigation.PopModalAsync(true);
 				}
-				catch
+				catch (Exception ex)
 				{
-					UserDialogs.Instance.HideLoading();
+					Console.WriteLine(ex);
+
+					await Device.InvokeOnMainThreadAsync(() => UserDialogs.Instance.HideLoading());
 					UserDialogs.Instance.Alert("Please try again later.", "Failed", "OK");
+				}
+				finally
+				{
+					await Device.InvokeOnMainThreadAsync(() => UserDialogs.Instance.HideLoading());
 				}
 			});
 	}
