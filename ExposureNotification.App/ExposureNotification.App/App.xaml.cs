@@ -25,8 +25,7 @@ namespace ExposureNotification.App
 		}
 
 		void OnNotificationTapped(NotificationTappedEventArgs e)
-		{
-		}
+			=> Shell.Current?.GoToAsync("//exposures", false);
 
 		protected override void OnStart()
 		{
