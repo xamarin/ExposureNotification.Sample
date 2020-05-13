@@ -89,7 +89,6 @@ namespace Xamarin.ExposureNotifications
 					try
 					{
 						await ExposureNotification.UpdateKeysFromServer();
-						t.SetTaskCompleted(true);
 					}
 					catch (Exception e)
 					{
