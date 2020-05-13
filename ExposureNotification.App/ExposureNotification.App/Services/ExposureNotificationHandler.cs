@@ -12,15 +12,14 @@ using Xamarin.Forms.Internals;
 
 namespace ExposureNotification.App
 {
-	[Preserve]
+	[Preserve] // Ensure this isn't linked out
 	public class ExposureNotificationHandler : IExposureNotificationHandler
 	{
 		public const string DefaultRegion = "default";
 
-		const string apiUrlBase = "http://localhost:7071/api/";
+		const string apiUrlBase = "https://exposurenotificationfunctions.azurewebsites.net/api/";
 		const string apiUrlBlobStorageBase = "https://exposurenotifications.blob.core.windows.net/";
 		const string blobStorageContainerNamePrefix = "";
-
 
 		static readonly HttpClient http = new HttpClient();
 
@@ -155,7 +154,8 @@ namespace ExposureNotification.App
 
 			try
 			{
-				var response = await http.PostAsync(url, new StringContent("{\"diagnosisUid\":\"" + diagnosisUid + "\"}"));
+				var json = "{\"diagnosisUid\":\"" + diagnosisUid + "\"}";
+				var response = await http.PostAsync(url, new StringContent(json));
 
 				response.EnsureSuccessStatusCode();
 
