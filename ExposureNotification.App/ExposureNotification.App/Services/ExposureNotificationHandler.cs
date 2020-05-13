@@ -31,15 +31,18 @@ namespace ExposureNotification.App
 			=> Task.FromResult(new Configuration());
 
 		// this will be called when a potential exposure has been detected
-		public Task ExposureDetectedAsync(ExposureDetectionSummary summary, IEnumerable<ExposureInfo> exposureInfo)
+		public async Task ExposureDetectedAsync(ExposureDetectionSummary summary, IEnumerable<ExposureInfo> exposureInfo)
 		{
 			LocalStateManager.Instance.ExposureSummary = summary;
 
-			LocalStateManager.Instance.ExposureInformation.AddRange(exposureInfo);
+			// Add these on main thread in case the UI is visible so it can update
+			await Device.InvokeOnMainThreadAsync(() =>
+			{
+				foreach (var i in exposureInfo)
+					LocalStateManager.Instance.ExposureInformation.Add(i);
+			});
 
 			LocalStateManager.Save();
-
-			MessagingCenter.Instance.Send(this, "exposure_info_changed");
 
 			var notification = new NotificationRequest
 			{
@@ -47,9 +50,8 @@ namespace ExposureNotification.App
 				Title = "Possible COVID-19 Exposure",
 				Description = "It is possible you have been exposed to someone who was a confirmed diagnosis of COVID-19.  Tap for more details."
 			};
-			NotificationCenter.Current.Show(notification);
 
-			return Task.CompletedTask;
+			NotificationCenter.Current.Show(notification);
 		}
 
 		// this will be called when they keys need to be collected from the server

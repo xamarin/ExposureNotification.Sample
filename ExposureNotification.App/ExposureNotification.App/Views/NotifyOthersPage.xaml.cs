@@ -1,4 +1,6 @@
-﻿using Xamarin.Forms;
+﻿using System.ComponentModel;
+using ExposureNotification.App.ViewModels;
+using Xamarin.Forms;
 
 namespace ExposureNotification.App.Views
 {
@@ -7,6 +9,14 @@ namespace ExposureNotification.App.Views
 		public NotifyOthersPage()
 		{
 			InitializeComponent();
+		}
+
+		protected override void OnAppearing()
+		{
+			if (BindingContext is BaseViewModel vm)
+				vm.NotifyAllProperties();
+
+			base.OnAppearing();
 		}
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using Xamarin.ExposureNotifications;
@@ -51,7 +52,7 @@ namespace ExposureNotification.App.Services
 
 		public string Region { get; set; } = ExposureNotificationHandler.DefaultRegion;
 
-		public List<ExposureInfo> ExposureInformation { get; set; } = new List<ExposureInfo>();
+		public ObservableCollection<ExposureInfo> ExposureInformation { get; set; } = new ObservableCollection<ExposureInfo>();
 
 		public ExposureDetectionSummary ExposureSummary { get; set; }
 
@@ -71,6 +72,9 @@ namespace ExposureNotification.App.Services
 				DiagnosisUid = diagnosisUid,
 			});
 		}
+
+		public void ClearDiagnosis()
+			=> PositiveDiagnoses?.Clear();
 
 		public PositiveDiagnosisState LatestDiagnosis
 			=> PositiveDiagnoses?

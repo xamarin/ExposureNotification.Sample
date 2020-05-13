@@ -11,6 +11,9 @@ namespace ExposureNotification.App.ViewModels
 		protected void NotifyPropertyChanged(string propertyName)
 			=> PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
+		public void NotifyAllProperties()
+			=> NotifyPropertyChanged(null);
+
 		public event PropertyChangedEventHandler PropertyChanged;
 	}
 }

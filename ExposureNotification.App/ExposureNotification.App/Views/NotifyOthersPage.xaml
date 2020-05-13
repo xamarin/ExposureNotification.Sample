@@ -38,7 +38,7 @@
 
 					<Label Margin="0,12,0,0" Text="Your diagnosis was shared on:" />
 
-					<Label Margin="0,12,0,0" Text="{Binding DiagnosisShareTimestamp, StringFormat='{0:yyyy-MM-dd}'}" />
+					<Label Margin="0,12,0,0" Text="{Binding DiagnosisShareTimestamp, StringFormat='{0:yyyy-MM-dd}'}" FontAttributes="Bold" />
 
 					<Label Margin="0,12,0,0" Text="This will help others in your community contain the spread of the virus." />
 

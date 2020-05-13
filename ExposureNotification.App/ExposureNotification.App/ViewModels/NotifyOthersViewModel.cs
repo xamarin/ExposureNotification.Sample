@@ -19,7 +19,7 @@ namespace ExposureNotification.App.ViewModels
 			=> LocalStateManager.Instance.LatestDiagnosis?.DiagnosisDate ?? DateTimeOffset.MinValue;
 
 		public ICommand SharePositiveDiagnosisCommand
-			=> new Command(() => Navigation.PushModalAsync(new NavigationPage(new SharePositiveDiagnosisPage())));
+			=> new Command(async () => await Navigation.PushModalAsync(new NavigationPage(new SharePositiveDiagnosisPage())));
 
 		public ICommand LearnMoreCommand
 			=> new Command(() => Browser.OpenAsync(Strings.NotifyOthers_LearnMore_Url));
