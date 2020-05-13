@@ -13,7 +13,7 @@ namespace ExposureNotification.App.Views
 
 		protected override void OnAppearing()
 		{
-			if (BindingContext is BaseViewModel vm)
+			if (BindingContext is ViewModelBase vm)
 				vm.NotifyAllProperties();
 
 			base.OnAppearing();

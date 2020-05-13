@@ -46,8 +46,9 @@
 
 		<Style x:Key="CardFrame" TargetType="Frame">
 			<Setter Property="CornerRadius" Value="10" />
-			<Setter Property="Padding" Value="14" />
-		</Style>
+            <Setter Property="Padding" Value="14" />
+            <Setter Property="Visual" Value="Material"/>
+        </Style>
 
 		<Style x:Key="Container" TargetType="StackLayout">
 			<Setter Property="Padding" Value="14" />
@@ -63,6 +64,25 @@
 			<Setter Property="TextColor" Value="White" />
 			<Setter Property="BackgroundColor" Value="{StaticResource PrimaryColor}" />
 		</Style>
+
+        <Style x:Key="CloseFrame" TargetType="Frame">
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Visual" Value="Material"/>
+            <Setter Property="Margin" Value="0,0,12,0"/>
+            <Setter Property="HeightRequest" Value="44"/>
+            <Setter Property="WidthRequest" Value="44"/>
+            <Setter Property="HorizontalOptions" Value="End"/>
+            <Setter Property="VerticalOptions" Value="Center"/>
+            <Setter Property="CornerRadius" Value="22"/>
+        </Style>
+
+        <Style x:Key="CloseLabel" TargetType="Label">
+            <Setter Property="FontFamily" Value="FA-S"/>
+            <Setter Property="FontSize" Value="Medium"/>
+            <Setter Property="HorizontalOptions" Value="Center"/>
+            <Setter Property="VerticalOptions" Value="Center"/>
+            <Setter Property="Text" Value="{StaticResource IconDeny}"/>
+        </Style>
 
 		<converters:InvertedBoolConverter x:Key="InvertedBoolConverter" />
 	</Application.Resources>

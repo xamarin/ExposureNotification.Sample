@@ -1,55 +1,81 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage x:Class="ExposureNotification.App.Views.NotifyOthersPage" 
-	xmlns="http://xamarin.com/schemas/2014/forms" 
-	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
-	xmlns:d="http://xamarin.com/schemas/2014/forms/design" 
-	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-	xmlns:viewmodel="clr-namespace:ExposureNotification.App.ViewModels" Title="Notify Others" BackgroundColor="{StaticResource BackgroundColor}" mc:Ignorable="d">
-	<ContentPage.BindingContext>
-		<viewmodel:NotifyOthersViewModel />
-	</ContentPage.BindingContext>
+<ContentPage
+    x:Class="ExposureNotification.App.Views.NotifyOthersPage"
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:viewmodel="clr-namespace:ExposureNotification.App.ViewModels"
+    Title="Notify Others"
+    x:DataType="viewmodel:NotifyOthersViewModel"
+    BackgroundColor="{StaticResource BackgroundColor}"
+    mc:Ignorable="d">
+    <ContentPage.BindingContext>
+        <viewmodel:NotifyOthersViewModel />
+    </ContentPage.BindingContext>
 
-	<ScrollView>
-		<StackLayout Style="{DynamicResource Container}">
-			<Frame Style="{DynamicResource CardFrame}" IsVisible="{Binding DiagnosisPending, Converter={StaticResource InvertedBoolConverter}}">
-				<StackLayout>
+    <ScrollView>
+        <StackLayout Style="{DynamicResource Container}">
+            <Frame IsVisible="{Binding DiagnosisPending, Converter={StaticResource InvertedBoolConverter}}" Style="{DynamicResource CardFrame}">
+                <StackLayout>
 
-					<Label Text="Share A Positive Diagnosis" FontAttributes="Bold" FontSize="Subtitle" />
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="Subtitle"
+                        Text="Share A Positive Diagnosis" />
 
-					<Label Margin="0,12,0,0" Text="If you tested positive for the virus that causes COVID-19, you can choose to share your diagnosis.  This will help others in your community contain the spread of the virus." />
+                    <Label Margin="0,12,0,0" Text="If you tested positive for the virus that causes COVID-19, you can choose to share your diagnosis.  This will help others in your community contain the spread of the virus." />
 
-					<Label Text="Learn more" FontAttributes="Bold" TextColor="{DynamicResource PrimaryColor}">
-						<Label.GestureRecognizers>
-							<TapGestureRecognizer Command="{Binding LearnMoreCommand}" />
-						</Label.GestureRecognizers>
-					</Label>
+                    <Label
+                        FontAttributes="Bold"
+                        Text="Learn more"
+                        TextColor="{DynamicResource PrimaryColor}">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding LearnMoreCommand}" />
+                        </Label.GestureRecognizers>
+                    </Label>
 
 
 
-					<Button Margin="0,20,0,0" Command="{Binding SharePositiveDiagnosisCommand}" HorizontalOptions="End" IsEnabled="{Binding IsEnabled}" Style="{DynamicResource ButtonRounded}" Text="Share A Positive Diagnosis" />
+                    <Button
+                        Margin="0,20,0,0"
+                        Command="{Binding SharePositiveDiagnosisCommand}"
+                        HorizontalOptions="End"
+                        IsEnabled="{Binding IsEnabled}"
+                        Style="{DynamicResource ButtonRounded}"
+                        Text="Share A Positive Diagnosis" />
 
-				</StackLayout>
-			</Frame>
+                </StackLayout>
+            </Frame>
 
-			<Frame Style="{DynamicResource CardFrame}" IsVisible="{Binding DiagnosisPending}">
-				<StackLayout>
+            <Frame IsVisible="{Binding DiagnosisPending}" Style="{DynamicResource CardFrame}">
+                <StackLayout>
 
-					<Label Text="Diagnosis Shared" FontAttributes="Bold" FontSize="Subtitle" />
+                    <Label
+                        FontAttributes="Bold"
+                        FontSize="Subtitle"
+                        Text="Diagnosis Shared" />
 
-					<Label Margin="0,12,0,0" Text="Your diagnosis was shared on:" />
+                    <Label Margin="0,12,0,0" Text="Your diagnosis was shared on:" />
 
-					<Label Margin="0,12,0,0" Text="{Binding DiagnosisShareTimestamp, StringFormat='{0:yyyy-MM-dd}'}" FontAttributes="Bold" />
+                    <Label
+                        Margin="0,12,0,0"
+                        FontAttributes="Bold"
+                        Text="{Binding DiagnosisShareTimestamp, StringFormat='{0:yyyy-MM-dd}'}" />
 
-					<Label Margin="0,12,0,0" Text="This will help others in your community contain the spread of the virus." />
+                    <Label Margin="0,12,0,0" Text="This will help others in your community contain the spread of the virus." />
 
-					<Label Text="Learn more" FontAttributes="Bold" TextColor="{DynamicResource PrimaryColor}">
-						<Label.GestureRecognizers>
-							<TapGestureRecognizer Command="{Binding LearnMoreCommand}" />
-						</Label.GestureRecognizers>
-					</Label>
+                    <Label
+                        FontAttributes="Bold"
+                        Text="Learn more"
+                        TextColor="{DynamicResource PrimaryColor}">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding LearnMoreCommand}" />
+                        </Label.GestureRecognizers>
+                    </Label>
 
-				</StackLayout>
-			</Frame>
-		</StackLayout>
-	</ScrollView>
+                </StackLayout>
+            </Frame>
+        </StackLayout>
+    </ScrollView>
 </ContentPage>

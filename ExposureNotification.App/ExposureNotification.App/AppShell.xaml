@@ -25,32 +25,32 @@
 		</ResourceDictionary>
 	</Shell.Resources>
 
-	<ShellContent ContentTemplate="{DataTemplate view:WelcomePage}" Route="welcome" />
+	<ShellContent ContentTemplate="{DataTemplate view:WelcomePage}" Route="WelcomePage" />
 	
 	<!-- Your Pages -->
 	<TabBar x:Name="TabBar">
-		<Tab Title="Info" Route="info">
+        <Tab Title="Info" Route="InfoPage">
 			<Tab.Icon>
 				<FontImageSource FontFamily="FA-R" Glyph="{StaticResource IconInfo}"/>
 			</Tab.Icon>
 			<ShellContent ContentTemplate="{DataTemplate view:InfoPage}"/>
 		</Tab>
-		
-		<Tab Title="Exposures" Route="exposures">
+
+        <Tab Title="Exposures" Route="ExposuresPage">
 			<Tab.Icon>
 				<FontImageSource Glyph="{StaticResource IconBell}" FontFamily="FA-R" />
 			</Tab.Icon>
 			<ShellContent ContentTemplate="{DataTemplate view:ExposuresPage}"/>
 		</Tab>
 		
-		<Tab Title="Notify Others" Route="notify">
+		<Tab Title="Notify Others" Route="NotifyOthersPage">
 			<Tab.Icon>
 				<FontImageSource FontFamily="FA-R" Glyph="{StaticResource IconFlag}"/>
 			</Tab.Icon>
 			<ShellContent ContentTemplate="{DataTemplate view:NotifyOthersPage}"/>
 		</Tab>
 
-		<Tab Title="Developer" Route="developer" IsEnabled="False" x:Name="tabDeveloper">
+        <Tab Title="Developer" Route="DeveloperPage" IsEnabled="False" x:Name="tabDeveloper">
 			<Tab.Icon>
 				<FontImageSource FontFamily="FA-R" Glyph="{StaticResource IconGem}"/>
 			</Tab.Icon>

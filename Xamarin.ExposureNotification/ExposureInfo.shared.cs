@@ -4,6 +4,11 @@ namespace Xamarin.ExposureNotifications
 {
 	public class ExposureInfo
 	{
+		public ExposureInfo()
+        {
+
+        }
+
 		public ExposureInfo(DateTime timestamp, TimeSpan duration, int attenuationValue, int totalRiskScore, RiskLevel riskLevel)
 		{
 			Timestamp = timestamp;

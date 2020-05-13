@@ -4,38 +4,44 @@ using System.Text;
 using System.Windows.Input;
 using Acr.UserDialogs;
 using ExposureNotification.App.Services;
+using MvvmHelpers.Commands;
 using Xamarin.Forms;
 
 namespace ExposureNotification.App.ViewModels
 {
-	public class DeveloperViewModel : BaseViewModel
+	public class DeveloperViewModel : ViewModelBase
 	{
+		public DeveloperViewModel()
+        {
+
+        }
+
 		public string NativeImplementationName
 			=> Xamarin.ExposureNotifications.ExposureNotification.OverridesNativeImplementation
 				? "TEST" : "LIVE";
 
-		public ICommand ResetSelfDiagnosis
-			=> new Command(async () =>
+		public AsyncCommand ResetSelfDiagnosis
+			=> new AsyncCommand(() =>
 			{
 				LocalStateManager.Instance.ClearDiagnosis();
 				LocalStateManager.Save();
-				await UserDialogs.Instance.AlertAsync("Self Diagnosis Cleared!");
+				return UserDialogs.Instance.AlertAsync("Self Diagnosis Cleared!");
 			});
 
 
-		public ICommand ResetExposures
-			=> new Command(async () =>
+		public AsyncCommand ResetExposures
+			=> new AsyncCommand(() =>
 			{
 				LocalStateManager.Instance.ExposureInformation.Clear();
 				LocalStateManager.Instance.ExposureSummary = null;
 				LocalStateManager.Save();
-				await UserDialogs.Instance.AlertAsync("Exposures Cleared!");
+				return UserDialogs.Instance.AlertAsync("Exposures Cleared!");
 			});
 
-		public ICommand AddExposures
-			=> new Command(async () =>
+		public AsyncCommand AddExposures
+			=> new AsyncCommand(() =>
 			{
-				await Device.InvokeOnMainThreadAsync(() =>
+				return Device.InvokeOnMainThreadAsync(() =>
 				{
 					LocalStateManager.Instance.ExposureInformation.Add(
 						new Xamarin.ExposureNotifications.ExposureInfo(DateTime.Now.AddDays(-7), TimeSpan.FromMinutes(30), 70, 6, Xamarin.ExposureNotifications.RiskLevel.High));
@@ -46,16 +52,16 @@ namespace ExposureNotification.App.ViewModels
 				});
 			});
 
-		public ICommand ResetWelcome
-			=> new Command(async () =>
+		public AsyncCommand ResetWelcome
+			=> new AsyncCommand(() =>
 			{
 				LocalStateManager.Instance.IsWelcomed = false;
 				LocalStateManager.Save();
-				await UserDialogs.Instance.AlertAsync("Welcome state reset!");
+				return UserDialogs.Instance.AlertAsync("Welcome state reset!");
 			});
 
-		public ICommand ResetEnabled
-			=> new Command(async () =>
+		public AsyncCommand ResetEnabled
+			=> new AsyncCommand(async () =>
 			{
 				using (UserDialogs.Instance.Loading(string.Empty))
 				{

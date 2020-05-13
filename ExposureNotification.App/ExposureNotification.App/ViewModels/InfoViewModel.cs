@@ -2,11 +2,13 @@
 using System.Windows.Input;
 using Acr.UserDialogs;
 using ExposureNotification.App.Services;
+using ExposureNotification.App.Views;
+using MvvmHelpers.Commands;
 using Xamarin.Forms;
 
 namespace ExposureNotification.App.ViewModels
 {
-	public class InfoViewModel : BaseViewModel
+	public class InfoViewModel : ViewModelBase
 	{
 		public InfoViewModel()
 		{
@@ -18,17 +20,17 @@ namespace ExposureNotification.App.ViewModels
 				});
 		}
 
-		async Task Disabled()
+		Task Disabled()
 		{
 			LocalStateManager.Instance.LastIsEnabled = false;
 			LocalStateManager.Instance.IsWelcomed = false;
 			LocalStateManager.Save();
 
-			await Shell.Current.GoToAsync("//welcome");
+			return Shell.Current.GoToAsync($"//{nameof(WelcomePage)}");
 		}
 
-		public ICommand DisableCommand
-			=> new Command(async () =>
+		public AsyncCommand DisableCommand
+			=> new AsyncCommand(async () =>
 			{
 				try
 				{

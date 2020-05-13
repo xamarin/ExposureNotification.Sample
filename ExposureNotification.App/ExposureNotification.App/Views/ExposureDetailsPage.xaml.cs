@@ -6,11 +6,11 @@ namespace ExposureNotification.App.Views
 {
 	public partial class ExposureDetailsPage : ContentPage
 	{
-		public ExposureDetailsPage(ExposureInfo exposureInfo)
+		public ExposureDetailsPage()
 		{
 			InitializeComponent();
 
-			BindingContext = new ExposureDetailsViewModel(exposureInfo);
+			BindingContext = new ExposureDetailsViewModel();
 		}
 	}
 }
