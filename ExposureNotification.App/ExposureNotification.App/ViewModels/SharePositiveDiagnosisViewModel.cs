@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Windows.Input;
 using Acr.UserDialogs;
-using ExposureNotification.App.Resources;
 using ExposureNotification.App.Services;
 using Xamarin.Forms;
 
@@ -16,8 +13,7 @@ namespace ExposureNotification.App.ViewModels
 		public DateTime? DiagnosisTimestamp { get; set; }
 
 		public ICommand CancelCommand
-			=> new Command(async () =>
-				await Navigation.PopModalAsync(true));
+			=> new Command(() => Navigation.PopModalAsync(true));
 
 		public ICommand SubmitDiagnosisCommand
 			=> new Command(async () =>

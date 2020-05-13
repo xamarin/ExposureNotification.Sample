@@ -1,45 +1,43 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage
-	x:Class="ExposureNotification.App.Views.NotifyOthersPage"
-	xmlns="http://xamarin.com/schemas/2014/forms"
-	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-	xmlns:d="http://xamarin.com/schemas/2014/forms/design"
-	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-	xmlns:viewmodel="clr-namespace:ExposureNotification.App.ViewModels"
-	Title="Notify Others"
-	BackgroundColor="{StaticResource BackgroundColor}"
-	mc:Ignorable="d">
-	<ContentPage.BindingContext>
-		<viewmodel:NotifyOthersViewModel />
-	</ContentPage.BindingContext>
+﻿<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:viewmodel="clr-namespace:ExposureNotification.App.ViewModels"
+             mc:Ignorable="d"
+             x:Class="ExposureNotification.App.Views.NotifyOthersPage"
+             Title="Notify Others"
+             BackgroundColor="{StaticResource BackgroundColor}">
 
-	<ScrollView>
-		<StackLayout Style="{DynamicResource Container}">
-			<Frame Style="{DynamicResource CardFrame}">
-				<StackLayout>
+    <ContentPage.BindingContext>
+        <viewmodel:NotifyOthersViewModel />
+    </ContentPage.BindingContext>
 
-					<Label Text="Share A Positive Diagnosis" FontAttributes="Bold" FontSize="Subtitle" />
+    <ScrollView>
+        <StackLayout Style="{DynamicResource Container}">
+            <Frame Style="{DynamicResource CardFrame}">
+                <StackLayout>
 
-					<Label Margin="0,12,0,0" Text="If you tested positive for the virus that causes COVID-19, you can choose to share your diagnosis.  This will help others in your community contain the spread of the virus." />
+                    <Label Text="Share A Positive Diagnosis" FontAttributes="Bold" FontSize="Subtitle" />
 
-					<Label Text="Learn more" FontAttributes="Bold" TextColor="{DynamicResource PrimaryColor}">
-						<Label.GestureRecognizers>
-							<TapGestureRecognizer Command="{Binding LearnMoreCommand}" />
-						</Label.GestureRecognizers>
-					</Label>
+                    <Label Margin="0,12,0,0" Text="If you tested positive for the virus that causes COVID-19, you can choose to share your diagnosis.  This will help others in your community contain the spread of the virus." />
 
+                    <Label Text="Learn more" FontAttributes="Bold" TextColor="{DynamicResource PrimaryColor}">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding LearnMoreCommand}" />
+                        </Label.GestureRecognizers>
+                    </Label>
 
+                    <Button
+                        Margin="0,20,0,0"
+                        Command="{Binding SharePositiveDiagnosisCommand}"
+                        HorizontalOptions="End"
+                        IsEnabled="{Binding IsEnabled}"
+                        Style="{DynamicResource ButtonRounded}"
+                        Text="Share A Positive Diagnosis" />
 
-					<Button
-						Margin="0,20,0,0"
-						Command="{Binding SharePositiveDiagnosisCommand}"
-						HorizontalOptions="End"
-						IsEnabled="{Binding IsEnabled}"
-						Style="{DynamicResource ButtonRounded}"
-						Text="Share A Positive Diagnosis" />
+                </StackLayout>
+            </Frame>
+        </StackLayout>
+    </ScrollView>
 
-				</StackLayout>
-			</Frame>
-		</StackLayout>
-	</ScrollView>
 </ContentPage>

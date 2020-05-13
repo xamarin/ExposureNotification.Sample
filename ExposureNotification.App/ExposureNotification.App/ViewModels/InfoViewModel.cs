@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using System.Windows.Input;
 using Acr.UserDialogs;
 using ExposureNotification.App.Services;
-using Xamarin.Essentials;
 using Xamarin.Forms;
 
 namespace ExposureNotification.App.ViewModels

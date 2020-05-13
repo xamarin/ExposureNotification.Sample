@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using Xamarin.ExposureNotifications;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
+using Xamarin.ExposureNotifications;
 
 namespace ExposureNotification.App.Services
 {

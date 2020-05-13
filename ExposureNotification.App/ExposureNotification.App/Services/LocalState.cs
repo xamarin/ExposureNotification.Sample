@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 using Xamarin.ExposureNotifications;
 
 namespace ExposureNotification.App.Services
@@ -60,7 +58,7 @@ namespace ExposureNotification.App.Services
 		public List<PositiveDiagnosisState> PositiveDiagnoses { get; set; } = new List<PositiveDiagnosisState>();
 
 		PositiveDiagnosisState GetLatest()
-        {
+		{
 			var latest = PositiveDiagnoses?.OrderByDescending(p => p.DiagnosisDate)?.FirstOrDefault();
 
 			if (latest == null)
