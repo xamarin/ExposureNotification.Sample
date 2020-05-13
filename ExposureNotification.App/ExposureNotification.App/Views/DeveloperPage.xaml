@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	mc:Ignorable="d"
+	xmlns:viewmodel="clr-namespace:ExposureNotification.App.ViewModels"
+	Title="Developer"
+	BackgroundColor="{StaticResource BackgroundColor}"
+	x:Class="ExposureNotification.App.Views.DeveloperPage">
+	<ContentPage.BindingContext>
+		<viewmodel:DeveloperViewModel />
+	</ContentPage.BindingContext>
+	<ContentPage.Content>
+		<ScrollView>
+			<StackLayout Style="{DynamicResource Container}">
+				<Frame Style="{DynamicResource CardFrame}">
+					<StackLayout Spacing="20">
+						<StackLayout Orientation="Horizontal" HorizontalOptions="Center">
+							<Label Text="Native Implementation: " />
+							<Label Text="{Binding NativeImplementationName}" FontAttributes="Bold" />
+						</StackLayout>
+
+						<Button
+							Command="{Binding ResetWelcome}"
+							HorizontalOptions="CenterAndExpand"
+							Style="{DynamicResource ButtonRounded}"
+							Text="Reset Welcome State" />
+
+						<Button
+							Command="{Binding ResetEnabled}"
+							HorizontalOptions="CenterAndExpand"
+							Style="{DynamicResource ButtonRounded}"
+							Text="Reset Last Enabled State" />
+
+						<Button
+							Command="{Binding ResetSelfDiagnosis}"
+							HorizontalOptions="CenterAndExpand"
+							Style="{DynamicResource ButtonRounded}"
+							Text="Reset Self Diagnosis" />
+
+						<Button
+							Command="{Binding ResetExposures}"
+							HorizontalOptions="CenterAndExpand"
+							Style="{DynamicResource ButtonRounded}"
+							Text="Reset Exposures" />
+
+						<Button
+							Command="{Binding AddExposures}"
+							HorizontalOptions="CenterAndExpand"
+							Style="{DynamicResource ButtonRounded}"
+							Text="Add Exposures" />
+					</StackLayout>
+				</Frame>
+			</StackLayout>
+		</ScrollView>
+	</ContentPage.Content>
+</ContentPage>
