@@ -33,7 +33,8 @@ namespace Xamarin.ExposureNotifications
 
 					var asmName = asm.GetName().Name;
 
-					if (asmName.StartsWith("System.", StringComparison.OrdinalIgnoreCase)
+					if (asmName.StartsWith("mscorlib")
+						|| asmName.StartsWith("System.", StringComparison.OrdinalIgnoreCase)
 						|| asmName.StartsWith("Xamarin.", StringComparison.OrdinalIgnoreCase))
 						continue;
 
@@ -41,8 +42,10 @@ namespace Xamarin.ExposureNotifications
 
 					foreach (var t in allTypes)
 					{
-						if (t.IsClass && t.IsAssignableFrom(typeof(IExposureNotificationHandler)))
-							handler = (IExposureNotificationHandler)Activator.CreateInstance(t.GetType());
+						if (t.IsClass && typeof(IExposureNotificationHandler).IsAssignableFrom(t))
+						{
+							handler = (IExposureNotificationHandler)Activator.CreateInstance(t);
+						}
 					}
 				}
 
@@ -74,7 +77,7 @@ namespace Xamarin.ExposureNotifications
 		}
 
 		// Call this when the app needs to update the local keys
-		public static async Task<bool> UpdateKeysFromServer()
+		internal static async Task<bool> UpdateKeysFromServer()
 		{
 			using var batches = new TemporaryExposureKeyBatches();
 
