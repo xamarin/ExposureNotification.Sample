@@ -5,11 +5,20 @@ using System.Windows.Input;
 using ExposureNotification.App.Views;
 using Xamarin.Forms;
 using ExposureNotification.App.Resources;
+using ExposureNotification.App.Services;
 
 namespace ExposureNotification.App.ViewModels
 {
 	public class NotifyOthersViewModel : BaseViewModel
 	{
+
+		public bool DiagnosisPending
+			=> (LocalStateManager.Instance.LatestDiagnosis?.DiagnosisDate ?? DateTimeOffset.MinValue)
+				>= DateTimeOffset.UtcNow.AddDays(-14);
+
+		public DateTimeOffset DiagnosisShareTimestamp
+			=> LocalStateManager.Instance.LatestDiagnosis?.DiagnosisDate ?? DateTimeOffset.MinValue;
+
 		public ICommand SharePositiveDiagnosisCommand
 			=> new Command(async () =>
 				await Navigation.PushModalAsync(

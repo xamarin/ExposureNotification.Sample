@@ -15,7 +15,7 @@
 
 	<ScrollView>
 		<StackLayout Style="{DynamicResource Container}">
-			<Frame Style="{DynamicResource CardFrame}">
+			<Frame Style="{DynamicResource CardFrame}" IsVisible="{Binding DiagnosisPending, Converter={StaticResource InvertedBoolConverter}}">
 				<StackLayout>
 
 					<Label Text="Share A Positive Diagnosis" FontAttributes="Bold" FontSize="Subtitle" />
@@ -37,6 +37,26 @@
 						IsEnabled="{Binding IsEnabled}"
 						Style="{DynamicResource ButtonRounded}"
 						Text="Share A Positive Diagnosis" />
+
+				</StackLayout>
+			</Frame>
+
+			<Frame Style="{DynamicResource CardFrame}" IsVisible="{Binding DiagnosisPending}">
+				<StackLayout>
+
+					<Label Text="Diagnosis Shared" FontAttributes="Bold" FontSize="Subtitle" />
+
+					<Label Margin="0,12,0,0" Text="Your diagnosis was shared on:" />
+
+					<Label Margin="0,12,0,0" Text="{Binding DiagnosisShareTimestamp, StringFormat='{0:yyyy-MM-dd}'}" />
+
+					<Label Margin="0,12,0,0" Text="This will help others in your community contain the spread of the virus." />
+
+					<Label Text="Learn more" FontAttributes="Bold" TextColor="{DynamicResource PrimaryColor}">
+						<Label.GestureRecognizers>
+							<TapGestureRecognizer Command="{Binding LearnMoreCommand}" />
+						</Label.GestureRecognizers>
+					</Label>
 
 				</StackLayout>
 			</Frame>
