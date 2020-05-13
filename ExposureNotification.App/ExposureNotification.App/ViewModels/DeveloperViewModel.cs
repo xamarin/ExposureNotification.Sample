@@ -33,13 +33,13 @@ namespace ExposureNotification.App.ViewModels
 
 
 		public AsyncCommand ResetExposures
-			=> new AsyncCommand(() =>
+			=> new AsyncCommand(async () =>
 			{
 				await Device.InvokeOnMainThreadAsync(() => LocalStateManager.Instance.ExposureInformation.Clear());
 
 				LocalStateManager.Instance.ExposureSummary = null;
 				LocalStateManager.Save();
-				return UserDialogs.Instance.AlertAsync("Exposures Cleared!");
+				await UserDialogs.Instance.AlertAsync("Exposures Cleared!");
 			});
 
 		public AsyncCommand AddExposures
@@ -78,23 +78,23 @@ namespace ExposureNotification.App.ViewModels
 				await UserDialogs.Instance.AlertAsync("Last known enabled state reset!");
 			});
 
-		public ICommand ResetBatchFileIndex
-			=> new Command(async () =>
+		public AsyncCommand ResetBatchFileIndex
+			=> new AsyncCommand(() =>
 			{
 				LocalStateManager.Instance.ServerBatchNumber = 0;
 				LocalStateManager.Save();
-				NotifyPropertyChanged(nameof(CurrentBatchFileIndex));
-				await UserDialogs.Instance.AlertAsync("Reset Batch file index!");
+				OnPropertyChanged(nameof(CurrentBatchFileIndex));
+				return UserDialogs.Instance.AlertAsync("Reset Batch file index!");
 			});
 
-		public ICommand ManualTriggerKeyFetch
-			=> new Command(async () =>
+		public AsyncCommand ManualTriggerKeyFetch
+			=> new AsyncCommand(async () =>
 			{
 				using (UserDialogs.Instance.Loading("Fetching..."))
 				{
 					await Xamarin.ExposureNotifications.ExposureNotification.UpdateKeysFromServer();
 
-					NotifyPropertyChanged(nameof(CurrentBatchFileIndex));
+					OnPropertyChanged(nameof(CurrentBatchFileIndex));
 				}
 			});
 

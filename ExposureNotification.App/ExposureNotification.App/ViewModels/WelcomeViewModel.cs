@@ -23,7 +23,7 @@ namespace ExposureNotification.App.ViewModels
 				});
 		}
 
-		public bool IsEnabled
+		public new bool IsEnabled
 		{
 			get => LocalStateManager.Instance.LastIsEnabled;
 			set
