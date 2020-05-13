@@ -20,6 +20,9 @@ namespace ExposureNotification.App
 			// Local Notification tap event listener
 			NotificationCenter.Current.NotificationTapped += Current_NotificationTapped; ;
 
+			// Initialize the library which schedules background tasks, etc
+			Xamarin.ExposureNotifications.ExposureNotification.Init();
+
 			MainPage = new AppShell();
 		}
 

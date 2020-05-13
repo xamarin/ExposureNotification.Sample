@@ -7,6 +7,7 @@ using Android.Gms.Nearby.ExposureNotification;
 
 using Nearby = Android.Gms.Nearby.NearbyClass;
 using AndroidRiskLevel = Android.Gms.Nearby.ExposureNotification.RiskLevel;
+using AndroidX.Work;
 
 [assembly: UsesPermission(Android.Manifest.Permission.Bluetooth)]
 
@@ -44,6 +45,45 @@ namespace Xamarin.ExposureNotifications
 
 		static async Task<bool> PlatformIsEnabled()
 			=> await Instance.IsEnabledAsync();
+
+		public static void ConfigureBackgroundWorkRequest(TimeSpan repeatInterval, Action<PeriodicWorkRequest.Builder> requestBuilder)
+		{
+			if (requestBuilder == null)
+				throw new ArgumentNullException(nameof(requestBuilder));
+			if (repeatInterval == null)
+				throw new ArgumentNullException(nameof(repeatInterval));
+
+			bgRequestBuilder = requestBuilder;
+			bgRepeatInterval = repeatInterval;
+		}
+
+		static Action<PeriodicWorkRequest.Builder> bgRequestBuilder = b =>
+			b.SetConstraints(new Constraints.Builder()
+				.SetRequiresBatteryNotLow(true)
+				.SetRequiresDeviceIdle(true)
+				.SetRequiredNetworkType(NetworkType.Connected)
+				.Build());
+
+		static TimeSpan bgRepeatInterval = TimeSpan.FromHours(6);
+
+		static Task PlatformScheduleFetch()
+		{
+			var workManager = WorkManager.GetInstance(Essentials.Platform.AppContext);
+
+			var workRequestBuilder = new PeriodicWorkRequest.Builder(
+				typeof(BackgroundFetchWorker),
+				bgRepeatInterval);
+
+			bgRequestBuilder.Invoke(workRequestBuilder);
+			
+			var workRequest = workRequestBuilder.Build();
+
+			workManager.EnqueueUniquePeriodicWork("exposurenotification",
+				ExistingPeriodicWorkPolicy.Replace,
+				workRequest);
+
+			return Task.CompletedTask;
+		}
 
 		// Tells the local API when new diagnosis keys have been obtained from the server
 		static async Task PlatformDetectExposuresAsync(IEnumerable<string> keyFiles)
@@ -89,6 +129,34 @@ namespace Xamarin.ExposureNotifications
 				summary.DaysSinceLastExposure,
 				(ulong)summary.MatchedKeyCount,
 				(byte)summary.MaximumRiskScore);
+		}
+	}
+
+	public class BackgroundFetchWorker : Worker
+	{
+		public BackgroundFetchWorker(global::Android.Content.Context context, WorkerParameters workerParameters)
+			: base(context, workerParameters)
+		{
+		}
+
+		public override Result DoWork()
+		{
+			try
+			{
+				Task.Run(() => DoAsyncWork()).GetAwaiter().GetResult();
+				return Result.InvokeSuccess();
+			}
+			catch (Exception ex)
+			{
+				System.Diagnostics.Debug.WriteLine(ex);
+				return Result.InvokeRetry();
+			}
+		}
+
+		async Task DoAsyncWork()
+		{
+			if (await ExposureNotification.IsEnabledAsync())
+				await ExposureNotification.UpdateKeysFromServer();
 		}
 	}
 

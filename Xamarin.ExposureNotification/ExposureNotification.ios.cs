@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using BackgroundTasks;
 using ExposureNotifications;
 using Foundation;
 using Google.Protobuf;
+using Xamarin.Essentials;
 
 namespace Xamarin.ExposureNotifications
 {
@@ -58,6 +61,49 @@ namespace Xamarin.ExposureNotifications
 		{
 			var m = await GetManagerAsync();
 			return m.ExposureNotificationEnabled;
+		}
+
+
+		static Task PlatformScheduleFetch()
+		{
+			// This is a special ID suffix which iOS treats a certain way
+			// we can basically request infinite background tasks
+			// and iOS will throttle it sensibly for us.
+			var id = AppInfo.PackageName + ".exposure-notification";
+
+			void scheduleBgTask()
+			{
+				var newBgTask = new BGProcessingTaskRequest(id);
+				newBgTask.RequiresNetworkConnectivity = true;
+				BGTaskScheduler.Shared.Submit(newBgTask, out _);
+			}
+
+			BGTaskScheduler.Shared.Register(id, null, async t =>
+			{
+				if (await PlatformIsEnabled())
+				{
+					var cancelSrc = new CancellationTokenSource();
+					t.ExpirationHandler = cancelSrc.Cancel;
+
+					Exception ex = null;
+					try
+					{
+						await ExposureNotification.UpdateKeysFromServer();
+					}
+					catch (Exception e)
+					{
+						ex = e;
+					}
+
+					t.SetTaskCompleted(ex != null);
+				}
+
+				scheduleBgTask();
+			});
+
+			scheduleBgTask();
+
+			return Task.CompletedTask;
 		}
 
 		// Tells the local API when new diagnosis keys have been obtained from the server
