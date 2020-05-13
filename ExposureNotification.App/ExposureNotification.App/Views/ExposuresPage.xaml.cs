@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
+﻿using System.Linq;
 using Xamarin.ExposureNotifications;
 using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
 
 namespace ExposureNotification.App.Views
 {
-	[XamlCompilation(XamlCompilationOptions.Compile)]
 	public partial class ExposuresPage : ContentPage
 	{
 		public ExposuresPage()
@@ -24,7 +17,7 @@ namespace ExposureNotification.App.Views
 
 			if (info != null && info is ExposureInfo exposureInfo)
 				await Navigation.PushModalAsync(new NavigationPage(new ExposureDetailsPage(exposureInfo)), true);
-			
+
 			(sender as CollectionView).SelectedItem = null;
 		}
 	}

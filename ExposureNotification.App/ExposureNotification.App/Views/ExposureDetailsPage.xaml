@@ -1,39 +1,37 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
-	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-	xmlns:d="http://xamarin.com/schemas/2014/forms/design"
-	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-	xmlns:viewmodel="clr-namespace:ExposureNotification.App.ViewModels"
-	mc:Ignorable="d"
-	x:Class="ExposureNotification.App.Views.ExposureDetailsPage"
-	BackgroundColor="{DynamicResource BackgroundColor}"
-	Title="Possible Exposure Details">
-	<ContentPage.ToolbarItems>
-		<ToolbarItem Command="{Binding CancelCommand}">
-			<ToolbarItem.IconImageSource>
-				<FontImageSource Glyph="{StaticResource IconCancel}" FontFamily="FA-S" />
-			</ToolbarItem.IconImageSource>
-		</ToolbarItem>
-	</ContentPage.ToolbarItems>
-	<ContentPage.Content>
-		<StackLayout Style="{DynamicResource Container}">
-			<Frame Style="{DynamicResource CardFrame}">
-				<StackLayout Spacing="20">
-					<Label Text="[Actual copy to be provided by Public Health Authority]" />
+﻿<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             mc:Ignorable="d"
+             x:Class="ExposureNotification.App.Views.ExposureDetailsPage"
+             BackgroundColor="{DynamicResource BackgroundColor}"
+             Title="Possible Exposure Details">
 
-					<BoxView HeightRequest="2" BackgroundColor="{DynamicResource TextPrimaryColor}" />
-					
-					<Label Text="The person's test result has been verified.  You were near this person at:" />
-					<Label Text="{Binding When, StringFormat='{0:MMMM d, yyyy h:mm tt}'}" FontAttributes="Bold" />
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Command="{Binding CancelCommand}">
+            <ToolbarItem.IconImageSource>
+                <FontImageSource Glyph="{StaticResource IconCancel}" FontFamily="FA-S" />
+            </ToolbarItem.IconImageSource>
+        </ToolbarItem>
+    </ContentPage.ToolbarItems>
 
-					<Label Text="You were exposed to this person for approximately:" />
-					<Label Text="{Binding Duration, StringFormat='{0:%m} minutes'}" FontAttributes="Bold" />
+    <StackLayout Style="{DynamicResource Container}">
+        <Frame Style="{DynamicResource CardFrame}">
+            <StackLayout Spacing="20">
+                <Label Text="[Actual copy to be provided by Public Health Authority]" />
 
-					
-					<Label  Text="Next steps: [Actual copy to be provided by Public Health Authority]." />
-					
-				</StackLayout>
-			</Frame>
-		</StackLayout>
-	</ContentPage.Content>
+                <BoxView HeightRequest="2" BackgroundColor="{DynamicResource TextPrimaryColor}" />
+
+                <Label Text="The person's test result has been verified.  You were near this person at:" />
+                <Label Text="{Binding When, StringFormat='{0:MMMM d, yyyy h:mm tt}'}" FontAttributes="Bold" />
+
+                <Label Text="You were exposed to this person for approximately:" />
+                <Label Text="{Binding Duration, StringFormat='{0:%m} minutes'}" FontAttributes="Bold" />
+
+                <Label  Text="Next steps: [Actual copy to be provided by Public Health Authority]." />
+
+            </StackLayout>
+        </Frame>
+    </StackLayout>
+
 </ContentPage>

@@ -1,48 +1,49 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage
-	x:Class="ExposureNotification.App.Views.InfoPage"
-	xmlns="http://xamarin.com/schemas/2014/forms"
-	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-	xmlns:d="http://xamarin.com/schemas/2014/forms/design"
-	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-	xmlns:viewmodel="clr-namespace:ExposureNotification.App.ViewModels"
-	BackgroundColor="{StaticResource BackgroundColor}"
-	Title="Exposure Notifications"
-	mc:Ignorable="d">
-	<ContentPage.BindingContext>
-		<viewmodel:InfoViewModel />
-	</ContentPage.BindingContext>
-	<ScrollView>
-		<StackLayout Style="{DynamicResource Container}">
-			<Frame Style="{DynamicResource CardFrame}">
-				<StackLayout>
+﻿<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:viewmodel="clr-namespace:ExposureNotification.App.ViewModels"
+             mc:Ignorable="d"
+             x:Class="ExposureNotification.App.Views.InfoPage"
+             Title="Exposure Notifications"
+             BackgroundColor="{StaticResource BackgroundColor}">
 
-					<Image HorizontalOptions="Center" Margin="0,30,0,30">
-						<Image.Source>
-							<FontImageSource FontFamily="FA-R" Glyph="{DynamicResource IconStar}" Size="72" Color="{DynamicResource TextPrimaryColor}" />
-						</Image.Source>
-					</Image>
+    <ContentPage.BindingContext>
+        <viewmodel:InfoViewModel />
+    </ContentPage.BindingContext>
 
-					<Label Margin="0,0,0,10" Text="Welcome to the Sample Public Health Authority COVID-19 App" FontAttributes="Bold" FontSize="Title" HorizontalTextAlignment="Center" />
+    <ScrollView>
+        <StackLayout Style="{DynamicResource Container}">
+            <Frame Style="{DynamicResource CardFrame}">
+                <StackLayout>
 
-					<Label Margin="0,10,0,0" Text="[Actual copy to be provided by Public Health Authority]" />
+                    <Image HorizontalOptions="Center" Margin="0,30,0,30">
+                        <Image.Source>
+                            <FontImageSource FontFamily="FA-R" Glyph="{DynamicResource IconStar}" Size="72" Color="{DynamicResource TextPrimaryColor}" />
+                        </Image.Source>
+                    </Image>
 
-				</StackLayout>
-			</Frame>
+                    <Label Margin="0,0,0,10" Text="Welcome to the Sample Public Health Authority COVID-19 App" FontAttributes="Bold" FontSize="Title" HorizontalTextAlignment="Center" />
 
-			<Frame Style="{DynamicResource CardFrame}">
+                    <Label Margin="0,10,0,0" Text="[Actual copy to be provided by Public Health Authority]" />
 
-				<StackLayout>
-					<Label Margin="0,10,0,0" Text="Exposure Notifications are currently enabled.  You will be notified of any possible exposure." />
+                </StackLayout>
+            </Frame>
 
-					<Button
-						Margin="0,10,0,0"
-						Command="{Binding DisableCommand}"
-						HorizontalOptions="End"
-						Style="{DynamicResource ButtonRounded}"
-						Text="Disable" />
-				</StackLayout>
-			</Frame>
-		</StackLayout>
-	</ScrollView>
+            <Frame Style="{DynamicResource CardFrame}">
+
+                <StackLayout>
+                    <Label Margin="0,10,0,0" Text="Exposure Notifications are currently enabled.  You will be notified of any possible exposure." />
+
+                    <Button
+                        Margin="0,10,0,0"
+                        Command="{Binding DisableCommand}"
+                        HorizontalOptions="End"
+                        Style="{DynamicResource ButtonRounded}"
+                        Text="Disable" />
+                </StackLayout>
+            </Frame>
+        </StackLayout>
+    </ScrollView>
+
 </ContentPage>
