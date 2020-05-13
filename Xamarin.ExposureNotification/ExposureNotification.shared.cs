@@ -77,7 +77,7 @@ namespace Xamarin.ExposureNotifications
 		}
 
 		// Call this when the app needs to update the local keys
-		internal static async Task<bool> UpdateKeysFromServer()
+		public static async Task<bool> UpdateKeysFromServer()
 		{
 			using var batches = new TemporaryExposureKeyBatches();
 
