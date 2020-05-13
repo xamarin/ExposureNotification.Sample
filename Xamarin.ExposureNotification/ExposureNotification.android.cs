@@ -46,7 +46,7 @@ namespace Xamarin.ExposureNotifications
 		static async Task<bool> PlatformIsEnabled()
 			=> await Instance.IsEnabledAsync();
 
-		public static void ConfigureBackgroundWorkRequest(Action<PeriodicWorkRequest.Builder> requestBuilder, TimeSpan repeatInterval)
+		public static void ConfigureBackgroundWorkRequest(TimeSpan repeatInterval, Action<PeriodicWorkRequest.Builder> requestBuilder)
 		{
 			if (requestBuilder == null)
 				throw new ArgumentNullException(nameof(requestBuilder));
