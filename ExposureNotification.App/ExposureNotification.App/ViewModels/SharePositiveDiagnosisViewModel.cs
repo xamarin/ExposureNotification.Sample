@@ -13,7 +13,7 @@ namespace ExposureNotification.App.ViewModels
 	{
 		public string DiagnosisUid { get; set; }
 
-		public DateTime? DiagnosisTimestamp { get; set; }
+		public DateTime? DiagnosisTimestamp { get; set; } = DateTime.Now;
 
 		public ICommand CancelCommand
 			=> new Command(async () =>
@@ -57,9 +57,14 @@ namespace ExposureNotification.App.ViewModels
 							return;
 						}
 
+						if (!DiagnosisTimestamp.HasValue || DiagnosisTimestamp.Value > DateTime.Now)
+						{
+							await UserDialogs.Instance.AlertAsync("Please provide a valid Test Date", "Invalid Test Date", "OK");
+							return;
+						}
+
 						// Set the submitted UID
-						LocalStateManager.Instance.LatestDiagnosis.DiagnosisUid = DiagnosisUid;
-						LocalStateManager.Instance.LatestDiagnosis.DiagnosisDate = DiagnosisTimestamp ?? DateTime.UtcNow;
+						LocalStateManager.Instance.AddDiagnosis(DiagnosisUid, new DateTimeOffset(DiagnosisTimestamp.Value));
 						LocalStateManager.Save();
 
 						// Submit our diagnosis
