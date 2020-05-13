@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Xml.Linq;
 using Xamarin.ExposureNotifications;
 
 namespace ExposureNotification.App.Services
@@ -59,30 +60,32 @@ namespace ExposureNotification.App.Services
 
 		public List<PositiveDiagnosisState> PositiveDiagnoses { get; set; } = new List<PositiveDiagnosisState>();
 
-		PositiveDiagnosisState GetLatest()
-        {
-			var latest = PositiveDiagnoses?.OrderByDescending(p => p.DiagnosisDate)?.FirstOrDefault();
+		public void AddDiagnosis(string diagnosisUid, DateTimeOffset submissionDate)
+		{
+			var existing = PositiveDiagnoses?.Where(d => d.DiagnosisUid.Equals(diagnosisUid, StringComparison.OrdinalIgnoreCase))
+				.OrderByDescending(d => d.DiagnosisDate).FirstOrDefault();
 
-			if (latest == null)
+			if (existing != null)
+				return;
+
+			PositiveDiagnoses.Add(new PositiveDiagnosisState
 			{
-				latest = new PositiveDiagnosisState();
-				PositiveDiagnoses.Add(latest);
-			}
-
-			return latest;
+				DiagnosisDate = submissionDate,
+				DiagnosisUid = diagnosisUid,
+			});
 		}
 
 		public PositiveDiagnosisState LatestDiagnosis
-		{
-			get => GetLatest();
-			set
-			{
-				var latest = GetLatest();
-				latest.DiagnosisDate = value.DiagnosisDate;
-				latest.DiagnosisUid = value.DiagnosisUid;
-				latest.Shared = value.Shared;
-			}
-		}
+			=> PositiveDiagnoses?
+				.Where(d => d.Shared)
+				.OrderByDescending(p => p.DiagnosisDate)?
+				.FirstOrDefault();
+
+		public PositiveDiagnosisState PendingDiagnosis
+			=> PositiveDiagnoses?
+				.Where(d => !d.Shared)
+				.OrderByDescending(p => p.DiagnosisDate)?
+				.FirstOrDefault();
 	}
 
 	public class PositiveDiagnosisState
@@ -91,7 +94,6 @@ namespace ExposureNotification.App.Services
 
 		public DateTimeOffset DiagnosisDate { get; set; }
 
-		// Set true after actually submitted to server
-		public bool Shared { get; set; } = false;
+		public bool Shared { get; set; }
 	}
 }
