@@ -20,6 +20,8 @@ namespace ExposureNotification.Backend.Functions
 				Environment.GetEnvironmentVariable("BlobStorageConnectionString", EnvironmentVariableTarget.Process);
 			BlobStorageContainerNamePrefix =
 				Environment.GetEnvironmentVariable("BlobStorageContainerNamePrefix", EnvironmentVariableTarget.Process) ?? string.Empty;
+			DeleteKeysFromDbAfterBatching =
+				(Environment.GetEnvironmentVariable("DeleteKeysFromDbAfterBatching", EnvironmentVariableTarget.Process) ?? string.Empty).Equals("true", StringComparison.OrdinalIgnoreCase);
 
 			var regions =
 				Environment.GetEnvironmentVariable("ExposureKeyRegions", EnvironmentVariableTarget.Process)
@@ -47,5 +49,7 @@ namespace ExposureNotification.Backend.Functions
 		internal static string BlobStorageContainerNamePrefix { get; private set; }
 
 		internal static string[] ExposureKeyRegions { get; private set; }
+
+		internal static bool DeleteKeysFromDbAfterBatching { get; private set; }
 	}
 }
