@@ -6,6 +6,7 @@
 	xmlns:view="clr-namespace:ExposureNotification.App.Views"
 	mc:Ignorable="d"
 	Visual="Material"
+	FlyoutBehavior="Disabled"
 	x:Class="ExposureNotification.App.AppShell">
 	<Shell.Resources>
 		<ResourceDictionary>
@@ -24,7 +25,8 @@
 		</ResourceDictionary>
 	</Shell.Resources>
 
-
+	<ShellContent ContentTemplate="{DataTemplate view:WelcomePage}" Route="welcome" />
+	
 	<!-- Your Pages -->
 	<TabBar x:Name="TabBar">
 		<Tab Title="Info" Route="info">

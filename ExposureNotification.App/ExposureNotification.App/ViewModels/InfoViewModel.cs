@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Input;
+using Acr.UserDialogs;
 using ExposureNotification.App.Services;
 using Xamarin.Essentials;
 using Xamarin.Forms;
@@ -13,51 +15,39 @@ namespace ExposureNotification.App.ViewModels
 		public InfoViewModel()
 		{
 			Xamarin.ExposureNotifications.ExposureNotification.IsEnabledAsync()
-				.ContinueWith(t =>
+				.ContinueWith(async t =>
 				{
-					IsEnabled = t.Result;
+					if (!t.Result)
+						await Disabled();
 				});
 		}
 
-		public bool IsEnabled
+		async Task Disabled()
 		{
-			get => LocalStateManager.Instance.LastIsEnabled;
-			set
-			{
-				LocalStateManager.Instance.LastIsEnabled = value;
-				LocalStateManager.Save();
-				NotifyPropertyChanged(nameof(IsEnabled));
-			}
+			LocalStateManager.Instance.LastIsEnabled = false;
+			LocalStateManager.Instance.IsWelcomed = false;
+			LocalStateManager.Save();
+
+			await Shell.Current.GoToAsync("//welcome");
 		}
 
-		public bool IsWelcomed
-		{
-			get => LocalStateManager.Instance.IsWelcomed;
-			set
-			{
-				LocalStateManager.Instance.IsWelcomed = value;
-				LocalStateManager.Save();
-				NotifyPropertyChanged(nameof(IsWelcomed));
-			}
-		}
-
-		public ICommand EnableDisableCommand
+		public ICommand DisableCommand
 			=> new Command(async () =>
 			{
-				var enabled = await Xamarin.ExposureNotifications.ExposureNotification.IsEnabledAsync();
+				try
+				{
+					using (UserDialogs.Instance.Loading(string.Empty))
+					{
+						var enabled = await Xamarin.ExposureNotifications.ExposureNotification.IsEnabledAsync();
 
-				if (enabled)
-					await Xamarin.ExposureNotifications.ExposureNotification.StopAsync();
-				else
-					await Xamarin.ExposureNotifications.ExposureNotification.StartAsync();
-
-				IsEnabled = enabled;
+						if (enabled)
+							await Xamarin.ExposureNotifications.ExposureNotification.StopAsync();
+					}
+				}
+				finally
+				{
+					await Disabled();
+				}
 			});
-
-		public ICommand GetStartedCommand
-			=> new Command(() => IsWelcomed = true);
-
-		public ICommand NotNowCommand
-			=> new Command(() => IsWelcomed = false);
 	}
 }
