@@ -1,58 +1,58 @@
 ﻿<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
-             xmlns:viewmodel="clr-namespace:ExposureNotification.App.ViewModels"
-             mc:Ignorable="d"
-             x:Class="ExposureNotification.App.Views.SharePositiveDiagnosisPage"
-             Title="Share a Positive Diagnosis"
-             Visual="Material"
-             BackgroundColor="{StaticResource BackgroundColor}">
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+	xmlns:viewmodel="clr-namespace:ExposureNotification.App.ViewModels"
+	mc:Ignorable="d"
+	x:Class="ExposureNotification.App.Views.SharePositiveDiagnosisPage"
+	Title="Share a Positive Diagnosis"
+	Visual="Material"
+	BackgroundColor="{StaticResource BackgroundColor}">
 
-    <ContentPage.BindingContext>
-        <viewmodel:SharePositiveDiagnosisViewModel />
-    </ContentPage.BindingContext>
+	<ContentPage.BindingContext>
+		<viewmodel:SharePositiveDiagnosisViewModel />
+	</ContentPage.BindingContext>
 
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Command="{Binding CancelCommand}">
-            <ToolbarItem.IconImageSource>
-                <FontImageSource Glyph="{StaticResource IconCancel}" FontFamily="FA-S" />
-            </ToolbarItem.IconImageSource>
-        </ToolbarItem>
-    </ContentPage.ToolbarItems>
+	<ContentPage.ToolbarItems>
+		<ToolbarItem Command="{Binding CancelCommand}">
+			<ToolbarItem.IconImageSource>
+				<FontImageSource Glyph="{StaticResource IconCancel}" FontFamily="FA-S" />
+			</ToolbarItem.IconImageSource>
+		</ToolbarItem>
+	</ContentPage.ToolbarItems>
 
-    <ScrollView>
-        <StackLayout Style="{DynamicResource Container}">
-            <Frame Style="{DynamicResource CardFrame}">
-                <StackLayout>
+	<ScrollView>
+		<StackLayout Style="{DynamicResource Container}">
+			<Frame Style="{DynamicResource CardFrame}">
+				<StackLayout>
 
-                    <Label Text="[Insert text from local Health authority]" />
+					<Label Text="[Insert text from local Health authority]" />
 
-                    <Label Margin="0,12,0,0" Text="Only those who have been exposed will receive a notification." />
+					<Label Margin="0,12,0,0" Text="Only those who have been exposed will receive a notification." />
 
-                    <Entry
-                        HorizontalOptions="FillAndExpand"
-                        Placeholder="Diagnosis Identifier"
-                        Text="{Binding DiagnosisUid, Mode=TwoWay}"
-                        TextColor="{StaticResource TextPrimaryColor}" />
+					<Entry
+						HorizontalOptions="FillAndExpand"
+						Placeholder="Diagnosis Identifier"
+						Text="{Binding DiagnosisUid, Mode=TwoWay}"
+						TextColor="{StaticResource TextPrimaryColor}" />
 
-                    <Label Margin="0,12,0,0" Text="The unique test identifier that came with your COVID-19 test must be used to verify your positive test result." />
+					<Label Margin="0,12,0,0" Text="The unique test identifier that came with your COVID-19 test must be used to verify your positive test result." />
 
-                    <DatePicker Margin="0,20,0,0" Date="{Binding DiagnosisDate}" />
+					<DatePicker Margin="0,20,0,0" Date="{Binding DiagnosisDate}" />
 
-                    <Label Margin="0,12,0,0" Text="The test date helps the app know when you may have been contagious and notify the right people of potential exposure." />
+					<Label Margin="0,12,0,0" Text="The test date helps the app know when you may have been contagious and notify the right people of potential exposure." />
 
 
-                    <Button
-                        Command="{Binding SubmitDiagnosisCommand}"
-                        HorizontalOptions="End"
-                        IsEnabled="{Binding IsEnabled}"
-                        Style="{DynamicResource ButtonRounded}"
-                        Text="Next" />
+					<Button
+						Command="{Binding SubmitDiagnosisCommand}"
+						HorizontalOptions="End"
+						IsEnabled="{Binding IsEnabled}"
+						Style="{DynamicResource ButtonRounded}"
+						Text="Next" />
 
-                </StackLayout>
-            </Frame>
-        </StackLayout>
-    </ScrollView>
+				</StackLayout>
+			</Frame>
+		</StackLayout>
+	</ScrollView>
 
 </ContentPage>
