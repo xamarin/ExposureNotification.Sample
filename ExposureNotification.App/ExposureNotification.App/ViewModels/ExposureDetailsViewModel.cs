@@ -18,5 +18,11 @@ namespace ExposureNotification.App.ViewModels
 				await Navigation.PopModalAsync(true));
 
 		public ExposureInfo ExposureInfo { get; set; }
+
+		public DateTime When
+			=> ExposureInfo.Timestamp;
+
+		public TimeSpan Duration
+			=> ExposureInfo.Duration;
 	}
 }

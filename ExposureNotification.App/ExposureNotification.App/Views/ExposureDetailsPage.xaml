@@ -18,16 +18,19 @@
 	<ContentPage.Content>
 		<StackLayout Style="{DynamicResource Container}">
 			<Frame Style="{DynamicResource CardFrame}">
-				<StackLayout>
+				<StackLayout Spacing="20">
 					<Label Text="[Actual copy to be provided by Public Health Authority]" />
 
 					<BoxView HeightRequest="2" BackgroundColor="{DynamicResource TextPrimaryColor}" />
 					
-					<Label FontAttributes="Bold" Text="The person's test result has been verified.  You were near this person on:" />
-					<Label Text="{Binding RollingStart}" FontAttributes="Bold" />
+					<Label Text="The person's test result has been verified.  You were near this person at:" />
+					<Label Text="{Binding When, StringFormat='{0:MMMM d, yyyy h:mm tt}'}" FontAttributes="Bold" />
 
+					<Label Text="You were exposed to this person for approximately:" />
+					<Label Text="{Binding Duration, StringFormat='{0:%m} minutes'}" FontAttributes="Bold" />
 
-					<Label FontAttributes="Bold" Text="Next steps: [Actual copy to be provided by Public Health Authority]." />
+					
+					<Label  Text="Next steps: [Actual copy to be provided by Public Health Authority]." />
 					
 				</StackLayout>
 			</Frame>

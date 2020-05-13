@@ -3146,10 +3146,6 @@ namespace ExposureNotification.App.Droid
 			global::Xamarin.ExposureNotification.Resource.Attribute.scopeUris = global::ExposureNotification.App.Droid.Resource.Attribute.scopeUris;
 			global::Xamarin.ExposureNotification.Resource.Attribute.statusBarBackground = global::ExposureNotification.App.Droid.Resource.Attribute.statusBarBackground;
 			global::Xamarin.ExposureNotification.Resource.Attribute.ttcIndex = global::ExposureNotification.App.Droid.Resource.Attribute.ttcIndex;
-			global::Xamarin.ExposureNotification.Resource.Boolean.enable_system_alarm_service_default = global::ExposureNotification.App.Droid.Resource.Boolean.enable_system_alarm_service_default;
-			global::Xamarin.ExposureNotification.Resource.Boolean.enable_system_foreground_service_default = global::ExposureNotification.App.Droid.Resource.Boolean.enable_system_foreground_service_default;
-			global::Xamarin.ExposureNotification.Resource.Boolean.enable_system_job_service_default = global::ExposureNotification.App.Droid.Resource.Boolean.enable_system_job_service_default;
-			global::Xamarin.ExposureNotification.Resource.Boolean.workmanager_test_configuration = global::ExposureNotification.App.Droid.Resource.Boolean.workmanager_test_configuration;
 			global::Xamarin.ExposureNotification.Resource.Color.browser_actions_bg_grey = global::ExposureNotification.App.Droid.Resource.Color.browser_actions_bg_grey;
 			global::Xamarin.ExposureNotification.Resource.Color.browser_actions_divider_color = global::ExposureNotification.App.Droid.Resource.Color.browser_actions_divider_color;
 			global::Xamarin.ExposureNotification.Resource.Color.browser_actions_text_color = global::ExposureNotification.App.Droid.Resource.Color.browser_actions_text_color;
