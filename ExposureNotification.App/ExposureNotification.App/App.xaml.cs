@@ -1,4 +1,5 @@
-﻿using ExposureNotification.App.Views;
+﻿using ExposureNotification.App.Styles;
+using ExposureNotification.App.Views;
 using Plugin.LocalNotification;
 using Xamarin.Forms;
 
@@ -26,10 +27,11 @@ namespace ExposureNotification.App
 		}
 
 		void OnNotificationTapped(NotificationTappedEventArgs e)
-			=> Shell.Current?.GoToAsync($"//{nameof(ExposuresPage)}", false);
+			=> Shell.Current.GoToAsync($"//{nameof(ExposuresPage)}", false);
 
 		protected override void OnStart()
 		{
+			OnResume();
 		}
 
 		protected override void OnSleep()
@@ -38,6 +40,7 @@ namespace ExposureNotification.App
 
 		protected override void OnResume()
 		{
+			ThemeHelper.ChangeTheme(true);
 		}
 	}
 }

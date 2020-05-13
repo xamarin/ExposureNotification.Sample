@@ -24,7 +24,7 @@ namespace ExposureNotification.App.ViewModels
 			=> LocalStateManager.Instance.LatestDiagnosis?.DiagnosisDate ?? DateTimeOffset.MinValue;
 
 		public AsyncCommand SharePositiveDiagnosisCommand
-			=> new AsyncCommand(() => Shell.Current.GoToAsync($"{nameof(SharePositiveDiagnosisPage)}"));
+			=> new AsyncCommand(() => GoToAsync($"{nameof(SharePositiveDiagnosisPage)}"));
 
 		public AsyncCommand LearnMoreCommand
 			=> new AsyncCommand(() => Browser.OpenAsync(Strings.NotifyOthers_LearnMore_Url));

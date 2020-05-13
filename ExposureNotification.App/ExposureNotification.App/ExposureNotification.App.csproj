@@ -32,22 +32,4 @@
 		<ProjectReference Include="..\..\Xamarin.ExposureNotification\Xamarin.ExposureNotification.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<Compile Update="Resources\Strings.Designer.cs">
-			<DesignTime>True</DesignTime>
-			<AutoGen>True</AutoGen>
-			<DependentUpon>Strings.resx</DependentUpon>
-		</Compile>
-	</ItemGroup>
-
-	<ItemGroup>
-		<EmbeddedResource Update="Resources\Strings.resx">
-			<Generator>ResXFileCodeGenerator</Generator>
-			<LastGenOutput>Strings.Designer.cs</LastGenOutput>
-		</EmbeddedResource>
-		<EmbeddedResource Update="Views\DeveloperPage.xaml">
-		  <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-		</EmbeddedResource>
-	</ItemGroup>
-
 </Project>

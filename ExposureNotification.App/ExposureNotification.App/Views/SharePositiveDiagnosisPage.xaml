@@ -9,7 +9,7 @@
     Title="Share a Positive Diagnosis"
     ios:Page.UseSafeArea="True"
     x:DataType="viewmodel:SharePositiveDiagnosisViewModel"
-    BackgroundColor="{StaticResource BackgroundColor}"
+    BackgroundColor="{DynamicResource BackgroundColor}"
     Shell.PresentationMode="ModalAnimated"
     Visual="Material"
     mc:Ignorable="d">
@@ -35,6 +35,7 @@
         <Label
             FontSize="Medium"
             HorizontalOptions="Center"
+            Style="{DynamicResource MediumLabelStyle}"
             Text="Share a Positive Diagnosis"
             TextColor="{DynamicResource PrimaryColor}"
             VerticalOptions="Center" />
@@ -44,21 +45,35 @@
                 <Frame Style="{DynamicResource CardFrame}">
                     <StackLayout>
 
-                        <Label Text="[Insert text from local Health authority]" />
+                        <Label Style="{DynamicResource SmallLabelStyle}" Text="[Insert text from local Health authority]" />
 
-                        <Label Margin="0,12,0,0" Text="Only those who have been exposed will receive a notification." />
+                        <Label
+                            Margin="0,12,0,0"
+                            Style="{DynamicResource SmallLabelStyle}"
+                            Text="Only those who have been exposed will receive a notification." />
 
                         <Entry
                             HorizontalOptions="FillAndExpand"
                             Placeholder="Diagnosis Identifier"
-                            Text="{Binding DiagnosisUid, Mode=TwoWay}"
-                            TextColor="{StaticResource TextPrimaryColor}" />
+                            Style="{DynamicResource EntryStyle}"
+                            BackgroundColor="{DynamicResource BackgroundColor}"
+                            Text="{Binding DiagnosisUid, Mode=TwoWay}" />
 
-                        <Label Margin="0,12,0,0" Text="The unique test identifier that came with your COVID-19 test must be used to verify your positive test result." />
+                        <Label
+                            Margin="0,12,0,0"
+                            Style="{DynamicResource SmallLabelStyle}"
+                            Text="The unique test identifier that came with your COVID-19 test must be used to verify your positive test result." />
 
-                        <DatePicker Margin="0,20,0,0" Date="{Binding DiagnosisTimestamp}" />
+                        <DatePicker
+                            Margin="0,20,0,0"
+                            Date="{Binding DiagnosisTimestamp}"
+                            Style="{DynamicResource DatePickerStyle}"
+                            BackgroundColor="{DynamicResource BackgroundColor}"/>
 
-                        <Label Margin="0,12,0,0" Text="The test date helps the app know when you may have been contagious and notify the right people of potential exposure." />
+                        <Label
+                            Margin="0,12,0,0"
+                            Style="{DynamicResource SmallLabelStyle}"
+                            Text="The test date helps the app know when you may have been contagious and notify the right people of potential exposure." />
 
 
                         <Button

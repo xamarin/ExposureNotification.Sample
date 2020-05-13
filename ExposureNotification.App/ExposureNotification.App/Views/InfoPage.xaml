@@ -7,7 +7,7 @@
     xmlns:viewmodel="clr-namespace:ExposureNotification.App.ViewModels"
     Title="Exposure Notifications"
     x:DataType="viewmodel:InfoViewModel"
-    BackgroundColor="{StaticResource BackgroundColor}"
+    BackgroundColor="{DynamicResource BackgroundColor}"
     mc:Ignorable="d">
 
     <ContentPage.BindingContext>
@@ -25,7 +25,7 @@
                                 FontFamily="FA-R"
                                 Glyph="{DynamicResource IconStar}"
                                 Size="72"
-                                Color="{DynamicResource TextPrimaryColor}" />
+                                Color="{DynamicResource SystemGray}" />
                         </Image.Source>
                     </Image>
 
@@ -33,10 +33,11 @@
                         Margin="0,0,0,10"
                         FontAttributes="Bold"
                         FontSize="Title"
+                        Style="{DynamicResource TitleLabelStyle}"
                         HorizontalTextAlignment="Center"
                         Text="Welcome to the Sample Public Health Authority COVID-19 App" />
 
-                    <Label Margin="0,10,0,0" Text="[Actual copy to be provided by Public Health Authority]" />
+                    <Label Style="{DynamicResource SmallLabelStyle}" Margin="0,10,0,0" Text="[Actual copy to be provided by Public Health Authority]" />
 
                 </StackLayout>
             </Frame>
@@ -44,7 +45,7 @@
             <Frame Style="{DynamicResource CardFrame}">
 
                 <StackLayout>
-                    <Label Margin="0,10,0,0" Text="Exposure Notifications are currently enabled.  You will be notified of any possible exposure." />
+                    <Label Style="{DynamicResource SmallLabelStyle}" Margin="0,10,0,0" Text="Exposure Notifications are currently enabled.  You will be notified of any possible exposure." />
 
                     <Button
                         Margin="0,10,0,0"

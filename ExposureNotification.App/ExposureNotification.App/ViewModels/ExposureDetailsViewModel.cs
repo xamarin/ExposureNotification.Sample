@@ -28,7 +28,7 @@ namespace ExposureNotification.App.ViewModels
         }
 
 		public AsyncCommand CancelCommand
-			=> new AsyncCommand(() => Shell.Current.GoToAsync(".."));
+			=> new AsyncCommand(() => GoToAsync(".."));
 
 		public ExposureInfo ExposureInfo { get; set; } = new ExposureInfo();
 

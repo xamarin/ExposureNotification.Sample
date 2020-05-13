@@ -18,7 +18,7 @@ namespace ExposureNotification.App.ViewModels
 					if (t.Result)
 					{
 						IsEnabled = true;
-						await Shell.Current.GoToAsync($"//{nameof(InfoPage)}");
+						await GoToAsync($"//{nameof(InfoPage)}");
 					}
 				});
 		}
@@ -55,7 +55,7 @@ namespace ExposureNotification.App.ViewModels
 					if (!enabled)
 						await Xamarin.ExposureNotifications.ExposureNotification.StartAsync();
 				}
-				await Shell.Current.GoToAsync($"//{nameof(InfoPage)}");
+				await GoToAsync($"//{nameof(InfoPage)}");
 			});
 
 		public ICommand GetStartedCommand

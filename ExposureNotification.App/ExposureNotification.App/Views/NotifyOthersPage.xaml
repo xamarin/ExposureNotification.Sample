@@ -8,7 +8,7 @@
     xmlns:viewmodel="clr-namespace:ExposureNotification.App.ViewModels"
     Title="Notify Others"
     x:DataType="viewmodel:NotifyOthersViewModel"
-    BackgroundColor="{StaticResource BackgroundColor}"
+    BackgroundColor="{DynamicResource BackgroundColor}"
     mc:Ignorable="d">
     <ContentPage.BindingContext>
         <viewmodel:NotifyOthersViewModel />
@@ -22,12 +22,17 @@
                     <Label
                         FontAttributes="Bold"
                         FontSize="Subtitle"
+                        Style="{DynamicResource SubtitleLabelStyle}"
                         Text="Share A Positive Diagnosis" />
 
-                    <Label Margin="0,12,0,0" Text="If you tested positive for the virus that causes COVID-19, you can choose to share your diagnosis.  This will help others in your community contain the spread of the virus." />
+                    <Label
+                        Margin="0,12,0,0"
+                        Style="{DynamicResource SmallLabelStyle}"
+                        Text="If you tested positive for the virus that causes COVID-19, you can choose to share your diagnosis.  This will help others in your community contain the spread of the virus." />
 
                     <Label
                         FontAttributes="Bold"
+                        Style="{DynamicResource SmallLabelStyle}"
                         Text="Learn more"
                         TextColor="{DynamicResource PrimaryColor}">
                         <Label.GestureRecognizers>
@@ -54,19 +59,28 @@
                     <Label
                         FontAttributes="Bold"
                         FontSize="Subtitle"
+                        Style="{DynamicResource SubtitleLabelStyle}"
                         Text="Diagnosis Shared" />
 
-                    <Label Margin="0,12,0,0" Text="Your diagnosis was shared on:" />
+                    <Label
+                        Margin="0,12,0,0"
+                        Style="{DynamicResource SmallLabelStyle}"
+                        Text="Your diagnosis was shared on:" />
 
                     <Label
                         Margin="0,12,0,0"
                         FontAttributes="Bold"
+                        Style="{DynamicResource SmallLabelStyle}"
                         Text="{Binding DiagnosisShareTimestamp, StringFormat='{0:yyyy-MM-dd}'}" />
 
-                    <Label Margin="0,12,0,0" Text="This will help others in your community contain the spread of the virus." />
+                    <Label
+                        Margin="0,12,0,0"
+                        Style="{DynamicResource SmallLabelStyle}"
+                        Text="This will help others in your community contain the spread of the virus." />
 
                     <Label
                         FontAttributes="Bold"
+                        Style="{DynamicResource SmallLabelStyle}"
                         Text="Learn more"
                         TextColor="{DynamicResource PrimaryColor}">
                         <Label.GestureRecognizers>

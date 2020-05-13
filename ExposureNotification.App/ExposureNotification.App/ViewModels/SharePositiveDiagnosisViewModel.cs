@@ -18,7 +18,7 @@ namespace ExposureNotification.App.ViewModels
 		public DateTime? DiagnosisTimestamp { get; set; } = DateTime.Now;
 
 		public AsyncCommand CancelCommand
-			=> new AsyncCommand(() => Shell.Current.GoToAsync(".."));
+			=> new AsyncCommand(() => GoToAsync(".."));
 
 		public AsyncCommand SubmitDiagnosisCommand
 			=> new AsyncCommand(async () =>
@@ -79,7 +79,7 @@ namespace ExposureNotification.App.ViewModels
 
 					await UserDialogs.Instance.AlertAsync("Diagnosis Submitted", "Complete", "OK");
 
-					await Shell.Current.GoToAsync("..");
+					await GoToAsync("..");
 				}
 				catch (Exception ex)
 				{

@@ -26,7 +26,7 @@ namespace ExposureNotification.App.ViewModels
 			LocalStateManager.Instance.IsWelcomed = false;
 			LocalStateManager.Save();
 
-			return Shell.Current.GoToAsync($"//{nameof(WelcomePage)}");
+			return GoToAsync($"//{nameof(WelcomePage)}");
 		}
 
 		public AsyncCommand DisableCommand

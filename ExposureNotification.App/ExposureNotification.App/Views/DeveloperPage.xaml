@@ -8,7 +8,7 @@
     xmlns:viewmodel="clr-namespace:ExposureNotification.App.ViewModels"
     Title="Developer"
     x:DataType="viewmodel:DeveloperViewModel"
-    BackgroundColor="{StaticResource BackgroundColor}"
+    BackgroundColor="{DynamicResource BackgroundColor}"
     mc:Ignorable="d">
     <ContentPage.BindingContext>
         <viewmodel:DeveloperViewModel />
@@ -19,8 +19,11 @@
                 <Frame Style="{DynamicResource CardFrame}">
                     <StackLayout Spacing="20">
                         <StackLayout HorizontalOptions="Center" Orientation="Horizontal">
-                            <Label Text="Native Implementation: " />
-                            <Label FontAttributes="Bold" Text="{Binding NativeImplementationName}" />
+                            <Label Style="{DynamicResource SmallLabelStyle}" Text="Native Implementation: " />
+                            <Label
+                                FontAttributes="Bold"
+                                Style="{DynamicResource SmallLabelStyle}"
+                                Text="{Binding NativeImplementationName}" />
                         </StackLayout>
 
                         <Button
@@ -35,63 +38,78 @@
                             Style="{DynamicResource ButtonRounded}"
                             Text="Reset Last Enabled State" />
 
-					</StackLayout>
-				</Frame>
+                    </StackLayout>
+                </Frame>
 
 
-				<Frame Style="{DynamicResource CardFrame}">
-					<StackLayout Spacing="20">
-						<Label Text="Notify Others" FontAttributes="Bold" FontSize="Subtitle" />
-						
-						<Button
-							Command="{Binding ResetSelfDiagnosis}"
-							HorizontalOptions="CenterAndExpand"
-							Style="{DynamicResource ButtonRounded}"
-							Text="Reset Self Diagnosis" />
-					</StackLayout>
-				</Frame>
+                <Frame Style="{DynamicResource CardFrame}">
+                    <StackLayout Spacing="20">
+                        <Label
+                            FontAttributes="Bold"
+                            FontSize="Subtitle"
+                            Style="{DynamicResource SmallLabelStyle}"
+                            Text="Notify Others" />
 
-				<Frame Style="{DynamicResource CardFrame}">
-					<StackLayout Spacing="20">
-						<Label Text="Exposures" FontAttributes="Bold" FontSize="Subtitle" />
-            <Button
-                Command="{Binding ResetExposures}"
-                HorizontalOptions="CenterAndExpand"
-                Style="{DynamicResource ButtonRounded}"
-                Text="Reset Exposures" />
-						<Button
-							Command="{Binding AddExposures}"
-							HorizontalOptions="CenterAndExpand"
-							Style="{DynamicResource ButtonRounded}"
-							Text="Add Exposures" />
-					</StackLayout>
-				</Frame>
+                        <Button
+                            Command="{Binding ResetSelfDiagnosis}"
+                            HorizontalOptions="CenterAndExpand"
+                            Style="{DynamicResource ButtonRounded}"
+                            Text="Reset Self Diagnosis" />
+                    </StackLayout>
+                </Frame>
 
-				<Frame Style="{DynamicResource CardFrame}">
-					<StackLayout Spacing="20">
-						<Label Text="Batch File Index" FontAttributes="Bold" FontSize="Subtitle" />
+                <Frame Style="{DynamicResource CardFrame}">
+                    <StackLayout Spacing="20">
+                        <Label
+                            FontAttributes="Bold"
+                            FontSize="Subtitle"
+                            Style="{DynamicResource SmallLabelStyle}"
+                            Text="Exposures" />
+                        <Button
+                            Command="{Binding ResetExposures}"
+                            HorizontalOptions="CenterAndExpand"
+                            Style="{DynamicResource ButtonRounded}"
+                            Text="Reset Exposures" />
+                        <Button
+                            Command="{Binding AddExposures}"
+                            HorizontalOptions="CenterAndExpand"
+                            Style="{DynamicResource ButtonRounded}"
+                            Text="Add Exposures" />
+                    </StackLayout>
+                </Frame>
 
-						<StackLayout Orientation="Horizontal" HorizontalOptions="Center">
-							<Label Text="Latest Batch File Processed: " />
-							<Label Text="{Binding CurrentBatchFileIndex}" FontAttributes="Bold" />
-						</StackLayout>
+                <Frame Style="{DynamicResource CardFrame}">
+                    <StackLayout Spacing="20">
+                        <Label
+                            FontAttributes="Bold"
+                            FontSize="Subtitle"
+                            Style="{DynamicResource SmallLabelStyle}"
+                            Text="Batch File Index" />
 
-						<Button
-							Command="{Binding ResetBatchFileIndex}"
-							HorizontalOptions="CenterAndExpand"
-							Style="{DynamicResource ButtonRounded}"
-							Text="Reset Batch File Index" />
+                        <StackLayout HorizontalOptions="Center" Orientation="Horizontal">
+                            <Label Style="{DynamicResource SmallLabelStyle}" Text="Latest Batch File Processed: " />
+                            <Label
+                                FontAttributes="Bold"
+                                Style="{DynamicResource SmallLabelStyle}"
+                                Text="{Binding CurrentBatchFileIndex}" />
+                        </StackLayout>
+
+                        <Button
+                            Command="{Binding ResetBatchFileIndex}"
+                            HorizontalOptions="CenterAndExpand"
+                            Style="{DynamicResource ButtonRounded}"
+                            Text="Reset Batch File Index" />
 
 
-						<Button
-							Command="{Binding ManualTriggerKeyFetch}"
-							HorizontalOptions="CenterAndExpand"
-							Style="{DynamicResource ButtonRounded}"
-							Text="Trigger Key Fetch" />
+                        <Button
+                            Command="{Binding ManualTriggerKeyFetch}"
+                            HorizontalOptions="CenterAndExpand"
+                            Style="{DynamicResource ButtonRounded}"
+                            Text="Trigger Key Fetch" />
 
-					</StackLayout>
-				</Frame>
-			</StackLayout>
-		</ScrollView>
-	</ContentPage.Content>
+                    </StackLayout>
+                </Frame>
+            </StackLayout>
+        </ScrollView>
+    </ContentPage.Content>
 </ContentPage>

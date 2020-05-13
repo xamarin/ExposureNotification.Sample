@@ -65,6 +65,7 @@
   <ItemGroup>
     <Compile Include="Main.cs" />
     <Compile Include="AppDelegate.cs" />
+    <Compile Include="Renderers\DefaultPageRenderer.cs" />
     <None Include="Entitlements.plist" />
     <None Include="Info.plist" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -150,4 +151,5 @@
       <Name>ExposureNotification.App</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
 </Project>

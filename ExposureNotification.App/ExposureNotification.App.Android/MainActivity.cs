@@ -9,6 +9,8 @@ using Android.OS;
 using Acr.UserDialogs;
 using Plugin.LocalNotification;
 using Android.Content;
+using ExposureNotification.App.Styles;
+using Android.Content.Res;
 
 namespace ExposureNotification.App.Droid
 {
@@ -35,7 +37,7 @@ namespace ExposureNotification.App.Droid
 			NotificationCenter.NotifyNotificationTapped(base.Intent);
 		}
 
-		public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
+		public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
 		{
 			Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
 
@@ -48,5 +50,11 @@ namespace ExposureNotification.App.Droid
 
 			base.OnNewIntent(intent);
 		}
-	}
+
+        public override void OnConfigurationChanged(Configuration newConfig)
+        {
+			ThemeHelper.ChangeTheme();
+            base.OnConfigurationChanged(newConfig);
+        }
+    }
 }

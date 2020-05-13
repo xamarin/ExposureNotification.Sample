@@ -28,8 +28,8 @@
             <Label Style="{DynamicResource CloseLabel}" />
         </Frame>
         <Label
-            FontSize="Medium"
             HorizontalOptions="Center"
+            Style="{DynamicResource MediumLabelStyle}"
             Text="Possible Exposure Details"
             TextColor="{DynamicResource PrimaryColor}"
             VerticalOptions="Center" />
@@ -37,17 +37,23 @@
         <StackLayout Grid.Row="1" Style="{DynamicResource Container}">
             <Frame Style="{DynamicResource CardFrame}">
                 <StackLayout Spacing="20">
-                    <Label Text="[Actual copy to be provided by Public Health Authority]" />
+                    <Label Style="{DynamicResource SmallLabelStyle}" Text="[Actual copy to be provided by Public Health Authority]" />
 
                     <BoxView BackgroundColor="{DynamicResource TextPrimaryColor}" HeightRequest="2" />
 
-                    <Label Text="The person's test result has been verified.  You were near this person at:" />
-                    <Label FontAttributes="Bold" Text="{Binding When, StringFormat='{0:MMMM d, yyyy h:mm tt}'}" />
+                    <Label Style="{DynamicResource SmallLabelStyle}" Text="The person's test result has been verified.  You were near this person at:" />
+                    <Label
+                        FontAttributes="Bold"
+                        Style="{DynamicResource SmallLabelStyle}"
+                        Text="{Binding When, StringFormat='{0:MMMM d, yyyy h:mm tt}'}" />
 
-                    <Label Text="You were exposed to this person for approximately:" />
-                    <Label FontAttributes="Bold" Text="{Binding Duration, StringFormat='{0:%m} minutes'}" />
+                    <Label Style="{DynamicResource SmallLabelStyle}" Text="You were exposed to this person for approximately:" />
+                    <Label
+                        FontAttributes="Bold"
+                        Style="{DynamicResource SmallLabelStyle}"
+                        Text="{Binding Duration, StringFormat='{0:%m} minutes'}" />
 
-                    <Label Text="Next steps: [Actual copy to be provided by Public Health Authority]." />
+                    <Label Style="{DynamicResource SmallLabelStyle}" Text="Next steps: [Actual copy to be provided by Public Health Authority]." />
 
                 </StackLayout>
             </Frame>

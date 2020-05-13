@@ -20,7 +20,7 @@
         <Label
             Margin="10,10,10,0"
             FontAttributes="Bold"
-            FontSize="Subtitle"
+            Style="{DynamicResource SubtitleLabelStyle}"
             Text="Exposures in Past 14 Days" />
 
         <CollectionView ItemsSource="{Binding ExposureInformation}" SelectionMode="None">
@@ -45,10 +45,12 @@
                                     Grid.Row="0"
                                     Grid.Column="0"
                                     FontAttributes="Bold"
+                                    Style="{DynamicResource MediumLabelStyle}"
                                     Text="Possible exposure" />
                                 <Label
                                     Grid.Row="1"
                                     Grid.Column="0"
+                                    Style="{DynamicResource SmallLabelStyle}"
                                     Text="{Binding Timestamp}" />
 
                                 <Image
@@ -60,7 +62,7 @@
                                             FontFamily="FA-R"
                                             Glyph="{StaticResource IconRightArrow}"
                                             Size="18"
-                                            Color="{DynamicResource TextPrimaryColor}" />
+                                            Color="{DynamicResource PrimaryColor}" />
                                     </Image.Source>
                                 </Image>
                             </Grid>
@@ -71,7 +73,7 @@
             <CollectionView.EmptyView>
 
 
-                <StackLayout Orientation="Vertical">
+                <StackLayout Orientation="Vertical" Style="{DynamicResource Container}">
                     <Label Margin="0,10,0,0" Text="No known exposures." />
                     <Label Margin="0,10,0,0" Text="You will be notified if you have been exposed to someone who reported a positive COVID-19 result." />
                 </StackLayout>

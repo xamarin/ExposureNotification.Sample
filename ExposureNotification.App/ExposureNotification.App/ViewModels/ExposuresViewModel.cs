@@ -29,9 +29,9 @@ namespace ExposureNotification.App.ViewModels
 		public ObservableCollection<Xamarin.ExposureNotifications.ExposureInfo> ExposureInformation
 			=> LocalStateManager.Instance.ExposureInformation;
 
+		bool navigating;
+
 		public AsyncCommand<ExposureInfo> ExposureSelectedCommand => new AsyncCommand<ExposureInfo>((info) =>
-		{
-			return Shell.Current.GoToAsync($"{nameof(ExposureDetailsPage)}?info={JsonConvert.SerializeObject(info)}");
-		});
+		   GoToAsync($"{nameof(ExposureDetailsPage)}?info={JsonConvert.SerializeObject(info)}"));
 	}
 }
