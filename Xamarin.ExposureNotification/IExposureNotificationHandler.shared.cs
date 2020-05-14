@@ -10,7 +10,7 @@ namespace Xamarin.ExposureNotifications
 		Task<Configuration> GetConfigurationAsync();
 
 		// Go fetch the keys from your server
-		Task FetchExposureKeysFromServerAsync(ITemporaryExposureKeyBatches batches);
+		Task<IEnumerable<string>> FetchExposureKeyBatchFilesFromServerAsync();
 
 		// Might be exposed, check and alert user if necessary
 		Task ExposureDetectedAsync(ExposureDetectionSummary summary, IEnumerable<ExposureInfo> ExposureInfo);
@@ -22,7 +22,7 @@ namespace Xamarin.ExposureNotifications
 	{
 		Task AddBatchAsync(IEnumerable<TemporaryExposureKey> keys);
 
-		Task AddBatchAsync(TemporaryExposureKeyBatch file);
+		Task AddBatchAsync(TemporaryExposureKeyExport file);
 	}
 
 	public interface INativeImplementation
@@ -30,7 +30,7 @@ namespace Xamarin.ExposureNotifications
 		Task StartAsync();
 		Task StopAsync();
 		Task<bool> IsEnabledAsync();
-		Task<(ExposureDetectionSummary summary, IEnumerable<ExposureInfo> info)> DetectExposuresAsync(TemporaryExposureKeyBatches batches);
+		Task<(ExposureDetectionSummary summary, IEnumerable<ExposureInfo> info)> DetectExposuresAsync(IEnumerable<string> files);
 		Task<IEnumerable<TemporaryExposureKey>> GetSelfTemporaryExposureKeysAsync();
 	}
 }

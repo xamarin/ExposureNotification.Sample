@@ -40,22 +40,16 @@ namespace Xamarin.ExposureNotifications
 				var batch = sequence.Take(MaxKeysPerFile);
 				sequence = sequence.Skip(MaxKeysPerFile);
 
-				var file = new TemporaryExposureKeyBatch();
-				file.Key.AddRange(batch.Select(k => new TemporaryExposureKeyBatchKey
-				{
-					KeyData = ByteString.CopyFrom(k.KeyData),
-					RollingStartNumber = (uint)k.RollingStartLong,
-					RollingPeriod = (uint)(k.RollingDuration.TotalMinutes / 10.0),
-					TransmissionRiskLevel = (int)k.TransmissionRiskLevel,
-				}));
+				var file = new TemporaryExposureKeyExport();
+				file.Keys.AddRange(batch);
 
 				await AddBatchAsync(file);
 			}
 		}
 
-		public Task AddBatchAsync(TemporaryExposureKeyBatch file)
+		public Task AddBatchAsync(TemporaryExposureKeyExport file)
 		{
-			if (file == null || file.Key == null || file.Key.Count <= 0)
+			if (file == null || file.Keys == null || file.Keys.Count <= 0)
 				return Task.CompletedTask;
 
 			if (!Directory.Exists(cacheRoot))

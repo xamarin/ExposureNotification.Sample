@@ -82,16 +82,14 @@ namespace Xamarin.ExposureNotifications
 		// Call this when the app needs to update the local keys
 		public static async Task<bool> UpdateKeysFromServer()
 		{
-			using var batches = new TemporaryExposureKeyBatches();
+			var downloadedFiles = await Handler?.FetchExposureKeyBatchFilesFromServerAsync();
 
-			await Handler?.FetchExposureKeysFromServerAsync(batches);
-
-			if (!batches.Files.Any())
+			if (!downloadedFiles.Any())
 				return false;
 
 			if (nativeImplementation != null)
 			{
-				var r = await nativeImplementation.DetectExposuresAsync(batches);
+				var r = await nativeImplementation.DetectExposuresAsync(downloadedFiles);
 
 				var hasMatches = (r.summary?.MatchedKeyCount ?? 0) > 0;
 
@@ -103,14 +101,14 @@ namespace Xamarin.ExposureNotifications
 
 #if __IOS__
 			// On iOS we need to check this ourselves and invoke the handler
-			var (summary, info) = await PlatformDetectExposuresAsync(batches.Files);
+			var (summary, info) = await PlatformDetectExposuresAsync(downloadedFiles);
 
 			// Check that the summary has any matches before notifying the callback
 			if (summary?.MatchedKeyCount > 0)
 				await Handler.ExposureDetectedAsync(summary, info);
 #elif __ANDROID__
 			// on Android this will happen in the broadcast receiver
-			await PlatformDetectExposuresAsync(batches.Files);
+			await PlatformDetectExposuresAsync(downloadedFiles);
 #endif
 
 			return true;
