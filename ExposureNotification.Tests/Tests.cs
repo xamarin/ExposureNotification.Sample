@@ -133,15 +133,15 @@ namespace ExposureNotification.Tests
 			{
 				for (var seg = nowDate; seg < nowDate.AddDays(1); seg += TimeSpan.FromMinutes(15))
 				{
-					var rnd = new byte[64];
+					var rnd = new byte[16];
 					random.NextBytes(rnd);
 
 					tracingKeys.Add(new TemporaryExposureKey
 					{
-						KeyData = rnd,
+						KeyDataBytes = rnd,
 						RollingStart = nowDate,
 						RollingDuration = TimeSpan.FromMinutes(random.Next(5, 60)),
-						TransmissionRiskLevel = (RiskLevel)random.Next(1, 8)
+						TransmissionRiskLevelValue = (RiskLevel)random.Next(1, 8)
 					});
 				}
 			};
