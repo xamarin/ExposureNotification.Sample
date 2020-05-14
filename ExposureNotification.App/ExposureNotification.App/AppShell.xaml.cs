@@ -23,10 +23,12 @@ namespace ExposureNotification.App
 			tabDeveloper.IsEnabled = true;
 #endif
 
-			Routing.RegisterRoute("exposuredetails", typeof(ExposureDetailsPage));
+			Routing.RegisterRoute(nameof(ExposureDetailsPage), typeof(ExposureDetailsPage));
+			Routing.RegisterRoute(nameof(SharePositiveDiagnosisPage), typeof(SharePositiveDiagnosisPage));
 
 			if (LocalStateManager.Instance.LastIsEnabled)
-				GoToAsync(new ShellNavigationState("//info"), false);
+				GoToAsync($"//{nameof(InfoPage)}", false);
+
 		}
 	}
 }

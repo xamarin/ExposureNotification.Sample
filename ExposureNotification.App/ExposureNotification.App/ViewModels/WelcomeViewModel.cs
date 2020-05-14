@@ -1,11 +1,14 @@
 ﻿using System.Windows.Input;
 using Acr.UserDialogs;
 using ExposureNotification.App.Services;
+using ExposureNotification.App.Views;
+using MvvmHelpers.Commands;
 using Xamarin.Forms;
+using Command = MvvmHelpers.Commands.Command;
 
 namespace ExposureNotification.App.ViewModels
 {
-	public class WelcomeViewModel : BaseViewModel
+	public class WelcomeViewModel : ViewModelBase
 	{
 		public WelcomeViewModel()
 		{
@@ -15,19 +18,19 @@ namespace ExposureNotification.App.ViewModels
 					if (t.Result)
 					{
 						IsEnabled = true;
-						await Shell.Current.GoToAsync("//info");
+						await GoToAsync($"//{nameof(InfoPage)}");
 					}
 				});
 		}
 
-		public bool IsEnabled
+		public new bool IsEnabled
 		{
 			get => LocalStateManager.Instance.LastIsEnabled;
 			set
 			{
 				LocalStateManager.Instance.LastIsEnabled = value;
 				LocalStateManager.Save();
-				NotifyPropertyChanged(nameof(IsEnabled));
+				OnPropertyChanged();
 			}
 		}
 
@@ -38,12 +41,12 @@ namespace ExposureNotification.App.ViewModels
 			{
 				LocalStateManager.Instance.IsWelcomed = value;
 				LocalStateManager.Save();
-				NotifyPropertyChanged(nameof(IsWelcomed));
+				OnPropertyChanged();
 			}
 		}
 
-		public ICommand EnableCommand
-			=> new Command(async () =>
+		public AsyncCommand EnableCommand
+			=> new AsyncCommand(async () =>
 			{
 				using (UserDialogs.Instance.Loading(string.Empty))
 				{
@@ -52,7 +55,7 @@ namespace ExposureNotification.App.ViewModels
 					if (!enabled)
 						await Xamarin.ExposureNotifications.ExposureNotification.StartAsync();
 				}
-				await Shell.Current.GoToAsync("//info");
+				await GoToAsync($"//{nameof(InfoPage)}");
 			});
 
 		public ICommand GetStartedCommand

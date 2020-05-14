@@ -3,13 +3,18 @@ using System.Windows.Input;
 using ExposureNotification.App.Resources;
 using ExposureNotification.App.Services;
 using ExposureNotification.App.Views;
+using MvvmHelpers.Commands;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 
 namespace ExposureNotification.App.ViewModels
 {
-	public class NotifyOthersViewModel : BaseViewModel
+	public class NotifyOthersViewModel : ViewModelBase
 	{
+		public NotifyOthersViewModel()
+        {
+			IsEnabled = true;
+        }
 
 		public bool DiagnosisPending
 			=> (LocalStateManager.Instance.LatestDiagnosis?.DiagnosisDate ?? DateTimeOffset.MinValue)
@@ -18,10 +23,10 @@ namespace ExposureNotification.App.ViewModels
 		public DateTimeOffset DiagnosisShareTimestamp
 			=> LocalStateManager.Instance.LatestDiagnosis?.DiagnosisDate ?? DateTimeOffset.MinValue;
 
-		public ICommand SharePositiveDiagnosisCommand
-			=> new Command(async () => await Navigation.PushModalAsync(new NavigationPage(new SharePositiveDiagnosisPage())));
+		public AsyncCommand SharePositiveDiagnosisCommand
+			=> new AsyncCommand(() => GoToAsync($"{nameof(SharePositiveDiagnosisPage)}"));
 
-		public ICommand LearnMoreCommand
-			=> new Command(() => Browser.OpenAsync(Strings.NotifyOthers_LearnMore_Url));
+		public AsyncCommand LearnMoreCommand
+			=> new AsyncCommand(() => Browser.OpenAsync(Strings.NotifyOthers_LearnMore_Url));
 	}
 }

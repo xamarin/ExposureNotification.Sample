@@ -2,24 +2,29 @@
 using System.Windows.Input;
 using Acr.UserDialogs;
 using ExposureNotification.App.Services;
+using MvvmHelpers.Commands;
 using Xamarin.Forms;
 
 namespace ExposureNotification.App.ViewModels
 {
-	public class SharePositiveDiagnosisViewModel : BaseViewModel
+	public class SharePositiveDiagnosisViewModel : ViewModelBase
 	{
+		public SharePositiveDiagnosisViewModel()
+        {
+			IsEnabled = true;
+        }
 		public string DiagnosisUid { get; set; }
 
 		public DateTime? DiagnosisTimestamp { get; set; } = DateTime.Now;
 
-		public ICommand CancelCommand
-			=> new Command(() => Navigation.PopModalAsync(true));
+		public AsyncCommand CancelCommand
+			=> new AsyncCommand(() => GoToAsync(".."));
 
-		public ICommand SubmitDiagnosisCommand
-			=> new Command(async () =>
+		public AsyncCommand SubmitDiagnosisCommand
+			=> new AsyncCommand(async () =>
 			{
 				using var dialog = UserDialogs.Instance.Loading("Verifying Diagnosis...");
-
+				IsEnabled = false;
 				try
 				{
 					// Check the diagnosis is valid on the server before asking the native api's for the keys
@@ -31,10 +36,12 @@ namespace ExposureNotification.App.ViewModels
 					dialog.Hide();
 
 					await UserDialogs.Instance.AlertAsync("Your diagnosis cannot be verified at this time to be submitted.", "Verification Failed", "OK");
+					IsEnabled = true;
 					return;
 				}
 
 				dialog.Title = "Submitting Diagnosis...";
+				IsEnabled = false;
 
 				try
 				{
@@ -72,7 +79,7 @@ namespace ExposureNotification.App.ViewModels
 
 					await UserDialogs.Instance.AlertAsync("Diagnosis Submitted", "Complete", "OK");
 
-					await Navigation.PopModalAsync(true);
+					await GoToAsync("..");
 				}
 				catch (Exception ex)
 				{
@@ -81,6 +88,10 @@ namespace ExposureNotification.App.ViewModels
 					dialog.Hide();
 					UserDialogs.Instance.Alert("Please try again later.", "Failed", "OK");
 				}
+				finally
+                {
+					IsEnabled = true;
+                }
 			});
 	}
 }

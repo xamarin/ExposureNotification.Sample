@@ -20,6 +20,7 @@
 	<ItemGroup>
 		<PackageReference Include="Acr.UserDialogs" Version="7.1.0.442" />
 		<PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+		<PackageReference Include="Refractored.MvvmHelpers" Version="1.6.1-beta" />
 		<PackageReference Include="System.Text.Json" Version="4.7.1" />
 		<PackageReference Include="Xamarin.Forms" Version="4.6.0.726" />
 		<PackageReference Include="Xamarin.Essentials" Version="1.5.3.1" />
@@ -29,24 +30,6 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\Xamarin.ExposureNotification\Xamarin.ExposureNotification.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Compile Update="Resources\Strings.Designer.cs">
-			<DesignTime>True</DesignTime>
-			<AutoGen>True</AutoGen>
-			<DependentUpon>Strings.resx</DependentUpon>
-		</Compile>
-	</ItemGroup>
-
-	<ItemGroup>
-		<EmbeddedResource Update="Resources\Strings.resx">
-			<Generator>ResXFileCodeGenerator</Generator>
-			<LastGenOutput>Strings.Designer.cs</LastGenOutput>
-		</EmbeddedResource>
-		<EmbeddedResource Update="Views\DeveloperPage.xaml">
-		  <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
-		</EmbeddedResource>
 	</ItemGroup>
 
 </Project>

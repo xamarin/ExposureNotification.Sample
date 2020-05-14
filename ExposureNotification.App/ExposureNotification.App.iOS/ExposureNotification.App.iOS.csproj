@@ -65,6 +65,7 @@
   <ItemGroup>
     <Compile Include="Main.cs" />
     <Compile Include="AppDelegate.cs" />
+    <Compile Include="Renderers\DefaultPageRenderer.cs" />
     <None Include="Entitlements.plist" />
     <None Include="Info.plist" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -129,6 +130,9 @@
     <PackageReference Include="Newtonsoft.Json">
       <Version>12.0.3</Version>
     </PackageReference>
+    <PackageReference Include="Refractored.MvvmHelpers">
+      <Version>1.6.1-beta</Version>
+    </PackageReference>
     <PackageReference Include="Xamarin.Forms" Version="4.6.0.726" />
     <PackageReference Include="Xamarin.Essentials" Version="1.5.3.1" />
     <PackageReference Include="Xamarin.Forms.Visual.Material">
@@ -147,4 +151,5 @@
       <Name>ExposureNotification.App</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
 </Project>
