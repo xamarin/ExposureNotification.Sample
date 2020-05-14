@@ -39,21 +39,12 @@ namespace ExposureNotification.Backend
 		public static DbTemporaryExposureKey FromKey(TemporaryExposureKey key, long testDateMsSinceEpoch)
 			=> new DbTemporaryExposureKey
 			{
-				Base64KeyData = Convert.ToBase64String(key.KeyData),
+				Base64KeyData = key.KeyData.ToBase64(),
 				TimestampMsSinceEpoch = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
 				TestDateMsSinceEpoch = testDateMsSinceEpoch,
-				RollingStartSecondsSinceEpoch = key.RollingStart.ToUnixTimeSeconds(),
-				RollingDuration = (int)key.RollingDuration.TotalMinutes,
+				RollingStartSecondsSinceEpoch = key.RollingStartIntervalNumber,
+				RollingDuration = key.RollingPeriod,
 				TransmissionRiskLevel = (int)key.TransmissionRiskLevel
-			};
-
-		public TemporaryExposureKeyBatchKey ToProtoKey()
-			=> new TemporaryExposureKeyBatchKey
-			{
-				KeyData = ByteString.FromBase64(Base64KeyData),
-				RollingStartNumber = (uint)RollingStartSecondsSinceEpoch,
-				RollingPeriod = (uint)RollingDuration,
-				TransmissionRiskLevel = TransmissionRiskLevel
 			};
 	}
 }

@@ -18,7 +18,7 @@ namespace ExposureNotification.Backend
 		// One person/diagnosis should never need to submit many many keys
 		// and we can detect if they try to and assume it's malicious and prevent it
 		// this is the threshold for how many keys we accept from a single diagnosis uid
-		const int maxKeysPerDiagnosisFile = 30;
+		const int maxKeysPerDiagnosisUid = 30;
 
 		public ExposureNotificationStorage(
 			Action<DbContextOptionsBuilder> buildDbContextOpetions = null,
@@ -99,10 +99,10 @@ namespace ExposureNotification.Backend
 			{
 				// Ensure the database contains the diagnosis uid
 				var dbDiag = await ctx.Diagnoses.FirstOrDefaultAsync(d => d.DiagnosisUid == diagnosis.DiagnosisUid);
-				
+
 				// Check that the diagnosis uid exists and that there aren't too many keys associated
 				// already, otherwise it might be someone submitting fake data with a legitimate key
-				if (dbDiag == null || dbDiag.KeyCount > maxKeysPerDiagnosisFile)
+				if (dbDiag == null || dbDiag.KeyCount > maxKeysPerDiagnosisUid)
 					throw new InvalidOperationException();
 
 				var dbKeys = diagnosis.Keys.Select(k => DbTemporaryExposureKey.FromKey(k, diagnosis.TestDate)).ToList();
@@ -124,39 +124,48 @@ namespace ExposureNotification.Backend
 			}
 		}
 
-		public async Task<int> GetNextBatchAsync(int batchNumber, string region, Func<TemporaryExposureKeyBatch, Task> processBatch)
+		public async Task CreateBatcheFilesAsync(string region, Func<TemporaryExposureKeyExport, Task> processExport)
 		{
 			region ??= DbTemporaryExposureKey.DefaultRegion;
-
-			var keyCount = 0;
 
 			using (var ctx = new ExposureNotificationContext(dbContextOptions))
 			using (var transaction = ctx.Database.BeginTransaction())
 			{
-				var keys = await ctx.TemporaryExposureKeys
-					.Where(k => k.Region == region && !k.Processed)
-					.OrderBy(k => k.TimestampMsSinceEpoch)
-					.Take(TemporaryExposureKeyBatches.MaxKeysPerFile)
-					.ToListAsync();
+				var cutoffMsEpoch = DateTimeOffset.UtcNow.AddDays(-14).ToUnixTimeMilliseconds();
 
-				var exposureKeys = keys.Select(k => k.ToProtoKey());
+				var keys = ctx.TemporaryExposureKeys
+					.Where(k => k.Region == region
+								&& !k.Processed
+								&& k.TimestampMsSinceEpoch >= cutoffMsEpoch);
 
-				keyCount = exposureKeys.Count();
+				// How many keys do we need to put in batchfiles
+				var totalCount = await keys.CountAsync();
 
-				var f = new TemporaryExposureKeyBatch
+				// How many files do we need to fit all the keys
+				var batchFileCount = Math.Ceiling((double)totalCount / (double)TemporaryExposureKeyExport.MaxKeysPerFile);
+
+
+				for (var i = 0; i < batchFileCount; i++)
 				{
-					Header = new TemporaryExposureKeyBatchHeader
-					{
-						BatchNum = batchNumber,
-						BatchSize = keyCount,
-						StartTimestamp = keys.First().TestDateMsSinceEpoch,
-						EndTimestamp = keys.Last().TestDateMsSinceEpoch,
-						Region = region
-					}
-				};
-				f.Key.AddRange(exposureKeys);
+					var batchFileKeys = keys.Skip(i * TemporaryExposureKeyExport.MaxKeysPerFile)
+						.Take(TemporaryExposureKeyExport.MaxKeysPerFile);
 
-				await processBatch(f);
+					var keysByTime = keys.OrderBy(k => k.TimestampMsSinceEpoch);
+
+					var export = new TemporaryExposureKeyExport
+					{
+						BatchNum = (i + 1),
+						BatchSize = (int)batchFileCount,
+						StartTimestamp = (ulong)(keysByTime.First().TimestampMsSinceEpoch / 1000),
+						EndTimestamp = (ulong)(keysByTime.Last().TimestampMsSinceEpoch / 1000),
+						Region = region
+					};
+					export.Keys.AddRange(batchFileKeys
+						.OrderBy(k => k.Base64KeyData)
+						.Select(k => k.ToKey()));
+
+					await processExport(export);
+				}
 
 				// Decide to delete keys or just mark them as processed
 				// Marking as processed is better 
@@ -174,8 +183,6 @@ namespace ExposureNotification.Backend
 
 				await transaction.CommitAsync();
 			}
-
-			return keyCount;
 		}
 
 		public class SelfDiagnosisSubmissionRequest
