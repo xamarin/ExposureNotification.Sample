@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using ExposureNotification.App.Services;
 using Newtonsoft.Json;
 using Plugin.LocalNotification;
+using Xamarin.Essentials;
 using Xamarin.ExposureNotifications;
 using Xamarin.Forms;
 using Xamarin.Forms.Internals;
@@ -55,64 +57,78 @@ namespace ExposureNotification.App
 		}
 
 		// this will be called when they keys need to be collected from the server
-		public async Task FetchExposureKeysFromServerAsync(ITemporaryExposureKeyBatches batches)
+		public async Task<IEnumerable<string>> FetchExposureKeyBatchFilesFromServerAsync()
 		{
+			var downloadedFiles = new List<string>();
+
 			// This is "default" by default
 			var region = LocalStateManager.Instance.Region ?? DefaultRegion;
 
-			var checkForMore = true;
-			do
+			var stopDownload = false;
+
+			while (!stopDownload)
 			{
+				// Find next directory to start checking
+				var dirNumber = LocalStateManager.Instance.ServerBatchNumber + 1;
+
+				var batchNumber = 1;
+
 				try
 				{
-					// Find next batch number
-					var batchNumber = LocalStateManager.Instance.ServerBatchNumber + 1;
-
-					// Build the blob storage url for the given batch file we are on next
-					var url = $"{apiUrlBlobStorageBase}/{blobStorageContainerNamePrefix}{region}/{batchNumber}.dat";
-
-					var response = await http.GetAsync(url);
-
-					// If we get a 404, there are no newer batch files available to download
-					if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+					while (true)
 					{
-						checkForMore = false;
-						break;
-					}
+						// Build the blob storage url for the given batch file we are on next
+						var url = $"{apiUrlBlobStorageBase}/{blobStorageContainerNamePrefix}{region}/{dirNumber}/{batchNumber}.dat";
 
-					response.EnsureSuccessStatusCode();
+						var response = await http.GetAsync(url);
 
-					// Skip batch files which are older than 14 days
-					if (response.Content.Headers.LastModified.HasValue)
-					{
-						if (response.Content.Headers.LastModified < DateTimeOffset.UtcNow.AddDays(-14))
+						// If we get a 404, there are no newer batch files available to download
+						if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
 						{
-							LocalStateManager.Instance.ServerBatchNumber = batchNumber;
-							LocalStateManager.Save();
-							checkForMore = true;
-							continue;
+							// Check if batch == 1 which means the first file doesn't exist
+							// The dir we tried is empty, we have all the latest, stop downloading
+							if (batchNumber == 1)
+								stopDownload = true;
+
+							// In any case no more files in this dir
+							break;
 						}
+
+						response.EnsureSuccessStatusCode();
+
+						// Skip batch files which are older than 14 days
+						if (response.Content.Headers.LastModified.HasValue)
+						{
+							if (response.Content.Headers.LastModified < DateTimeOffset.UtcNow.AddDays(-14))
+							{
+								batchNumber++;
+								continue;
+							}
+						}
+
+						var tmpFile = Path.Combine(FileSystem.CacheDirectory, Guid.NewGuid().ToString() + ".zip");
+
+						// Read the batch file stream
+						using var responseStream = await response.Content.ReadAsStreamAsync();
+						using var fileStream = File.Create(tmpFile);
+						await responseStream.CopyToAsync(fileStream);
+
+						downloadedFiles.Add(tmpFile);
 					}
 
-					// Read the batch file stream
-					using var responseStream = await response.Content.ReadAsStreamAsync();
-
-					// Parse into a Proto.File
-					var batchFile = TemporaryExposureKeyBatch.Parser.ParseFrom(responseStream);
-
-					// Submit to the batch processor
-					await batches.AddBatchAsync(batchFile);
-
-					// Update the number we are on
-					LocalStateManager.Instance.ServerBatchNumber = batchNumber;
+					LocalStateManager.Instance.ServerBatchNumber = dirNumber;
 					LocalStateManager.Save();
 				}
 				catch (Exception ex)
 				{
 					Console.WriteLine(ex);
-					checkForMore = false;
+
+					// If this failed for some reason, stop and allow the next job to continue
+					stopDownload = true;
 				}
-			} while (checkForMore);
+			}
+
+			return downloadedFiles;
 		}
 
 		// this will be called when the user is submitting a diagnosis and the local keys need to go to the server
