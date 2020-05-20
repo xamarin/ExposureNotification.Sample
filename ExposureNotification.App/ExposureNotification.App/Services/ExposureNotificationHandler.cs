@@ -57,24 +57,24 @@ namespace ExposureNotification.App
 		}
 
 		// this will be called when they keys need to be collected from the server
-		public async Task<IEnumerable<string>> FetchExposureKeyBatchFilesFromServerAsync()
+		public async Task FetchExposureKeyBatchFilesFromServerAsync(Func<IEnumerable<string>, Task> submitBatches)
 		{
-			var downloadedFiles = new List<string>();
-
 			// This is "default" by default
 			var region = LocalStateManager.Instance.Region ?? DefaultRegion;
+			var rightNow = DateTimeOffset.UtcNow;
 
-			var stopDownload = false;
-
-			while (!stopDownload)
+			try
 			{
 				// Find next directory to start checking
 				var dirNumber = LocalStateManager.Instance.ServerBatchNumber + 1;
 
-				var batchNumber = 1;
-
-				try
+				// For all the directories
+				while (true)
 				{
+					var downloadedFiles = new List<string>();
+					var batchNumber = 1;
+
+					// For all the batches in a directory
 					while (true)
 					{
 						// Build the blob storage url for the given batch file we are on next
@@ -84,51 +84,67 @@ namespace ExposureNotification.App
 
 						// If we get a 404, there are no newer batch files available to download
 						if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-						{
-							// Check if batch == 1 which means the first file doesn't exist
-							// The dir we tried is empty, we have all the latest, stop downloading
-							if (batchNumber == 1)
-								stopDownload = true;
-
-							// In any case no more files in this dir
 							break;
-						}
 
 						response.EnsureSuccessStatusCode();
 
 						// Skip batch files which are older than 14 days
-						if (response.Content.Headers.LastModified.HasValue)
+						if (response.Content.Headers.LastModified.HasValue && response.Content.Headers.LastModified < rightNow.AddDays(-14))
 						{
-							if (response.Content.Headers.LastModified < DateTimeOffset.UtcNow.AddDays(-14))
-							{
-								batchNumber++;
-								continue;
-							}
+							// If the first one is too old, the fake download it and pretend there was only one
+							// We can do this because each batch was created at the same time
+							batchNumber++;
+							break;
 						}
 
 						var tmpFile = Path.Combine(FileSystem.CacheDirectory, Guid.NewGuid().ToString() + ".zip");
 
-						// Read the batch file stream
+						// Read the batch file stream into a temporary file
 						using var responseStream = await response.Content.ReadAsStreamAsync();
 						using var fileStream = File.Create(tmpFile);
 						await responseStream.CopyToAsync(fileStream);
 
 						downloadedFiles.Add(tmpFile);
+
+						batchNumber++;
 					}
 
+					if (batchNumber == 1)
+						break;
+
+					// process the current directory, if there were any
+					if (downloadedFiles.Count > 0)
+					{
+						await submitBatches(downloadedFiles);
+
+						// delete all temporary files
+						foreach (var file in downloadedFiles)
+						{
+							try
+							{
+								File.Delete(file);
+							}
+							catch
+							{
+								// no-op
+							}
+						}
+					}
+
+					// Update the preferences
 					LocalStateManager.Instance.ServerBatchNumber = dirNumber;
 					LocalStateManager.Save();
-				}
-				catch (Exception ex)
-				{
-					Console.WriteLine(ex);
 
-					// If this failed for some reason, stop and allow the next job to continue
-					stopDownload = true;
+					dirNumber++;
 				}
 			}
+			catch (Exception ex)
+			{
+				// any expections, bail out and wait for the next time
 
-			return downloadedFiles;
+				// TODO: log the error on some server!
+				Console.WriteLine(ex);
+			}
 		}
 
 		// this will be called when the user is submitting a diagnosis and the local keys need to go to the server

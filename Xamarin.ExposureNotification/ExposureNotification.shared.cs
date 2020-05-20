@@ -82,36 +82,41 @@ namespace Xamarin.ExposureNotifications
 		// Call this when the app needs to update the local keys
 		public static async Task<bool> UpdateKeysFromServer()
 		{
-			var downloadedFiles = await Handler?.FetchExposureKeyBatchFilesFromServerAsync();
+			var processedAnyFiles = false;
 
-			if (!downloadedFiles.Any())
-				return false;
-
-			if (nativeImplementation != null)
+			await Handler?.FetchExposureKeyBatchFilesFromServerAsync(async downloadedFiles =>
 			{
-				var r = await nativeImplementation.DetectExposuresAsync(downloadedFiles);
+				if (!downloadedFiles.Any())
+					return;
 
-				var hasMatches = (r.summary?.MatchedKeyCount ?? 0) > 0;
+				if (nativeImplementation != null)
+				{
+					var r = await nativeImplementation.DetectExposuresAsync(downloadedFiles);
 
-				if (hasMatches)
-					await Handler.ExposureDetectedAsync(r.summary, r.info);
+					var hasMatches = (r.summary?.MatchedKeyCount ?? 0) > 0;
 
-				return true;
-			}
-
+					if (hasMatches)
+						await Handler.ExposureDetectedAsync(r.summary, r.info);
+				}
+				else
+				{
 #if __IOS__
-			// On iOS we need to check this ourselves and invoke the handler
-			var (summary, info) = await PlatformDetectExposuresAsync(downloadedFiles);
+					// On iOS we need to check this ourselves and invoke the handler
+					var (summary, info) = await PlatformDetectExposuresAsync(downloadedFiles);
 
-			// Check that the summary has any matches before notifying the callback
-			if (summary?.MatchedKeyCount > 0)
-				await Handler.ExposureDetectedAsync(summary, info);
+					// Check that the summary has any matches before notifying the callback
+					if (summary?.MatchedKeyCount > 0)
+						await Handler.ExposureDetectedAsync(summary, info);
 #elif __ANDROID__
-			// on Android this will happen in the broadcast receiver
-			await PlatformDetectExposuresAsync(downloadedFiles);
+					// on Android this will happen in the broadcast receiver
+					await PlatformDetectExposuresAsync(downloadedFiles);
 #endif
+				}
+				
+				processedAnyFiles = true;
+			});
 
-			return true;
+			return processedAnyFiles;
 		}
 
 		internal static Task<IEnumerable<TemporaryExposureKey>> GetSelfTemporaryExposureKeysAsync()
