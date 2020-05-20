@@ -19,13 +19,6 @@ namespace Xamarin.ExposureNotifications
 		Task UploadSelfExposureKeysToServerAsync(IEnumerable<TemporaryExposureKey> temporaryExposureKeys);
 	}
 
-	public interface ITemporaryExposureKeyBatches
-	{
-		Task AddBatchAsync(IEnumerable<TemporaryExposureKey> keys);
-
-		Task AddBatchAsync(TemporaryExposureKeyExport file);
-	}
-
 	public interface INativeImplementation
 	{
 		Task StartAsync();

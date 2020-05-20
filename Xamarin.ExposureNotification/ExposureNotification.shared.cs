@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Google.Protobuf;
-using Xamarin.Essentials;
 
 namespace Xamarin.ExposureNotifications
 {
@@ -112,7 +109,7 @@ namespace Xamarin.ExposureNotifications
 					await PlatformDetectExposuresAsync(downloadedFiles);
 #endif
 				}
-				
+
 				processedAnyFiles = true;
 			});
 

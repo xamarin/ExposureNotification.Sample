@@ -2,7 +2,6 @@
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Xamarin.ExposureNotifications;
 
 [assembly: FunctionsStartup(typeof(ExposureNotification.Backend.Functions.Startup))]
 
@@ -45,7 +44,9 @@ namespace ExposureNotification.Backend.Functions
 		}
 
 		internal static string SqlServerConnectionString { get; private set; }
+
 		internal static string BlobStorageConnectionString { get; private set; }
+
 		internal static string BlobStorageContainerNamePrefix { get; private set; }
 
 		internal static string[] ExposureKeyRegions { get; private set; }

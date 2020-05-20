@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO.Compression;
+﻿using System.IO.Compression;
 using System.IO;
-using System.Text;
 using Google.Protobuf;
-using Xamarin.ExposureNotifications;
 
 namespace ExposureNotification.Backend.Functions
 {
-	class ExposureBatchFileUtil
+	public static class ExposureBatchFileUtil
 	{
-		// Header is 16 UTF8 characters with right padding
-		const string exportBinHeader = "EK Export v1    ";
-
 		// TODO: You need to sign this with the key and mechanism
 		// that google/apple shared with you
 		static byte[] SignSignature(byte[] contents)
@@ -43,7 +36,7 @@ namespace ExposureNotification.Backend.Functions
 				using (var binStream = binEntry.Open())
 				{
 					// Write header
-					binStream.Write(Encoding.UTF8.GetBytes(exportBinHeader));
+					binStream.Write(TemporaryExposureKeyExport.Header);
 
 					// Write export proto
 					export.WriteTo(binStream);

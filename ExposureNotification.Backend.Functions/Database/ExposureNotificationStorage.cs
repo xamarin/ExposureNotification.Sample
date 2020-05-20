@@ -9,7 +9,6 @@ using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Xml;
-using Xamarin.ExposureNotifications;
 
 namespace ExposureNotification.Backend
 {
@@ -142,20 +141,20 @@ namespace ExposureNotification.Backend
 				var totalCount = await keys.CountAsync();
 
 				// How many files do we need to fit all the keys
-				var batchFileCount = Math.Ceiling((double)totalCount / (double)TemporaryExposureKeyExport.MaxKeysPerFile);
-
+				var batchFileCount = (int)Math.Ceiling((double)totalCount / (double)TemporaryExposureKeyExport.MaxKeysPerFile);
 
 				for (var i = 0; i < batchFileCount; i++)
 				{
-					var batchFileKeys = keys.Skip(i * TemporaryExposureKeyExport.MaxKeysPerFile)
+					var batchFileKeys = keys
+						.Skip(i * TemporaryExposureKeyExport.MaxKeysPerFile)
 						.Take(TemporaryExposureKeyExport.MaxKeysPerFile);
 
 					var keysByTime = keys.OrderBy(k => k.TimestampMsSinceEpoch);
 
 					var export = new TemporaryExposureKeyExport
 					{
-						BatchNum = (i + 1),
-						BatchSize = (int)batchFileCount,
+						BatchNum = i + 1,
+						BatchSize = batchFileCount,
 						StartTimestamp = (ulong)(keysByTime.First().TimestampMsSinceEpoch / 1000),
 						EndTimestamp = (ulong)(keysByTime.Last().TimestampMsSinceEpoch / 1000),
 						Region = region

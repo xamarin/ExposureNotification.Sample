@@ -7,7 +7,6 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using System.Collections.Generic;
-using Xamarin.ExposureNotifications;
 using Newtonsoft.Json.Linq;
 
 namespace ExposureNotification.Backend.Functions

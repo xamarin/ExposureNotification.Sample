@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using BackgroundTasks;
 using ExposureNotifications;
 using Foundation;
-using Google.Protobuf;
 using Xamarin.Essentials;
 
 namespace Xamarin.ExposureNotifications

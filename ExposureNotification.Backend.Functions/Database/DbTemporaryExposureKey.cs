@@ -1,8 +1,8 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using ExposureNotification.Backend.Functions;
 using Google.Protobuf;
-using Xamarin.ExposureNotifications;
 
 namespace ExposureNotification.Backend
 {
@@ -30,11 +30,13 @@ namespace ExposureNotification.Backend
 		public int TransmissionRiskLevel { get; set; }
 
 		public TemporaryExposureKey ToKey()
-			=> new TemporaryExposureKey(
-				Convert.FromBase64String(Base64KeyData),
-				DateTimeOffset.FromUnixTimeSeconds(RollingStartSecondsSinceEpoch),
-				TimeSpan.FromMinutes(RollingDuration),
-				(RiskLevel)TransmissionRiskLevel);
+			=> new TemporaryExposureKey()
+			{
+				KeyData = ByteString.CopyFrom(Convert.FromBase64String(Base64KeyData)),
+				RollingStartIntervalNumber = (int)RollingStartSecondsSinceEpoch,
+				RollingPeriod = RollingDuration,
+				TransmissionRiskLevel = TransmissionRiskLevel
+			};
 
 		public static DbTemporaryExposureKey FromKey(TemporaryExposureKey key, long testDateMsSinceEpoch)
 			=> new DbTemporaryExposureKey
@@ -44,7 +46,7 @@ namespace ExposureNotification.Backend
 				TestDateMsSinceEpoch = testDateMsSinceEpoch,
 				RollingStartSecondsSinceEpoch = key.RollingStartIntervalNumber,
 				RollingDuration = key.RollingPeriod,
-				TransmissionRiskLevel = (int)key.TransmissionRiskLevel
+				TransmissionRiskLevel = key.TransmissionRiskLevel
 			};
 	}
 }

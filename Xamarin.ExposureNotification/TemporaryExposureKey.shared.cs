@@ -1,13 +1,7 @@
 ﻿using System;
-using Google.Protobuf;
 
 namespace Xamarin.ExposureNotifications
 {
-	public partial class TemporaryExposureKeyExport
-	{
-		public const int MaxKeysPerFile = 750000;
-	}
-
 	public partial class TemporaryExposureKey
 	{
 		public TemporaryExposureKey(byte[] keyData, DateTimeOffset rollingStart, TimeSpan rollingDuration, RiskLevel transmissionRisk)
@@ -26,28 +20,12 @@ namespace Xamarin.ExposureNotifications
 			TransmissionRiskLevelValue = transmissionRisk;
 		}
 
-		public byte[] KeyDataBytes
-		{
-			get => KeyData.ToByteArray();
-			set => KeyData = ByteString.CopyFrom(value);
-		}
+		public byte[] KeyDataBytes { get; set; }
 
-		public DateTimeOffset RollingStart
-		{
-			get => DateTimeOffset.FromUnixTimeSeconds(RollingStartIntervalNumber);
-			set => RollingStartIntervalNumber = (int)value.ToUnixTimeSeconds();
-		}
+		public DateTimeOffset RollingStart { get; set; }
 
-		public TimeSpan RollingDuration
-		{
-			get => TimeSpan.FromMinutes(RollingPeriod);
-			set => RollingPeriod = (int)value.TotalMinutes;
-		}
+		public TimeSpan RollingDuration { get; set; }
 
-		public RiskLevel TransmissionRiskLevelValue
-		{
-			get => (RiskLevel)TransmissionRiskLevel;
-			set => TransmissionRiskLevel = (int)value;
-		}
+		public RiskLevel TransmissionRiskLevelValue { get; set; }
 	}
 }
