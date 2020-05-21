@@ -49,21 +49,14 @@ namespace ExposureNotification.Backend.Functions.Tests
 			Assert.Equal("ExampleServer_k1", info.VerificationKeyId);
 		}
 
-		[Fact]
-		public void ValidateSignedExampleSignatureValidity()
+		[Theory]
+		[InlineData("TestAssets/SignedExample/export.zip", "TestAssets/SignedExample/public.pem")]
+		public void ValidateSignedExampleSignatureValidity(string zipPath, string pemPath)
 		{
-			using var zipFile = ZipFile.OpenRead("TestAssets/SignedExample/export.zip");
-			using var exportSig = zipFile.GetSignature();
-			using var exportBin = zipFile.GetBin(false);
+			using var zip = File.OpenRead(zipPath);
+			var pem = File.ReadAllText(pemPath);
 
-			var signatureList = TEKSignatureList.Parser.ParseFrom(exportSig);
-			var signature = signatureList.Signatures[0].Signature.ToByteArray();
-
-			var pem = File.ReadAllText("TestAssets/SignedExample/public.pem");
-
-			var bin = exportBin.ToArray();
-
-			Assert.True(Utils.ValidateSignature(bin, signature, pem));
+			Utils.ValidateExportFileSignature(zip, pem);
 		}
 
 		[Fact]

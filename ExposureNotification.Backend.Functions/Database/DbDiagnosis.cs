@@ -2,7 +2,7 @@
 
 namespace ExposureNotification.Backend.Database
 {
-	class DbDiagnosis
+	public class DbDiagnosis
 	{
 		public DbDiagnosis(string diagnosisUid)
 			=> DiagnosisUid = diagnosisUid;

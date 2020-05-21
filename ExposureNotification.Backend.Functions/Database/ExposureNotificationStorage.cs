@@ -41,6 +41,22 @@ namespace ExposureNotification.Backend.Database
 			}
 		}
 
+		public Task<List<DbSignerInfo>> GetAllSignerInfosAsync()
+		{
+			// TODO: load this from a DB or config
+			var si = new List<DbSignerInfo>
+			{
+				new DbSignerInfo
+				{
+					AndroidPackage = "com.xamarin.exposurenotificationsample",
+					AppBundleId = "com.xamarin.exposurenotificationsample",
+					VerificationKeyId = "ExampleServer_k1",
+					VerificationKeyVersion = "1",
+				}
+			};
+
+			return Task.FromResult(si);
+		}
 
 		public void DeleteAllKeysAsync()
 		{
@@ -121,7 +137,7 @@ namespace ExposureNotification.Backend.Database
 			}
 		}
 
-		public async Task CreateBatcheFilesAsync(string region, Func<TemporaryExposureKeyExport, Task> processExport)
+		public async Task CreateBatchFilesAsync(string region, Func<TemporaryExposureKeyExport, Task> processExport)
 		{
 			region ??= DbTemporaryExposureKey.DefaultRegion;
 
@@ -145,19 +161,10 @@ namespace ExposureNotification.Backend.Database
 				{
 					var batchFileKeys = keys
 						.Skip(i * TemporaryExposureKeyExport.MaxKeysPerFile)
-						.Take(TemporaryExposureKeyExport.MaxKeysPerFile);
+						.Take(TemporaryExposureKeyExport.MaxKeysPerFile)
+						.ToArray();
 
-					var keysByTime = keys.OrderBy(k => k.TimestampMsSinceEpoch);
-
-					var export = new TemporaryExposureKeyExport
-					{
-						BatchNum = i + 1,
-						BatchSize = batchFileCount,
-						StartTimestamp = (ulong)(keysByTime.First().TimestampMsSinceEpoch / 1000),
-						EndTimestamp = (ulong)(keysByTime.Last().TimestampMsSinceEpoch / 1000),
-						Region = region,
-						Keys = { batchFileKeys.OrderBy(k => k.Base64KeyData).Select(k => k.ToKey()) },
-					};
+					var export = CreateUnsignedExport(region, i + 1, batchFileCount, batchFileKeys);
 
 					await processExport(export);
 				}
@@ -178,6 +185,21 @@ namespace ExposureNotification.Backend.Database
 
 				await transaction.CommitAsync();
 			}
+		}
+
+		public static TemporaryExposureKeyExport CreateUnsignedExport(string region, int batchNumber, int batchCount, IEnumerable<DbTemporaryExposureKey> keys)
+		{
+			var keysByTime = keys.OrderBy(k => k.TimestampMsSinceEpoch);
+
+			return new TemporaryExposureKeyExport
+			{
+				BatchNum = batchNumber,
+				BatchSize = batchCount,
+				StartTimestamp = (ulong)(keysByTime.First().TimestampMsSinceEpoch / 1000),
+				EndTimestamp = (ulong)(keysByTime.Last().TimestampMsSinceEpoch / 1000),
+				Region = region,
+				Keys = { keys.OrderBy(k => k.Base64KeyData).Select(k => k.ToKey()) },
+			};
 		}
 	}
 }

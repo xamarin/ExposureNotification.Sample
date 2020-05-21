@@ -3,18 +3,43 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using ExposureNotification.Backend.Database;
 using ExposureNotification.Backend.Proto;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Security;
+using Xunit;
 
 namespace ExposureNotification.Backend.Functions.Tests
 {
 	public static class Utils
 	{
+		static readonly Random random = new Random();
+
+		public const string SigningAlgorithm = "SHA-256withECDSA";
+
+		public static byte[] GetRandomBytes(int count = 16)
+		{
+			var rnd = new byte[count];
+			random.NextBytes(rnd);
+			return rnd;
+		}
+
+		public static string GetRandomBytesAsBase64(int countBytes = 16)
+			=> Convert.ToBase64String(GetRandomBytes(countBytes));
+
+		public static DbTemporaryExposureKey GenerateRandomDbKey(DateTimeOffset date) =>
+			new DbTemporaryExposureKey
+			{
+				TimestampMsSinceEpoch = date.ToUnixTimeMilliseconds(),
+				Base64KeyData = GetRandomBytesAsBase64(),
+				RollingStartSecondsSinceEpoch = date.ToUnixTimeSeconds(),
+				RollingDuration = 1,
+				TransmissionRiskLevel = 1
+			};
+
 		public static List<TemporaryExposureKey> GenerateTemporaryExposureKeys(int daysBack)
 		{
-			var random = new Random();
 			var nowDate = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, 0, 0, 0, 0, DateTimeKind.Utc);
 
 			var tracingKeys = new List<TemporaryExposureKey>();
@@ -23,8 +48,7 @@ namespace ExposureNotification.Backend.Functions.Tests
 			{
 				for (var seg = nowDate; seg < nowDate.AddDays(1); seg += TimeSpan.FromMinutes(15))
 				{
-					var rnd = new byte[16];
-					random.NextBytes(rnd);
+					var rnd = GetRandomBytes();
 					var duration = TimeSpan.FromMinutes(random.Next(5, 60));
 					var risk = (RiskLevel)random.Next(1, 8 + 1);
 
@@ -80,9 +104,23 @@ namespace ExposureNotification.Backend.Functions.Tests
 			return ms;
 		}
 
-		public static bool ValidateSignature(byte[] message, byte[] signature, string pem, string algorithm = "SHA-256withECDSA")
+		public static void ValidateExportFileSignature(Stream export, string pem, string algorithm = SigningAlgorithm)
 		{
-			using var stringReader = new StringReader(pem);
+			using var zipFile = new ZipArchive(export);
+			using var exportSig = zipFile.GetSignature();
+			using var exportBin = zipFile.GetBin(false);
+
+			var signatureList = TEKSignatureList.Parser.ParseFrom(exportSig);
+			var signature = signatureList.Signatures[0].Signature.ToByteArray();
+
+			var bin = exportBin.ToArray();
+
+			Assert.True(ValidateSignature(bin, signature, pem.Trim(), algorithm));
+		}
+
+		public static bool ValidateSignature(byte[] message, byte[] signature, string pem, string algorithm = SigningAlgorithm)
+		{
+			using var stringReader = new StringReader(pem.Trim());
 			var reader = new PemReader(stringReader);
 			var pubkey = reader.ReadObject() as ECPublicKeyParameters;
 

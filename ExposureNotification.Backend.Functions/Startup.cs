@@ -1,7 +1,9 @@
 ﻿using System;
 using ExposureNotification.Backend.Database;
+using ExposureNotification.Backend.Signing;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 [assembly: FunctionsStartup(typeof(ExposureNotification.Backend.Functions.Startup))]
 
@@ -12,7 +14,7 @@ namespace ExposureNotification.Backend.Functions
 		const string inMemoryDatabaseName = "ChangeInProduction";
 		readonly static char[] separators = new[] { ';', ',', ':' };
 
-		internal static ExposureNotificationStorage Database;
+		internal static ExposureNotificationStorage Database { get; private set; }
 
 		public override void Configure(IFunctionsHostBuilder builder)
 		{
@@ -21,6 +23,8 @@ namespace ExposureNotification.Backend.Functions
 			BlobStorageContainerNamePrefix = GetEnv("BlobStorageContainerNamePrefix", string.Empty);
 			DeleteKeysFromDbAfterBatching = GetEnv("DeleteKeysFromDbAfterBatching", "false").Equals("true", StringComparison.OrdinalIgnoreCase);
 			ExposureKeyRegions = GetEnv("ExposureKeyRegions", DbTemporaryExposureKey.DefaultRegion).Split(separators);
+
+			builder.Services.AddTransient<ISigner, Signer>();
 
 			Database = new ExposureNotificationStorage(
 				builder =>

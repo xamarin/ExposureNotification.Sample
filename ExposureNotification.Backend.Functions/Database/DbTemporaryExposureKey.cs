@@ -6,7 +6,7 @@ using Google.Protobuf;
 
 namespace ExposureNotification.Backend.Database
 {
-	class DbTemporaryExposureKey
+	public class DbTemporaryExposureKey
 	{
 		public const string DefaultRegion = "default";
 

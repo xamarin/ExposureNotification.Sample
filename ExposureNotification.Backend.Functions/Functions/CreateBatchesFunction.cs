@@ -1,8 +1,7 @@
 using System;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using ExposureNotification.Backend.Signing;
 using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
 using Microsoft.Azure.WebJobs;
@@ -18,7 +17,7 @@ namespace ExposureNotification.Backend.Functions
 
 		// Every 6 hours "0 0 */6 * * *"
 		[FunctionName("CreateBatchesFunction")]
-		public static async Task Run([TimerTrigger("0 0 */6 * * *")]TimerInfo myTimer, ILogger log)
+		public static async Task Run([TimerTrigger("0 0 */6 * * *")] TimerInfo myTimer, ILogger log, ISigner signer)
 		{
 			var cloudStorageAccount = CloudStorageAccount.Parse(Startup.BlobStorageConnectionString);
 			var cloudBlobClient = cloudStorageAccount.CreateCloudBlobClient();
@@ -58,7 +57,11 @@ namespace ExposureNotification.Backend.Functions
 				// Actual next is plus one
 				var nextDirNumber = highestDirNumber + 1;
 
-				await Startup.Database.CreateBatcheFilesAsync(region, async export =>
+				// Load all signer infos
+				var signerInfos = await Startup.Database.GetAllSignerInfosAsync();
+
+				// Create batch files from all the keys in the database
+				await Startup.Database.CreateBatchFilesAsync(region, async export =>
 				{
 					// Don't process a batch without keys
 					if (export == null || (export.Keys != null && export.Keys.Count() <= 0))
@@ -70,7 +73,7 @@ namespace ExposureNotification.Backend.Functions
 					var blockBlob = cloudBlobContainer.GetBlockBlobReference(batchFileName);
 
 					// Write the proto buf to a memory stream
-					using var signedFileStream = ExposureBatchFileUtil.CreateSignedFile(export);
+					using var signedFileStream = await ExposureBatchFileUtil.CreateSignedFileAsync(export, signerInfos, signer);
 
 					// Set the batch number and region as metadata
 					blockBlob.Metadata[dirNumberMetadataKey] = nextDirNumber.ToString();
