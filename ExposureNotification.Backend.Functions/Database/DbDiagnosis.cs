@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ExposureNotification.Backend
+namespace ExposureNotification.Backend.Database
 {
 	class DbDiagnosis
 	{
@@ -9,7 +9,6 @@ namespace ExposureNotification.Backend
 
 		[Key]
 		public string DiagnosisUid { get; set; }
-
 
 		public int KeyCount { get; set; }
 	}

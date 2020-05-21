@@ -9,7 +9,7 @@ using pb = global::Google.Protobuf;
 using pbc = global::Google.Protobuf.Collections;
 using pbr = global::Google.Protobuf.Reflection;
 using scg = global::System.Collections.Generic;
-namespace ExposureNotification.Backend.Functions {
+namespace ExposureNotification.Backend.Proto {
 
   /// <summary>Holder for reflection information generated from TemporaryExposureKeyBatch.proto</summary>
   public static partial class TemporaryExposureKeyBatchReflection {
@@ -44,11 +44,11 @@ namespace ExposureNotification.Backend.Functions {
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::ExposureNotification.Backend.Functions.TemporaryExposureKeyExport), global::ExposureNotification.Backend.Functions.TemporaryExposureKeyExport.Parser, new[]{ "StartTimestamp", "EndTimestamp", "Region", "BatchNum", "BatchSize", "SignatureInfos", "Keys" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::ExposureNotification.Backend.Functions.SignatureInfo), global::ExposureNotification.Backend.Functions.SignatureInfo.Parser, new[]{ "AppBundleId", "AndroidPackage", "VerificationKeyVersion", "VerificationKeyId", "SignatureAlgorithm" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::ExposureNotification.Backend.Functions.TemporaryExposureKey), global::ExposureNotification.Backend.Functions.TemporaryExposureKey.Parser, new[]{ "KeyData", "TransmissionRiskLevel", "RollingStartIntervalNumber", "RollingPeriod" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::ExposureNotification.Backend.Functions.TEKSignatureList), global::ExposureNotification.Backend.Functions.TEKSignatureList.Parser, new[]{ "Signatures" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::ExposureNotification.Backend.Functions.TEKSignature), global::ExposureNotification.Backend.Functions.TEKSignature.Parser, new[]{ "SignatureInfo", "BatchNum", "BatchSize", "Signature" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::ExposureNotification.Backend.Proto.TemporaryExposureKeyExport), global::ExposureNotification.Backend.Proto.TemporaryExposureKeyExport.Parser, new[]{ "StartTimestamp", "EndTimestamp", "Region", "BatchNum", "BatchSize", "SignatureInfos", "Keys" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::ExposureNotification.Backend.Proto.SignatureInfo), global::ExposureNotification.Backend.Proto.SignatureInfo.Parser, new[]{ "AppBundleId", "AndroidPackage", "VerificationKeyVersion", "VerificationKeyId", "SignatureAlgorithm" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::ExposureNotification.Backend.Proto.TemporaryExposureKey), global::ExposureNotification.Backend.Proto.TemporaryExposureKey.Parser, new[]{ "KeyData", "TransmissionRiskLevel", "RollingStartIntervalNumber", "RollingPeriod" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::ExposureNotification.Backend.Proto.TEKSignatureList), global::ExposureNotification.Backend.Proto.TEKSignatureList.Parser, new[]{ "Signatures" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::ExposureNotification.Backend.Proto.TEKSignature), global::ExposureNotification.Backend.Proto.TEKSignature.Parser, new[]{ "SignatureInfo", "BatchNum", "BatchSize", "Signature" }, null, null, null, null)
           }));
     }
     #endregion
@@ -74,7 +74,7 @@ namespace ExposureNotification.Backend.Functions {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::ExposureNotification.Backend.Functions.TemporaryExposureKeyBatchReflection.Descriptor.MessageTypes[0]; }
+      get { return global::ExposureNotification.Backend.Proto.TemporaryExposureKeyBatchReflection.Descriptor.MessageTypes[0]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -238,27 +238,27 @@ namespace ExposureNotification.Backend.Functions {
 
     /// <summary>Field number for the "signature_infos" field.</summary>
     public const int SignatureInfosFieldNumber = 6;
-    private static readonly pb::FieldCodec<global::ExposureNotification.Backend.Functions.SignatureInfo> _repeated_signatureInfos_codec
-        = pb::FieldCodec.ForMessage(50, global::ExposureNotification.Backend.Functions.SignatureInfo.Parser);
-    private readonly pbc::RepeatedField<global::ExposureNotification.Backend.Functions.SignatureInfo> signatureInfos_ = new pbc::RepeatedField<global::ExposureNotification.Backend.Functions.SignatureInfo>();
+    private static readonly pb::FieldCodec<global::ExposureNotification.Backend.Proto.SignatureInfo> _repeated_signatureInfos_codec
+        = pb::FieldCodec.ForMessage(50, global::ExposureNotification.Backend.Proto.SignatureInfo.Parser);
+    private readonly pbc::RepeatedField<global::ExposureNotification.Backend.Proto.SignatureInfo> signatureInfos_ = new pbc::RepeatedField<global::ExposureNotification.Backend.Proto.SignatureInfo>();
     /// <summary>
     /// Information about signatures
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::RepeatedField<global::ExposureNotification.Backend.Functions.SignatureInfo> SignatureInfos {
+    public pbc::RepeatedField<global::ExposureNotification.Backend.Proto.SignatureInfo> SignatureInfos {
       get { return signatureInfos_; }
     }
 
     /// <summary>Field number for the "keys" field.</summary>
     public const int KeysFieldNumber = 7;
-    private static readonly pb::FieldCodec<global::ExposureNotification.Backend.Functions.TemporaryExposureKey> _repeated_keys_codec
-        = pb::FieldCodec.ForMessage(58, global::ExposureNotification.Backend.Functions.TemporaryExposureKey.Parser);
-    private readonly pbc::RepeatedField<global::ExposureNotification.Backend.Functions.TemporaryExposureKey> keys_ = new pbc::RepeatedField<global::ExposureNotification.Backend.Functions.TemporaryExposureKey>();
+    private static readonly pb::FieldCodec<global::ExposureNotification.Backend.Proto.TemporaryExposureKey> _repeated_keys_codec
+        = pb::FieldCodec.ForMessage(58, global::ExposureNotification.Backend.Proto.TemporaryExposureKey.Parser);
+    private readonly pbc::RepeatedField<global::ExposureNotification.Backend.Proto.TemporaryExposureKey> keys_ = new pbc::RepeatedField<global::ExposureNotification.Backend.Proto.TemporaryExposureKey>();
     /// <summary>
     /// The TemporaryExposureKeys themselves
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::RepeatedField<global::ExposureNotification.Backend.Functions.TemporaryExposureKey> Keys {
+    public pbc::RepeatedField<global::ExposureNotification.Backend.Proto.TemporaryExposureKey> Keys {
       get { return keys_; }
     }
 
@@ -436,7 +436,7 @@ namespace ExposureNotification.Backend.Functions {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::ExposureNotification.Backend.Functions.TemporaryExposureKeyBatchReflection.Descriptor.MessageTypes[1]; }
+      get { return global::ExposureNotification.Backend.Proto.TemporaryExposureKeyBatchReflection.Descriptor.MessageTypes[1]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -755,7 +755,7 @@ namespace ExposureNotification.Backend.Functions {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::ExposureNotification.Backend.Functions.TemporaryExposureKeyBatchReflection.Descriptor.MessageTypes[2]; }
+      get { return global::ExposureNotification.Backend.Proto.TemporaryExposureKeyBatchReflection.Descriptor.MessageTypes[2]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1032,7 +1032,7 @@ namespace ExposureNotification.Backend.Functions {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::ExposureNotification.Backend.Functions.TemporaryExposureKeyBatchReflection.Descriptor.MessageTypes[3]; }
+      get { return global::ExposureNotification.Backend.Proto.TemporaryExposureKeyBatchReflection.Descriptor.MessageTypes[3]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1060,11 +1060,11 @@ namespace ExposureNotification.Backend.Functions {
 
     /// <summary>Field number for the "signatures" field.</summary>
     public const int SignaturesFieldNumber = 1;
-    private static readonly pb::FieldCodec<global::ExposureNotification.Backend.Functions.TEKSignature> _repeated_signatures_codec
-        = pb::FieldCodec.ForMessage(10, global::ExposureNotification.Backend.Functions.TEKSignature.Parser);
-    private readonly pbc::RepeatedField<global::ExposureNotification.Backend.Functions.TEKSignature> signatures_ = new pbc::RepeatedField<global::ExposureNotification.Backend.Functions.TEKSignature>();
+    private static readonly pb::FieldCodec<global::ExposureNotification.Backend.Proto.TEKSignature> _repeated_signatures_codec
+        = pb::FieldCodec.ForMessage(10, global::ExposureNotification.Backend.Proto.TEKSignature.Parser);
+    private readonly pbc::RepeatedField<global::ExposureNotification.Backend.Proto.TEKSignature> signatures_ = new pbc::RepeatedField<global::ExposureNotification.Backend.Proto.TEKSignature>();
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::RepeatedField<global::ExposureNotification.Backend.Functions.TEKSignature> Signatures {
+    public pbc::RepeatedField<global::ExposureNotification.Backend.Proto.TEKSignature> Signatures {
       get { return signatures_; }
     }
 
@@ -1154,7 +1154,7 @@ namespace ExposureNotification.Backend.Functions {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::ExposureNotification.Backend.Functions.TemporaryExposureKeyBatchReflection.Descriptor.MessageTypes[4]; }
+      get { return global::ExposureNotification.Backend.Proto.TemporaryExposureKeyBatchReflection.Descriptor.MessageTypes[4]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1186,12 +1186,12 @@ namespace ExposureNotification.Backend.Functions {
 
     /// <summary>Field number for the "signature_info" field.</summary>
     public const int SignatureInfoFieldNumber = 1;
-    private global::ExposureNotification.Backend.Functions.SignatureInfo signatureInfo_;
+    private global::ExposureNotification.Backend.Proto.SignatureInfo signatureInfo_;
     /// <summary>
     /// Info about the signing key, version, algorithm, etc
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::ExposureNotification.Backend.Functions.SignatureInfo SignatureInfo {
+    public global::ExposureNotification.Backend.Proto.SignatureInfo SignatureInfo {
       get { return signatureInfo_; }
       set {
         signatureInfo_ = value;
@@ -1364,7 +1364,7 @@ namespace ExposureNotification.Backend.Functions {
       }
       if (other.signatureInfo_ != null) {
         if (signatureInfo_ == null) {
-          SignatureInfo = new global::ExposureNotification.Backend.Functions.SignatureInfo();
+          SignatureInfo = new global::ExposureNotification.Backend.Proto.SignatureInfo();
         }
         SignatureInfo.MergeFrom(other.SignatureInfo);
       }
@@ -1390,7 +1390,7 @@ namespace ExposureNotification.Backend.Functions {
             break;
           case 10: {
             if (signatureInfo_ == null) {
-              SignatureInfo = new global::ExposureNotification.Backend.Functions.SignatureInfo();
+              SignatureInfo = new global::ExposureNotification.Backend.Proto.SignatureInfo();
             }
             input.ReadMessage(SignatureInfo);
             break;

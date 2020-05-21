@@ -1,16 +1,14 @@
 ﻿using ExposureNotification.Backend.Functions;
+using ExposureNotification.Backend.Network;
+using ExposureNotification.Backend.Proto;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using System.Xml;
 
-namespace ExposureNotification.Backend
+namespace ExposureNotification.Backend.Database
 {
 	public class ExposureNotificationStorage
 	{
@@ -157,11 +155,9 @@ namespace ExposureNotification.Backend
 						BatchSize = batchFileCount,
 						StartTimestamp = (ulong)(keysByTime.First().TimestampMsSinceEpoch / 1000),
 						EndTimestamp = (ulong)(keysByTime.Last().TimestampMsSinceEpoch / 1000),
-						Region = region
+						Region = region,
+						Keys = { batchFileKeys.OrderBy(k => k.Base64KeyData).Select(k => k.ToKey()) },
 					};
-					export.Keys.AddRange(batchFileKeys
-						.OrderBy(k => k.Base64KeyData)
-						.Select(k => k.ToKey()));
 
 					await processExport(export);
 				}
@@ -182,18 +178,6 @@ namespace ExposureNotification.Backend
 
 				await transaction.CommitAsync();
 			}
-		}
-
-		public class SelfDiagnosisSubmissionRequest
-		{
-			[JsonProperty("diagnosisUid")]
-			public string DiagnosisUid { get; set; }
-
-			[JsonProperty("testDate")]
-			public long TestDate { get; set; }
-
-			[JsonProperty("keys")]
-			public IEnumerable<TemporaryExposureKey> Keys { get; set; }
 		}
 	}
 }

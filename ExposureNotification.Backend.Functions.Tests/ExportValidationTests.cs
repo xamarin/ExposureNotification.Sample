@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using ExposureNotification.Backend.Proto;
 using Xunit;
 
 namespace ExposureNotification.Backend.Functions.Tests

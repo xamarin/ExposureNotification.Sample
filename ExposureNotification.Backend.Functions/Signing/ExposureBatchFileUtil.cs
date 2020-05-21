@@ -1,6 +1,7 @@
 ﻿using System.IO.Compression;
 using System.IO;
 using Google.Protobuf;
+using ExposureNotification.Backend.Proto;
 
 namespace ExposureNotification.Backend.Functions
 {

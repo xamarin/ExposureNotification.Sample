@@ -14,7 +14,7 @@
 
 syntax = "proto2";
 
-option csharp_namespace = "ExposureNotification.Backend.Functions";
+option csharp_namespace = "ExposureNotification.Backend.Proto";
 
 // Protobuf definition for exports of confirmed temporary exposure keys.
 //

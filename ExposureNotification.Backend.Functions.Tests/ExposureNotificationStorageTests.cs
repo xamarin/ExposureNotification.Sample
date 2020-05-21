@@ -1,5 +1,7 @@
 using System;
 using System.Threading.Tasks;
+using ExposureNotification.Backend.Database;
+using ExposureNotification.Backend.Network;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
@@ -83,7 +85,7 @@ namespace ExposureNotification.Backend.Functions.Tests
 
 			await Assert.ThrowsAsync<InvalidOperationException>(async () =>
 			{
-				await Storage.SubmitPositiveDiagnosisAsync(new ExposureNotificationStorage.SelfDiagnosisSubmissionRequest
+				await Storage.SubmitPositiveDiagnosisAsync(new SelfDiagnosisSubmissionRequest
 				{
 					DiagnosisUid = "notaddeduid1",
 					Keys = keys
@@ -108,7 +110,6 @@ namespace ExposureNotification.Backend.Functions.Tests
 		//			DiagnosisUid = "testkeys",
 		//			Keys = keys
 		//		});
-
 
 		//	var allKeys = await Storage.GetAllKeysAsync();
 

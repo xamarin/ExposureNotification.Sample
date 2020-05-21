@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace ExposureNotification.Backend
+namespace ExposureNotification.Backend.Database
 {
 	class ExposureNotificationContext : DbContext
 	{

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using ExposureNotification.Backend.Functions;
+using ExposureNotification.Backend.Proto;
 using Google.Protobuf;
 
-namespace ExposureNotification.Backend
+namespace ExposureNotification.Backend.Database
 {
 	class DbTemporaryExposureKey
 	{

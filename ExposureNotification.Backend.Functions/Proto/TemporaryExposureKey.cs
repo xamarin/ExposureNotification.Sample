@@ -2,7 +2,7 @@
 using System.Text;
 using Google.Protobuf;
 
-namespace ExposureNotification.Backend.Functions
+namespace ExposureNotification.Backend.Proto
 {
 	public partial class TemporaryExposureKeyExport
 	{

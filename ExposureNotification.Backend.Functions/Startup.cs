@@ -1,7 +1,7 @@
 ﻿using System;
+using ExposureNotification.Backend.Database;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 
 [assembly: FunctionsStartup(typeof(ExposureNotification.Backend.Functions.Startup))]
 
@@ -9,37 +9,30 @@ namespace ExposureNotification.Backend.Functions
 {
 	public class Startup : FunctionsStartup
 	{
+		const string inMemoryDatabaseName = "ChangeInProduction";
+		readonly static char[] separators = new[] { ';', ',', ':' };
+
 		internal static ExposureNotificationStorage Database;
 
 		public override void Configure(IFunctionsHostBuilder builder)
 		{
-			SqlServerConnectionString =
-				Environment.GetEnvironmentVariable("SqlServerConnectionString", EnvironmentVariableTarget.Process);
-			BlobStorageConnectionString =
-				Environment.GetEnvironmentVariable("BlobStorageConnectionString", EnvironmentVariableTarget.Process);
-			BlobStorageContainerNamePrefix =
-				Environment.GetEnvironmentVariable("BlobStorageContainerNamePrefix", EnvironmentVariableTarget.Process) ?? string.Empty;
-			DeleteKeysFromDbAfterBatching =
-				(Environment.GetEnvironmentVariable("DeleteKeysFromDbAfterBatching", EnvironmentVariableTarget.Process) ?? string.Empty).Equals("true", StringComparison.OrdinalIgnoreCase);
-
-			var regions =
-				Environment.GetEnvironmentVariable("ExposureKeyRegions", EnvironmentVariableTarget.Process)
-					?? DbTemporaryExposureKey.DefaultRegion;
-
-			ExposureKeyRegions = regions.Split(new[] { ';', ',', ':' });
+			SqlServerConnectionString = GetEnv("SqlServerConnectionString");
+			BlobStorageConnectionString = GetEnv("BlobStorageConnectionString");
+			BlobStorageContainerNamePrefix = GetEnv("BlobStorageContainerNamePrefix", string.Empty);
+			DeleteKeysFromDbAfterBatching = GetEnv("DeleteKeysFromDbAfterBatching", "false").Equals("true", StringComparison.OrdinalIgnoreCase);
+			ExposureKeyRegions = GetEnv("ExposureKeyRegions", DbTemporaryExposureKey.DefaultRegion).Split(separators);
 
 			Database = new ExposureNotificationStorage(
 				builder =>
 				{
 					if (string.IsNullOrEmpty(SqlServerConnectionString))
-						builder.UseInMemoryDatabase("ChangeInProduction");
+						builder.UseInMemoryDatabase(inMemoryDatabaseName);
 					else
 						builder.UseSqlServer(SqlServerConnectionString);
 				},
 				initialize =>
 				{
-					//if (string.IsNullOrEmpty(SqlServerConnectionString))
-						initialize.Database.EnsureCreated();
+					initialize.Database.EnsureCreated();
 				});
 		}
 
@@ -52,5 +45,8 @@ namespace ExposureNotification.Backend.Functions
 		internal static string[] ExposureKeyRegions { get; private set; }
 
 		internal static bool DeleteKeysFromDbAfterBatching { get; private set; }
+
+		static string GetEnv(string name, string nullValue = null)
+			=> Environment.GetEnvironmentVariable(name, EnvironmentVariableTarget.Process) ?? nullValue;
 	}
 }
