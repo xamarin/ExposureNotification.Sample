@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.OpenSsl;
+using Org.BouncyCastle.Security;
 
 namespace ExposureNotification.Backend.Functions.Tests
 {
@@ -54,8 +57,8 @@ namespace ExposureNotification.Backend.Functions.Tests
 			return export;
 		}
 
-		public static MemoryStream GetBin(this ZipArchive zip) =>
-			zip.GetContents("export.bin", TemporaryExposureKeyExport.Header.Length);
+		public static MemoryStream GetBin(this ZipArchive zip, bool skipHeader = true) =>
+			zip.GetContents("export.bin", skipHeader ? TemporaryExposureKeyExport.Header.Length : 0);
 
 		public static MemoryStream GetSignature(this ZipArchive zip) =>
 			zip.GetContents("export.sig");
@@ -74,6 +77,19 @@ namespace ExposureNotification.Backend.Functions.Tests
 			entryStream.CopyTo(ms);
 			ms.Position = 0;
 			return ms;
+		}
+
+		public static bool ValidateSignature(byte[] message, byte[] signature, string pem, string algorithm = "SHA-256withECDSA")
+		{
+			using var stringReader = new StringReader(pem);
+			var reader = new PemReader(stringReader);
+			var pubkey = reader.ReadObject() as ECPublicKeyParameters;
+
+			var signer = SignerUtilities.GetSigner(algorithm);
+			signer.Init(false, pubkey);
+			signer.BlockUpdate(message, 0, message.Length);
+
+			return signer.VerifySignature(signature);
 		}
 	}
 }

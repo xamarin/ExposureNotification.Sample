@@ -1,12 +1,7 @@
-﻿using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System;
-using System.IO;
+﻿using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Text;
 using Xunit;
-using Org.BouncyCastle.OpenSsl;
 
 namespace ExposureNotification.Backend.Functions.Tests
 {
@@ -15,9 +10,7 @@ namespace ExposureNotification.Backend.Functions.Tests
 		[Fact]
 		public void ValidateSignedExample()
 		{
-			var exportFile = "TestAssets/SignedExample/export.zip";
-
-			using var zipFile = ZipFile.OpenRead(exportFile);
+			using var zipFile = ZipFile.OpenRead("TestAssets/SignedExample/export.zip");
 
 			var expectedEntries = new[] { "export.bin", "export.sig" };
 			var entries = zipFile.Entries.Select(e => e.FullName);
@@ -27,9 +20,7 @@ namespace ExposureNotification.Backend.Functions.Tests
 		[Fact]
 		public void ValidateSignedExampleBinary()
 		{
-			var exportFile = "TestAssets/SignedExample/export.zip";
-
-			using var zipFile = ZipFile.OpenRead(exportFile);
+			using var zipFile = ZipFile.OpenRead("TestAssets/SignedExample/export.zip");
 			using var exportBin = zipFile.GetBin();
 
 			var export = TemporaryExposureKeyExport.Parser.ParseFrom(exportBin);
@@ -43,9 +34,7 @@ namespace ExposureNotification.Backend.Functions.Tests
 		[Fact]
 		public void ValidateSignedExampleSignature()
 		{
-			var exportFile = "TestAssets/SignedExample/export.zip";
-
-			using var zipFile = ZipFile.OpenRead(exportFile);
+			using var zipFile = ZipFile.OpenRead("TestAssets/SignedExample/export.zip");
 			using var exportSig = zipFile.GetSignature();
 
 			var signatureList = TEKSignatureList.Parser.ParseFrom(exportSig);
@@ -62,37 +51,24 @@ namespace ExposureNotification.Backend.Functions.Tests
 		[Fact]
 		public void ValidateSignedExampleSignatureValidity()
 		{
-			var exportFile = "TestAssets/SignedExample/export.zip";
-			using var zipFile = ZipFile.OpenRead(exportFile);
+			using var zipFile = ZipFile.OpenRead("TestAssets/SignedExample/export.zip");
 			using var exportSig = zipFile.GetSignature();
-			using var exportBin = zipFile.GetBin();
+			using var exportBin = zipFile.GetBin(false);
 
 			var signatureList = TEKSignatureList.Parser.ParseFrom(exportSig);
 			var signature = signatureList.Signatures[0].Signature.ToByteArray();
 
-			var pemFile = "TestAssets/SignedExample/public.pem";
-			var pem = File.ReadAllText(pemFile);
+			var pem = File.ReadAllText("TestAssets/SignedExample/public.pem");
 
 			var bin = exportBin.ToArray();
 
-			Assert.True(Validate(signature, pem, bin));
-		}
-
-		public bool Validate(byte[] signature, string pem, byte[] data)
-		{
-			using var stringReader = new StringReader(pem);
-			var reader = new PemReader(stringReader);
-			var obj = reader.ReadObject();
-
-			return false;
+			Assert.True(Utils.ValidateSignature(bin, signature, pem));
 		}
 
 		[Fact]
 		public void ValidateKeysExample()
 		{
-			var exportFile = "TestAssets/KeysExample/export.zip";
-
-			using var zipFile = ZipFile.OpenRead(exportFile);
+			using var zipFile = ZipFile.OpenRead("TestAssets/KeysExample/export.zip");
 
 			var expectedEntries = new[] { "export.bin", "export.sig" };
 			var entries = zipFile.Entries.Select(e => e.FullName);
