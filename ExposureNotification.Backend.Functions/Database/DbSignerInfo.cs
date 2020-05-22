@@ -16,5 +16,7 @@ namespace ExposureNotification.Backend.Database
 		public string VerificationKeyId { get; set; }
 
 		public string VerificationKeyVersion { get; set; }
+
+		public string AzureVaultSecretIdentifier { get; set; }
 	}
 }

@@ -18,24 +18,11 @@ namespace ExposureNotification.Backend.Functions
 
 		public static async Task<Stream> CreateSignedFileAsync(TemporaryExposureKeyExport export, IEnumerable<DbSignerInfo> signerInfos, ISigner signer)
 		{
-			// Convert the infos into proto versions
-			var signatures = signerInfos.Select(si => new SignatureInfo
-			{
-				AndroidPackage = si.AndroidPackage,
-				AppBundleId = si.AppBundleId,
-				SignatureAlgorithm = SignatureAlgorithm,
-				VerificationKeyId = si.VerificationKeyId,
-				VerificationKeyVersion = si.VerificationKeyVersion,
-			});
-
-			// First add all signatures to the actual export
-			export.SignatureInfos.AddRange(signatures);
-
 			var ms = new MemoryStream();
 
 			using (var zipFile = new ZipArchive(ms, ZipArchiveMode.Create, true))
 			using (var bin = await CreateBinAsync(export))
-			using (var sig = await CreateSigAsync(export, bin.ToArray(), signer))
+			using (var sig = await CreateSigAsync(export, bin.ToArray(), signer, signerInfos))
 			{
 				// Copy the bin contents into the entry
 				var binEntry = zipFile.CreateEntry(BinEntryName, CompressionLevel.Optimal);
@@ -73,22 +60,29 @@ namespace ExposureNotification.Backend.Functions
 			return stream;
 		}
 
-		public static async Task<MemoryStream> CreateSigAsync(TemporaryExposureKeyExport export, byte[] exportBytes, ISigner signer)
+		public static async Task<MemoryStream> CreateSigAsync(TemporaryExposureKeyExport export, byte[] exportBytes, ISigner signer, IEnumerable<DbSignerInfo> signerInfos)
 		{
 			var stream = new MemoryStream();
 
 			// Create signature list object
 			var tk = new TEKSignatureList();
-			foreach (var sigInfo in export.SignatureInfos)
+			foreach (var sigInfo in signerInfos)
 			{
 				// Generate the signature from the bin file contents
-				var sig = await signer.GenerateSignatureAsync(exportBytes);
+				var sig = await signer.GenerateSignatureAsync(exportBytes, sigInfo);
 
 				tk.Signatures.Add(new TEKSignature
 				{
 					BatchNum = export.BatchNum,
 					BatchSize = export.BatchSize,
-					SignatureInfo = sigInfo,
+					SignatureInfo = new SignatureInfo
+					{
+						AndroidPackage = sigInfo.AndroidPackage,
+						AppBundleId = sigInfo.AppBundleId,
+						SignatureAlgorithm = SignatureAlgorithm,
+						VerificationKeyId = sigInfo.VerificationKeyId,
+						VerificationKeyVersion = sigInfo.VerificationKeyVersion,
+					},
 					Signature = ByteString.CopyFrom(sig),
 				});
 			}

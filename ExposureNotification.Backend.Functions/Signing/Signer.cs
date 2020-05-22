@@ -2,6 +2,7 @@
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+using ExposureNotification.Backend.Database;
 using ExposureNotification.Backend.Proto;
 using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.Services.AppAuthentication;
@@ -12,11 +13,8 @@ namespace ExposureNotification.Backend.Signing
 	{
 		// TODO: You need to sign this with the key and mechanism
 		// that google/apple shared with you
-		public async Task<byte[]> GenerateSignatureAsync(byte[] contents)
+		public async Task<byte[]> GenerateSignatureAsync(byte[] contents, DbSignerInfo signerInfo)
 		{
-			// Get the configured secret ID
-			var keyVaultSecretId = Environment.GetEnvironmentVariable("SigningKeyVaultSecretId", EnvironmentVariableTarget.Process);
-
 			// Use a built in token provider which works in azure functions if the service/app identity is granted access to the key vault
 			var azureServiceTokenProvider = new AzureServiceTokenProvider();
 
@@ -25,7 +23,7 @@ namespace ExposureNotification.Backend.Signing
 
 			// Get the secret specified in the app config
 			// This is actually am Elliptic Curve certificate (ECDSA) with a P-256 curve
-			var keyVaultSecret = await keyVault.GetSecretAsync(keyVaultSecretId);
+			var keyVaultSecret = await keyVault.GetSecretAsync(signerInfo.AzureVaultSecretIdentifier);
 
 			// Turn this into a certificate object
 			var keyVaultCert = new X509Certificate2(Convert.FromBase64String(keyVaultSecret.Value));
