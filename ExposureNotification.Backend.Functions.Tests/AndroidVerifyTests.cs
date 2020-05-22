@@ -18,7 +18,7 @@ namespace ExposureNotification.Backend.Functions.Tests
 
 		static readonly SelfDiagnosisSubmission submission = new SelfDiagnosisSubmission
 		{
-			AppPackageName = "com.xamarin.exposurenotification.sampleapp",
+			AppPackageName = "com.companyname.ExposureNotification.app",
 			Platform = "android",
 			Regions = new[] { "default" },
 			VerificationPayload = "POSITIVE_TEST_123456",
