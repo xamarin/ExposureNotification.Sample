@@ -200,26 +200,5 @@ namespace ExposureNotification.App
 				return submission;
 			}
 		}
-
-		internal static async Task<bool> VerifyDiagnosisUid(string diagnosisUid)
-		{
-			var url = $"{apiUrlBase.TrimEnd('/')}/selfdiagnosis";
-
-			var http = new HttpClient();
-
-			try
-			{
-				var json = "{\"diagnosisUid\":\"" + diagnosisUid + "\"}";
-				var response = await http.PostAsync(url, new StringContent(json));
-
-				response.EnsureSuccessStatusCode();
-
-				return true;
-			}
-			catch
-			{
-				return false;
-			}
-		}
 	}
 }

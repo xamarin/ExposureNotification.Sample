@@ -35,26 +35,8 @@ namespace ExposureNotification.App.ViewModels
 					return;
 				}
 
-				// Verify the UID
-				using var dialog = UserDialogs.Instance.Loading("Verifying Diagnosis...");
-				IsEnabled = false;
-				try
-				{
-					// Check the diagnosis is valid on the server before asking the native api's for the keys
-					if (!await ExposureNotificationHandler.VerifyDiagnosisUid(DiagnosisUid))
-						throw new Exception();
-				}
-				catch
-				{
-					dialog.Hide();
-
-					await UserDialogs.Instance.AlertAsync("Your diagnosis cannot be verified at this time to be submitted.", "Verification Failed", "OK");
-					IsEnabled = true;
-					return;
-				}
-
 				// Submit the UID
-				dialog.Title = "Submitting Diagnosis...";
+				using var dialog = UserDialogs.Instance.Loading("Submitting Diagnosis...");
 				IsEnabled = false;
 				try
 				{
