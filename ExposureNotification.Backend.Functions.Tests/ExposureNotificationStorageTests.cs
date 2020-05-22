@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using ExposureNotification.Backend.Database;
 using ExposureNotification.Backend.Network;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace ExposureNotification.Backend.Functions.Tests
@@ -11,9 +13,15 @@ namespace ExposureNotification.Backend.Functions.Tests
 	{
 		public ExposureNotificationStorageTests()
 		{
-			Storage = new ExposureNotificationStorage(
-				builder => builder.UseInMemoryDatabase("Tests"),
-				initialize => initialize.Database.EnsureCreated());
+			var builder = new DbContextOptionsBuilder()
+				.UseInMemoryDatabase("ExposureNotificationStorageTests")
+				.ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+			var context = new ExposureNotificationContext(builder.Options);
+
+			var settings = new Settings();
+			var options = Options.Create(settings);
+			
+			Storage = new ExposureNotificationStorage(context, options);
 		}
 
 		public ExposureNotificationStorage Storage { get; }

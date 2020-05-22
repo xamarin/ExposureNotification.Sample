@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ namespace ExposureNotification.Backend.Functions.Tests
 		public async Task ValidateFile()
 		{
 			var expectedExport = GenerateRandomExport();
-			using var stream = await ExposureBatchFileUtil.CreateSignedFileAsync(expectedExport, TestSignatures, Signer);
+			using var stream = await ExposureBatchFileUtil.CreateSignedFileAsync(expectedExport, TestSignatures);
 
 			using var zipFile = new ZipArchive(stream);
 
@@ -28,7 +29,7 @@ namespace ExposureNotification.Backend.Functions.Tests
 		public async Task ValidateFileBinary()
 		{
 			var expectedExport = GenerateRandomExport();
-			using var stream = await ExposureBatchFileUtil.CreateSignedFileAsync(expectedExport, TestSignatures, Signer);
+			using var stream = await ExposureBatchFileUtil.CreateSignedFileAsync(expectedExport, TestSignatures);
 
 			using var zipFile = new ZipArchive(stream);
 			using var exportBin = zipFile.GetBin();
@@ -46,7 +47,7 @@ namespace ExposureNotification.Backend.Functions.Tests
 		public async Task ValidateFileSignature()
 		{
 			var expectedExport = GenerateRandomExport();
-			using var stream = await ExposureBatchFileUtil.CreateSignedFileAsync(expectedExport, TestSignatures, Signer);
+			using var stream = await ExposureBatchFileUtil.CreateSignedFileAsync(expectedExport, TestSignatures);
 
 			using var zipFile = new ZipArchive(stream);
 			using var exportSig = zipFile.GetSignature();
@@ -68,7 +69,7 @@ namespace ExposureNotification.Backend.Functions.Tests
 		{
 			var export = Utils.GenerateTemporaryExposureKeyExport(10);
 
-			using var stream = await ExposureBatchFileUtil.CreateSignedFileAsync(export, TestSignatures, Signer);
+			using var stream = await ExposureBatchFileUtil.CreateSignedFileAsync(export, TestSignatures);
 
 			Assert.NotNull(stream);
 			Assert.NotEqual(0, stream.Length);
@@ -79,7 +80,7 @@ namespace ExposureNotification.Backend.Functions.Tests
 		{
 			var export = Utils.GenerateTemporaryExposureKeyExport(10);
 
-			using var stream = await ExposureBatchFileUtil.CreateSignedFileAsync(export, TestSignatures, Signer);
+			using var stream = await ExposureBatchFileUtil.CreateSignedFileAsync(export, TestSignatures);
 			using var zip = new ZipArchive(stream);
 
 			using var bin = zip.GetBin(false);
@@ -114,7 +115,7 @@ namespace ExposureNotification.Backend.Functions.Tests
 		{
 			var expectedExport = GenerateRandomExport();
 
-			using var stream = await ExposureBatchFileUtil.CreateSignedFileAsync(expectedExport, TestSignatures, Signer);
+			using var stream = await ExposureBatchFileUtil.CreateSignedFileAsync(expectedExport, TestSignatures);
 			Assert.NotNull(stream);
 
 			using var zip = new ZipArchive(stream);
@@ -134,9 +135,6 @@ namespace ExposureNotification.Backend.Functions.Tests
 		//	Utils.ValidateExportFileSignature(stream, TestPublicKey);
 		//}
 
-		static ISigner Signer
-			=> new TestSigner();
-
 		static DbSignerInfo[] TestSignatures
 			=> new DbSignerInfo[]
 			{
@@ -146,7 +144,7 @@ namespace ExposureNotification.Backend.Functions.Tests
 					AppBundleId = "com.xamarin.exposurenotificationsample.tests",
 					VerificationKeyId = "TestServer",
 					VerificationKeyVersion = "2",
-					AzureVaultSecretIdentifier = "https://exposurenotifications.vault.azure.net/secrets/sample/94b11196ccfb4747a66674d4110d175c"
+					SigningKeyBase64String = Convert.ToBase64String(File.ReadAllBytes("TestAssets/sample-ecdsa-p256-cert.pfx"))
 				}
 			};
 

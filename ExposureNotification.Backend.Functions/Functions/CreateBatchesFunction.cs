@@ -20,13 +20,11 @@ namespace ExposureNotification.Backend.Functions
 
 		readonly ExposureNotificationStorage storage;
 		readonly IOptions<Settings> settings;
-		readonly ISigner signer;
 
-		public CreateBatchesFunction(ExposureNotificationStorage storage, IOptions<Settings> settings, ISigner signer)
+		public CreateBatchesFunction(ExposureNotificationStorage storage, IOptions<Settings> settings)
 		{
 			this.storage = storage;
 			this.settings = settings;
-			this.signer = signer;
 		}
 
 		// Every 6 hours
@@ -93,7 +91,7 @@ namespace ExposureNotification.Backend.Functions
 					var blockBlob = cloudBlobContainer.GetBlockBlobReference(batchFileName);
 
 					// Write the proto buf to a memory stream
-					using var signedFileStream = await ExposureBatchFileUtil.CreateSignedFileAsync(export, signerInfos, signer);
+					using var signedFileStream = await ExposureBatchFileUtil.CreateSignedFileAsync(export, signerInfos);
 
 					// Set the batch number and region as metadata
 					blockBlob.Metadata[dirNumberMetadataKey] = nextDirNumber.ToString();

@@ -70,7 +70,6 @@ namespace ExposureNotification.Backend.Functions
 
 			// set up database "repository"
 			builder.Services.AddTransient<ExposureNotificationStorage>();
-			builder.Services.AddTransient<ISigner, Signer>();
 		}
 	}
 }

@@ -1,14 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using ExposureNotification.Backend.Database;
 using ExposureNotification.Backend.Proto;
-using ExposureNotification.Backend.Signing;
 using Google.Protobuf;
 
-namespace ExposureNotification.Backend.Functions
+namespace ExposureNotification.Backend.Signing
 {
 	public static class ExposureBatchFileUtil
 	{
@@ -16,7 +18,7 @@ namespace ExposureNotification.Backend.Functions
 		public const string BinEntryName = "export.bin";
 		public const string SigEntryName = "export.sig";
 
-		public static async Task<Stream> CreateSignedFileAsync(TemporaryExposureKeyExport export, IEnumerable<DbSignerInfo> signerInfos, ISigner signer)
+		public static async Task<Stream> CreateSignedFileAsync(TemporaryExposureKeyExport export, IEnumerable<DbSignerInfo> signerInfos)
 		{
 			export.SignatureInfos.AddRange(signerInfos.Select(sigInfo => new SignatureInfo
 			{
@@ -31,7 +33,7 @@ namespace ExposureNotification.Backend.Functions
 
 			using (var zipFile = new ZipArchive(ms, ZipArchiveMode.Create, true))
 			using (var bin = await CreateBinAsync(export))
-			using (var sig = await CreateSigAsync(export, bin.ToArray(), signer, signerInfos))
+			using (var sig = await CreateSigAsync(export, bin.ToArray(), signerInfos))
 			{
 				// Copy the bin contents into the entry
 				var binEntry = zipFile.CreateEntry(BinEntryName, CompressionLevel.Optimal);
@@ -69,7 +71,7 @@ namespace ExposureNotification.Backend.Functions
 			return stream;
 		}
 
-		public static async Task<MemoryStream> CreateSigAsync(TemporaryExposureKeyExport export, byte[] exportBytes, ISigner signer, IEnumerable<DbSignerInfo> signerInfos)
+		public static async Task<MemoryStream> CreateSigAsync(TemporaryExposureKeyExport export, byte[] exportBytes, IEnumerable<DbSignerInfo> signerInfos)
 		{
 			var stream = new MemoryStream();
 
@@ -78,7 +80,7 @@ namespace ExposureNotification.Backend.Functions
 			foreach (var sigInfo in signerInfos)
 			{
 				// Generate the signature from the bin file contents
-				var sig = await signer.GenerateSignatureAsync(exportBytes, sigInfo);
+				var sig = await GenerateSignatureAsync(exportBytes, sigInfo);
 
 				tk.Signatures.Add(new TEKSignature
 				{
@@ -103,6 +105,23 @@ namespace ExposureNotification.Backend.Functions
 			stream.Position = 0;
 
 			return stream;
+		}
+
+		public static Task<byte[]> GenerateSignatureAsync(byte[] contents, DbSignerInfo signerInfo)
+		{
+			// This is actually am Elliptic Curve certificate (ECDSA) with a P-256 curve
+			// It's been encoded to a base64 string
+			// Turn this into a certificate object
+			var bytes = Convert.FromBase64String(signerInfo.SigningKeyBase64String);
+			var keyVaultCert = new X509Certificate2(bytes);
+
+			// Get the private key to use for creating the signature
+			var ecdsaPrivateKey = keyVaultCert.GetECDsaPrivateKey();
+
+			// Create our signature based on the contents
+			var signature = ecdsaPrivateKey.SignData(contents, HashAlgorithmName.SHA256);
+
+			return Task.FromResult(signature);
 		}
 	}
 }

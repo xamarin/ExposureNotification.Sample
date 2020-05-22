@@ -4,6 +4,10 @@ namespace ExposureNotification.Backend.Database
 {
 	public class ExposureNotificationContext : DbContext
 	{
+		public ExposureNotificationContext()
+		{
+		}
+
 		public ExposureNotificationContext(DbContextOptions options)
 			: base(options)
 		{
