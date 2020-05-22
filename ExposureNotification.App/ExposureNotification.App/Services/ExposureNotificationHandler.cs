@@ -1,25 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using ExposureNotification.App.Services;
+using ExposureNotification.Backend.Network;
 using Newtonsoft.Json;
 using Plugin.LocalNotification;
 using Xamarin.Essentials;
 using Xamarin.ExposureNotifications;
 using Xamarin.Forms;
-using Xamarin.Forms.Internals;
 
 namespace ExposureNotification.App
 {
-	[Preserve] // Ensure this isn't linked out
+	[Xamarin.Forms.Internals.Preserve] // Ensure this isn't linked out
 	public class ExposureNotificationHandler : IExposureNotificationHandler
 	{
 		public const string DefaultRegion = "default";
 
-		const string apiUrlBase = "https://exposurenotificationfunctions.azurewebsites.net/api/";
-		const string apiUrlBlobStorageBase = "https://exposurenotifications.blob.core.windows.net/";
+		const string apiUrlBase = "http://10.0.2.2:7071/api/";
+		const string apiUrlBlobStorageBase = "http://10.0.2.2:10000/devstoreaccount1";
 		const string blobStorageContainerNamePrefix = "";
 
 		static readonly HttpClient http = new HttpClient();
@@ -155,29 +156,48 @@ namespace ExposureNotification.App
 			if (pendingDiagnosis == null || string.IsNullOrEmpty(pendingDiagnosis.DiagnosisUid))
 				throw new InvalidOperationException();
 
-			try
-			{
-				var url = $"{apiUrlBase.TrimEnd('/')}/selfdiagnosis";
+			var selfDiag = await CreateSubmissionAsync();
 
-				var json = JsonConvert.SerializeObject(new SelfDiagnosisSubmissionRequest
+			var url = $"{apiUrlBase.TrimEnd('/')}/selfdiagnosis";
+
+			var json = JsonConvert.SerializeObject(selfDiag);
+
+			using var http = new HttpClient();
+			var response = await http.PutAsync(url, new StringContent(json));
+
+			response.EnsureSuccessStatusCode();
+
+			// Update pending status
+			pendingDiagnosis.Shared = true;
+			LocalStateManager.Save();
+
+			async Task<SelfDiagnosisSubmission> CreateSubmissionAsync()
+			{
+				// Create the network keys
+				var keys = temporaryExposureKeys.Select(k => new ExposureKey
 				{
-					DiagnosisUid = pendingDiagnosis.DiagnosisUid,
-					TestDate = pendingDiagnosis.DiagnosisDate.ToUnixTimeMilliseconds(),
-					Keys = temporaryExposureKeys
+					Key = Convert.ToBase64String(k.Key),
+					RollingStart = (long)(k.RollingStart - DateTime.UnixEpoch).TotalMinutes / 10,
+					RollingDuration = (int)(k.RollingDuration.TotalMinutes / 10),
+					TransmissionRisk = (int)k.TransmissionRiskLevel
 				});
 
-				var http = new HttpClient();
-				var response = await http.PutAsync(url, new StringContent(json));
+				// Create the submission
+				var submission = new SelfDiagnosisSubmission(true)
+				{
+					AppPackageName = AppInfo.PackageName,
+					DeviceVerificationPayload = null,
+					Platform = DeviceInfo.Platform.ToString().ToLowerInvariant(),
+					Regions = new[] { LocalStateManager.Instance.Region ?? DefaultRegion },
+					Keys = keys.ToArray(),
+					VerificationPayload = pendingDiagnosis.DiagnosisUid,
+				};
 
-				response.EnsureSuccessStatusCode();
+				// See if we can add the device verification
+				if (DependencyService.Get<IDeviceVerifier>() is IDeviceVerifier verifier)
+					submission.DeviceVerificationPayload = await verifier?.VerifyAsync(submission);
 
-				// Update pending status
-				pendingDiagnosis.Shared = true;
-				LocalStateManager.Save();
-			}
-			catch
-			{
-				throw;
+				return submission;
 			}
 		}
 
@@ -200,18 +220,6 @@ namespace ExposureNotification.App
 			{
 				return false;
 			}
-		}
-
-		class SelfDiagnosisSubmissionRequest
-		{
-			[JsonProperty("diagnosisUid")]
-			public string DiagnosisUid { get; set; }
-
-			[JsonProperty("testDate")]
-			public long TestDate { get; set; }
-
-			[JsonProperty("keys")]
-			public IEnumerable<TemporaryExposureKey> Keys { get; set; }
 		}
 	}
 }

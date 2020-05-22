@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using ExposureNotification.Backend.Database;
+using ExposureNotification.Backend.Network;
 using ExposureNotification.Backend.Proto;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.OpenSsl;
@@ -37,6 +38,32 @@ namespace ExposureNotification.Backend.Functions.Tests
 				RollingDuration = 1,
 				TransmissionRiskLevel = 1
 			};
+
+		public static List<ExposureKey> GenerateExposureKeys(int daysBack)
+		{
+			var nowDate = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, 0, 0, 0, 0, DateTimeKind.Utc);
+
+			var tracingKeys = new List<ExposureKey>();
+
+			for (var day = nowDate.AddDays(-1 * daysBack); day <= nowDate; day += TimeSpan.FromDays(1))
+			{
+				for (var seg = nowDate; seg < nowDate.AddDays(1); seg += TimeSpan.FromMinutes(15))
+				{
+					var rnd = GetRandomBytesAsBase64();
+					var duration = random.Next(1, 60);
+					var risk = random.Next(1, 8 + 1);
+
+					tracingKeys.Add(new ExposureKey
+					{
+						Key = rnd,
+						RollingDuration = duration,
+						TransmissionRisk = risk
+					});
+				}
+			};
+
+			return tracingKeys;
+		}
 
 		public static List<TemporaryExposureKey> GenerateTemporaryExposureKeys(int daysBack)
 		{

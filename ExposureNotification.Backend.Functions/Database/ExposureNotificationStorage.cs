@@ -105,20 +105,20 @@ namespace ExposureNotification.Backend.Database
 				return Task.FromResult(ctx.Diagnoses.Any(d => d.DiagnosisUid.Equals(diagnosisUid)));
 		}
 
-		public async Task SubmitPositiveDiagnosisAsync(SelfDiagnosisSubmissionRequest diagnosis)
+		public async Task SubmitPositiveDiagnosisAsync(SelfDiagnosisSubmission diagnosis)
 		{
 			using (var ctx = new ExposureNotificationContext(dbContextOptions))
 			using (var transaction = ctx.Database.BeginTransaction())
 			{
 				// Ensure the database contains the diagnosis uid
-				var dbDiag = await ctx.Diagnoses.FirstOrDefaultAsync(d => d.DiagnosisUid == diagnosis.DiagnosisUid);
+				var dbDiag = await ctx.Diagnoses.FirstOrDefaultAsync(d => d.DiagnosisUid == diagnosis.VerificationPayload);
 
 				// Check that the diagnosis uid exists and that there aren't too many keys associated
 				// already, otherwise it might be someone submitting fake data with a legitimate key
 				if (dbDiag == null || dbDiag.KeyCount > maxKeysPerDiagnosisUid)
 					throw new InvalidOperationException();
 
-				var dbKeys = diagnosis.Keys.Select(k => DbTemporaryExposureKey.FromKey(k, diagnosis.TestDate)).ToList();
+				var dbKeys = diagnosis.Keys.Select(k => DbTemporaryExposureKey.FromKey(k)).ToList();
 
 				// Add the new keys to the db
 				foreach (var dbk in dbKeys)

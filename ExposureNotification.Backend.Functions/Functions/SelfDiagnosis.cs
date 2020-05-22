@@ -6,7 +6,6 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
-using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using ExposureNotification.Backend.Network;
 
@@ -33,7 +32,7 @@ namespace ExposureNotification.Backend.Functions
 			// Submit a self diagnosis after verifying
 			else if (req.Method.Equals("put", StringComparison.OrdinalIgnoreCase))
 			{
-				var diagnosis = JsonConvert.DeserializeObject<SelfDiagnosisSubmissionRequest>(requestBody);
+				var diagnosis = JsonConvert.DeserializeObject<SelfDiagnosisSubmission>(requestBody);
 
 				await Startup.Database.SubmitPositiveDiagnosisAsync(diagnosis);
 			}

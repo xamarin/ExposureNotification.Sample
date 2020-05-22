@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if DEBUG
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
@@ -69,3 +70,4 @@ namespace ExposureNotification.App.Services
 		}
 	}
 }
+#endif

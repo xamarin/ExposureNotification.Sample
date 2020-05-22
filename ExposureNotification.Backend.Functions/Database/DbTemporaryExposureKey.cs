@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using ExposureNotification.Backend.Network;
 using ExposureNotification.Backend.Proto;
 using Google.Protobuf;
 
@@ -21,8 +22,6 @@ namespace ExposureNotification.Backend.Database
 
 		public long TimestampMsSinceEpoch { get; set; }
 
-		public long TestDateMsSinceEpoch { get; set; }
-
 		public long RollingStartSecondsSinceEpoch { get; set; }
 
 		public int RollingDuration { get; set; }
@@ -38,15 +37,14 @@ namespace ExposureNotification.Backend.Database
 				TransmissionRiskLevel = TransmissionRiskLevel
 			};
 
-		public static DbTemporaryExposureKey FromKey(TemporaryExposureKey key, long testDateMsSinceEpoch)
+		public static DbTemporaryExposureKey FromKey(ExposureKey key)
 			=> new DbTemporaryExposureKey
 			{
-				Base64KeyData = key.KeyData.ToBase64(),
+				Base64KeyData = key.Key,
 				TimestampMsSinceEpoch = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-				TestDateMsSinceEpoch = testDateMsSinceEpoch,
-				RollingStartSecondsSinceEpoch = key.RollingStartIntervalNumber,
-				RollingDuration = key.RollingPeriod,
-				TransmissionRiskLevel = key.TransmissionRiskLevel
+				RollingStartSecondsSinceEpoch = key.RollingStart,
+				RollingDuration = key.RollingDuration,
+				TransmissionRiskLevel = key.TransmissionRisk
 			};
 	}
 }

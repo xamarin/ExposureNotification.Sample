@@ -81,13 +81,13 @@ namespace ExposureNotification.Backend.Functions.Tests
 		[Fact]
 		public async Task Submit_Diagnosis_Fails_Test()
 		{
-			var keys = Utils.GenerateTemporaryExposureKeys(14);
+			var keys = Utils.GenerateExposureKeys(14);
 
 			await Assert.ThrowsAsync<InvalidOperationException>(async () =>
 			{
-				await Storage.SubmitPositiveDiagnosisAsync(new SelfDiagnosisSubmissionRequest
+				await Storage.SubmitPositiveDiagnosisAsync(new SelfDiagnosisSubmission
 				{
-					DiagnosisUid = "notaddeduid1",
+					VerificationPayload = "notaddeduid1",
 					Keys = keys
 				});
 			});

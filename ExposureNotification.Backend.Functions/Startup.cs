@@ -3,6 +3,7 @@ using ExposureNotification.Backend.Database;
 using ExposureNotification.Backend.Signing;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 
 [assembly: FunctionsStartup(typeof(ExposureNotification.Backend.Functions.Startup))]
@@ -30,7 +31,8 @@ namespace ExposureNotification.Backend.Functions
 				builder =>
 				{
 					if (string.IsNullOrEmpty(SqlServerConnectionString))
-						builder.UseInMemoryDatabase(inMemoryDatabaseName);
+						builder.UseInMemoryDatabase(inMemoryDatabaseName)
+							.ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
 					else
 						builder.UseSqlServer(SqlServerConnectionString);
 				},
