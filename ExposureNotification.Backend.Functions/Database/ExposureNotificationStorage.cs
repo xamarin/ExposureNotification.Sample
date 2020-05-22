@@ -133,7 +133,7 @@ namespace ExposureNotification.Backend.Database
 				}
 
 				// Increment key count
-				dbDiag.KeyCount += diagnosis.Keys.Count() / Startup.SupportedRegions.Length;
+				dbDiag.KeyCount += diagnosis.Keys.Count();
 
 				await ctx.SaveChangesAsync();
 
