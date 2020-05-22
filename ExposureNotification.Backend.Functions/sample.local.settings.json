@@ -1,0 +1,18 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+
+    "EN:SkipKeyVault": true, // just use local config
+    "EN:KeyVaultName": "KEY_VAULT_NAME_HERE",
+
+    "EN:BlobStorageConnectionString": "UseDevelopmentStorage=true",
+    "EN:BlobStorageContainerNamePrefix": "region-",
+    "EN:DbConnectionString": null, // use in-memory
+    "EN:DeleteKeysFromDbAfterBatching": "false",
+    "EN:DisableDeviceVerification": "true",
+    "EN:SigningKey": null, // placeholder for KeyVault certificate
+    "EN:SupportedRegions": "ca;za"
+  }
+}
