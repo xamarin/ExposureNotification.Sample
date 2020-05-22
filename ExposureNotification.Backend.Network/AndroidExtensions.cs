@@ -14,7 +14,7 @@ namespace ExposureNotification.Backend.Network
 			return nonce;
 		}
 
-		public static string GetAndroidNonceClearText(this SelfDiagnosisSubmission submission) =>
+		static string GetAndroidNonceClearText(this SelfDiagnosisSubmission submission) =>
 			string.Join("|", submission.AppPackageName, GetKeyString(submission.Keys), GetRegionString(submission.Regions), submission.VerificationPayload);
 
 		static string GetKeyString(IEnumerable<ExposureKey> keys) =>

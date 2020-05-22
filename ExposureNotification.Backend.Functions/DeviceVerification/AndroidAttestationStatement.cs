@@ -14,7 +14,7 @@ namespace ExposureNotification.Backend.DeviceVerification
 				Nonce = Convert.FromBase64String(claims["nonce"]);
 
 			if (claims.ContainsKey("timestampMs") && long.TryParse(claims["timestampMs"], NumberStyles.Integer, CultureInfo.InvariantCulture, out var timestampMsLocal))
-				TimestampMs = timestampMsLocal;
+				TimestampMilliseconds = timestampMsLocal;
 
 			if (claims.ContainsKey("apkPackageName"))
 				ApkPackageName = claims["apkPackageName"];
@@ -36,7 +36,7 @@ namespace ExposureNotification.Backend.DeviceVerification
 
 		public byte[] Nonce { get; }
 
-		public long TimestampMs { get; }
+		public long TimestampMilliseconds { get; }
 
 		public string ApkPackageName { get; }
 

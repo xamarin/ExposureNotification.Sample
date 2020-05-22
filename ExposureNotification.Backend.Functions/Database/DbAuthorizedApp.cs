@@ -17,11 +17,11 @@ namespace ExposureNotification.Backend.Database
 
 		// SafetyNet configuration
 
-		public string[] SafetyNetApkDigestSHA256 { get; set; }
+		public string[] SafetyNetApkDigestSha256 { get; set; }
 
 		public bool SafetyNetBasicIntegrity { get; set; }
 
-		public bool SafetyNetCTSProfileMatch { get; set; }
+		public bool SafetyNetCtsProfileMatch { get; set; }
 
 		public int SafetyNetPastTimeSeconds { get; set; }
 

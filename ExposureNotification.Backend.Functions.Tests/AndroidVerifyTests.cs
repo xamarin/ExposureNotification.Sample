@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
+using ExposureNotification.Backend.Database;
 using ExposureNotification.Backend.DeviceVerification;
 using ExposureNotification.Backend.Network;
 using Newtonsoft.Json;
@@ -11,12 +13,6 @@ namespace ExposureNotification.Backend.Functions.Tests
 	{
 		static readonly SelfDiagnosisSubmission actualSubmission = 
 			JsonConvert.DeserializeObject<SelfDiagnosisSubmission>(File.ReadAllText("TestAssets/submission.json"));
-
-		const string cleartext =
-			"com.companyname.ExposureNotification.app|" +
-			"A8sh1Z5hB7hFKejbzwclnA==.2649983.3.2,Qm8HISNU/bdI+9o1/4ZHZw==.2650127.0.6|" +
-			"DEFAULT|" +
-			"POSITIVE_TEST_123456";
 
 		const string sha256 = "pnpQ6KkSqZ+y0yJIxKc9eqNXIM8olKZ5/rV0mxvIDWg=";
 
@@ -34,14 +30,6 @@ namespace ExposureNotification.Backend.Functions.Tests
 		};
 
 		[Fact]
-		public void VerifyNonceClearTextTest()
-		{
-			var nonceClear = submission.GetAndroidNonceClearText();
-
-			Assert.Equal(cleartext, nonceClear);
-		}
-
-		[Fact]
 		public void VerifyNonceTest()
 		{
 			var nonce = submission.GetAndroidNonce();
@@ -56,6 +44,22 @@ namespace ExposureNotification.Backend.Functions.Tests
 			var nonce = submission.GetAndroidNonce();
 
 			Assert.Equal(Convert.ToBase64String(nonce), Convert.ToBase64String(claims.Nonce));
+		}
+
+		[Fact]
+		public async Task VerifyTokenTest()
+		{
+			var app = new DbAuthorizedApp
+			{
+				PackageName = "com.companyname.ExposureNotification.app",
+				Platform = "android",
+			};
+
+			var nonce = submission.GetAndroidNonce();
+
+			var verified = await AndroidVerify.VerifyToken(actualSubmission.DeviceVerificationPayload, nonce, DateTimeOffset.UtcNow, app);
+
+			Assert.True(verified);
 		}
 	}
 }

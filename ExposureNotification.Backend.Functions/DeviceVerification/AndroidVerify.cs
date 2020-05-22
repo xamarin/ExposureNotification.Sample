@@ -16,9 +16,44 @@ namespace ExposureNotification.Backend.DeviceVerification
 		{
 			var claims = ParsePayload(token);
 
-			// Validate the nonce.
-			if (claims.Nonce != expectedNonce)
+			// Validate the nonce
+			if (Convert.ToBase64String(claims.Nonce) != Convert.ToBase64String(expectedNonce))
 				return false;
+
+			// Validate time interval
+			var now = requestTime.ToUnixTimeMilliseconds();
+			if (app.SafetyNetPastTimeSeconds > 0)
+			{
+				var minTime = now - (app.SafetyNetPastTimeSeconds * 1000);
+				if (claims.TimestampMilliseconds < minTime)
+					return false;
+			}
+			if (app.SafetyNetFutureTimeSeconds > 0)
+			{
+				var minTime = now + (app.SafetyNetFutureTimeSeconds * 1000);
+				if (claims.TimestampMilliseconds > minTime)
+					return false;
+			}
+
+			// Validate certificate
+			if (app.SafetyNetApkDigestSha256?.Length > 0)
+			{
+				var apkSha = Convert.ToBase64String(claims.ApkCertificateDigestSha256);
+				if (!app.SafetyNetApkDigestSha256.Contains(apkSha))
+					return false;
+			}
+
+			// Validate integrity
+			if (app.SafetyNetCtsProfileMatch)
+			{
+				if (!claims.CtsProfileMatch)
+					return false;
+			}
+			if (app.SafetyNetBasicIntegrity)
+			{
+				if (!claims.BasicIntegrity)
+					return false;
+			}
 
 			return true;
 		}
