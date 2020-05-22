@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ExposureNotification.Backend.Network;
+using ExposureNotification.Backend.DeviceVerification;
 
 namespace ExposureNotification.Backend.Functions
 {
@@ -15,24 +16,21 @@ namespace ExposureNotification.Backend.Functions
 	{
 		[FunctionName("Diagnosis")]
 		public async Task<IActionResult> Run(
-			[HttpTrigger(AuthorizationLevel.Anonymous, "post", "put", Route = "selfdiagnosis")] HttpRequest req)
+			[HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "selfdiagnosis")] HttpRequest req)
 		{
 			var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-
-			// Verify the diagnosis uid
-			if (req.Method.Equals("post", StringComparison.OrdinalIgnoreCase))
-			{
-				var j = JObject.Parse(requestBody);
-
-				var diagnosisUid = j.Value<string>("diagnosisUid");
-
-				if (!await Startup.Database.CheckIfDiagnosisUidExistsAsync(diagnosisUid))
-					return new ForbidResult();
-			}
-			// Submit a self diagnosis after verifying
-			else if (req.Method.Equals("put", StringComparison.OrdinalIgnoreCase))
+			
+			if (req.Method.Equals("put", StringComparison.OrdinalIgnoreCase))
 			{
 				var diagnosis = JsonConvert.DeserializeObject<SelfDiagnosisSubmission>(requestBody);
+
+				// Verification may be disabled for testing
+				if (!Startup.DisableDeviceVerification)
+				{
+					// Verify the device payload (safetynet attestation on android, or device check token on iOS)
+					if (!await Verify.VerifyDevice(diagnosis.DeviceVerificationPayload, diagnosis.Platform.Equals("android") ? Verify.DevicePlatform.Android : Verify.DevicePlatform.iOS))
+						return new BadRequestResult();
+				}
 
 				await Startup.Database.SubmitPositiveDiagnosisAsync(diagnosis);
 			}
