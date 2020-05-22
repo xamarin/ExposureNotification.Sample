@@ -135,18 +135,22 @@ namespace ExposureNotification.Backend.Database
 				if (dbDiag == null || dbDiag.KeyCount > maxKeysPerDiagnosisUid)
 					throw new InvalidOperationException();
 
-				var dbKeys = diagnosis.Keys.Select(k => DbTemporaryExposureKey.FromKey(k)).ToList();
-
-				// Add the new keys to the db
-				foreach (var dbk in dbKeys)
+				// Duplicate the key for each region so it gets included in the batch files for that region
+				foreach (var region in Startup.SupportedRegions)
 				{
-					// Only add key if it doesn't exist already
-					if (!await ctx.TemporaryExposureKeys.AnyAsync(k => k.Base64KeyData == dbk.Base64KeyData))
-						ctx.TemporaryExposureKeys.Add(dbk);
+					var dbKeys = diagnosis.Keys.Select(k => DbTemporaryExposureKey.FromKey(k, region)).ToList();
+
+					// Add the new keys to the db
+					foreach (var dbk in dbKeys)
+					{
+						// Only add key if it doesn't exist already
+						if (!await ctx.TemporaryExposureKeys.AnyAsync(k => k.Base64KeyData == dbk.Base64KeyData && k.Region == region))
+							ctx.TemporaryExposureKeys.Add(dbk);
+					}
 				}
 
 				// Increment key count
-				dbDiag.KeyCount += diagnosis.Keys.Count();
+				dbDiag.KeyCount += diagnosis.Keys.Count() / Startup.SupportedRegions.Length;
 
 				await ctx.SaveChangesAsync();
 
@@ -156,8 +160,6 @@ namespace ExposureNotification.Backend.Database
 
 		public async Task CreateBatchFilesAsync(string region, Func<TemporaryExposureKeyExport, Task> processExport)
 		{
-			region ??= DbTemporaryExposureKey.DefaultRegion;
-
 			using (var ctx = new ExposureNotificationContext(dbContextOptions))
 			using (var transaction = ctx.Database.BeginTransaction())
 			{

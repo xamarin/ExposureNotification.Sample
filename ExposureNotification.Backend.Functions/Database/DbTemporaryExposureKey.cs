@@ -9,14 +9,12 @@ namespace ExposureNotification.Backend.Database
 {
 	public class DbTemporaryExposureKey
 	{
-		public const string DefaultRegion = "default";
-
 		[Key, Column(Order = 0)]
 		public string Id { get; set; } = Guid.NewGuid().ToString();
 
 		public bool Processed { get; set; } = false;
 
-		public string Region { get; set; } = DefaultRegion;
+		public string Region { get; set; }
 
 		public string Base64KeyData { get; set; }
 
@@ -37,14 +35,15 @@ namespace ExposureNotification.Backend.Database
 				TransmissionRiskLevel = TransmissionRiskLevel
 			};
 
-		public static DbTemporaryExposureKey FromKey(ExposureKey key)
+		public static DbTemporaryExposureKey FromKey(ExposureKey key, string region)
 			=> new DbTemporaryExposureKey
 			{
 				Base64KeyData = key.Key,
 				TimestampMsSinceEpoch = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
 				RollingStartSecondsSinceEpoch = key.RollingStart,
 				RollingDuration = key.RollingDuration,
-				TransmissionRiskLevel = key.TransmissionRisk
+				TransmissionRiskLevel = key.TransmissionRisk,
+				Region = region
 			};
 	}
 }

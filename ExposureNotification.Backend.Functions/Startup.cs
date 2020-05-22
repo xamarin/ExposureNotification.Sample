@@ -29,11 +29,8 @@ namespace ExposureNotification.Backend.Functions
 			BlobStorageContainerNamePrefix = GetEnv("BlobStorageContainerNamePrefix", string.Empty);
 			DeleteKeysFromDbAfterBatching = GetEnv("DeleteKeysFromDbAfterBatching", "false").Equals("true", StringComparison.OrdinalIgnoreCase);
 			DisableDeviceVerification = GetEnv("DisableDeviceVerification", "false").Equals("true", StringComparison.OrdinalIgnoreCase);
-			ExposureKeyRegions = GetEnv("ExposureKeyRegions", DbTemporaryExposureKey.DefaultRegion).Split(separators);
-			AppleDeviceCheckKeyId = await GetKeyVaultSecret(GetEnv("AppleDeviceCheckKeyIdSecretId"));
-			AppleDeviceCheckTeamId = await GetKeyVaultSecret(GetEnv("AppleDeviceCheckTeamIdSecretId"));
-			AppleDeviceCheckP8FileContents = await GetKeyVaultSecret(GetEnv("AppleDeviceCheckP8FileContentsSecretId"));
-
+			SupportedRegions = GetEnv("ExposureKeyRegions").Split(separators);
+			
 			builder.Services.AddTransient<ISigner, Signer>();
 
 			Database = new ExposureNotificationStorage(
@@ -81,9 +78,9 @@ namespace ExposureNotification.Backend.Functions
 				{
 					PackageName = "com.companyname.ExposureNotification.App",
 					Platform = "ios",
-					DeviceCheckKeyId = AppleDeviceCheckKeyId,
-					DeviceCheckTeamId = AppleDeviceCheckTeamId,
-					DeviceCheckPrivateKey = AppleDeviceCheckP8FileContents
+					DeviceCheckKeyId = "YOURKEYID",
+					DeviceCheckTeamId = "YOURTEAMID",
+					DeviceCheckPrivateKey = "CONTENTS-OF-P8-FILE-WITH-NO-LINE-BREAKS"
 				},
 				_ => throw new ArgumentOutOfRangeException(nameof(platform))
 			};
@@ -94,17 +91,11 @@ namespace ExposureNotification.Backend.Functions
 
 		internal static string BlobStorageContainerNamePrefix { get; private set; }
 
-		internal static string[] ExposureKeyRegions { get; private set; }
+		internal static string[] SupportedRegions { get; private set; }
 
 		internal static bool DeleteKeysFromDbAfterBatching { get; private set; }
 
 		internal static bool DisableDeviceVerification { get; private set; }
-
-		internal static string AppleDeviceCheckKeyId { get; private set; }
-
-		internal static string AppleDeviceCheckTeamId { get; private set; }
-
-		internal static string AppleDeviceCheckP8FileContents { get; private set; }
 
 		static string GetEnv(string name, string nullValue = null)
 			=> Environment.GetEnvironmentVariable(name, EnvironmentVariableTarget.Process) ?? nullValue;

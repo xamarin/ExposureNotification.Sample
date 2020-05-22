@@ -31,7 +31,7 @@ namespace ExposureNotification.Backend.Functions
 			var cloudStorageAccount = CloudStorageAccount.Parse(Startup.BlobStorageConnectionString);
 			var cloudBlobClient = cloudStorageAccount.CreateCloudBlobClient();
 
-			foreach (var region in Startup.ExposureKeyRegions)
+			foreach (var region in Startup.SupportedRegions)
 			{
 				// We base the container name off a global configurable prefix
 				// and also the region name, so we end up having one container per
