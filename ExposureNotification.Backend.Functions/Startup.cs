@@ -29,7 +29,7 @@ namespace ExposureNotification.Backend.Functions
 			BlobStorageContainerNamePrefix = GetEnv("BlobStorageContainerNamePrefix", string.Empty);
 			DeleteKeysFromDbAfterBatching = GetEnv("DeleteKeysFromDbAfterBatching", "false").Equals("true", StringComparison.OrdinalIgnoreCase);
 			DisableDeviceVerification = GetEnv("DisableDeviceVerification", "false").Equals("true", StringComparison.OrdinalIgnoreCase);
-			ExposureKeyRegions = GetEnv("ExposureKeyRegions", DbTemporaryExposureKey.DefaultRegion).Split(separators);
+			SupportedRegions = GetEnv("ExposureKeyRegions").Split(separators);
 			
 			builder.Services.AddTransient<ISigner, Signer>();
 
@@ -91,7 +91,7 @@ namespace ExposureNotification.Backend.Functions
 
 		internal static string BlobStorageContainerNamePrefix { get; private set; }
 
-		internal static string[] ExposureKeyRegions { get; private set; }
+		internal static string[] SupportedRegions { get; private set; }
 
 		internal static bool DeleteKeysFromDbAfterBatching { get; private set; }
 
