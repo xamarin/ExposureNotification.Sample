@@ -135,7 +135,7 @@ namespace ExposureNotification.Backend.Functions.Tests
 		//}
 
 		static ISigner Signer
-			=> new Signer();
+			=> new TestSigner();
 
 		static DbSignerInfo[] TestSignatures
 			=> new DbSignerInfo[]
