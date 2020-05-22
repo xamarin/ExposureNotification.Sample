@@ -1,5 +1,5 @@
 
-# Xamarin Exposure Notification
+# Xamarin Exposure Notification (Forked)
 
 [Read our Planning Document with more details about how Exposure Notifications work](https://github.com/xamarin/xamarin.exposurenotification/blob/master/Exposure%20Notification%20Planning.pdf)
 
