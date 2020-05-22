@@ -24,6 +24,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExposureNotification.Backend.Network", "ExposureNotification.Backend.Network\ExposureNotification.Backend.Network.csproj", "{2943B7AC-B244-40A4-A6CC-A671D772EE75}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -110,6 +112,18 @@ Global
 		{455BD53E-C845-4530-BE1F-27E871C256FE}.Release|iPhone.Build.0 = Release|Any CPU
 		{455BD53E-C845-4530-BE1F-27E871C256FE}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
 		{455BD53E-C845-4530-BE1F-27E871C256FE}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{2943B7AC-B244-40A4-A6CC-A671D772EE75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2943B7AC-B244-40A4-A6CC-A671D772EE75}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2943B7AC-B244-40A4-A6CC-A671D772EE75}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{2943B7AC-B244-40A4-A6CC-A671D772EE75}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{2943B7AC-B244-40A4-A6CC-A671D772EE75}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{2943B7AC-B244-40A4-A6CC-A671D772EE75}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{2943B7AC-B244-40A4-A6CC-A671D772EE75}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2943B7AC-B244-40A4-A6CC-A671D772EE75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2943B7AC-B244-40A4-A6CC-A671D772EE75}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{2943B7AC-B244-40A4-A6CC-A671D772EE75}.Release|iPhone.Build.0 = Release|Any CPU
+		{2943B7AC-B244-40A4-A6CC-A671D772EE75}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{2943B7AC-B244-40A4-A6CC-A671D772EE75}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -120,6 +134,7 @@ Global
 		{B98A079D-6A61-4923-B7DB-E311631E0F53} = {EA30B735-C1D6-4C23-8507-E36C40E50C53}
 		{074D4797-914B-49D3-91DB-70DBA4CB18B6} = {38082226-D417-473C-913C-15E9B50C1664}
 		{C1A104D7-1C75-45DB-8C3D-162C1E553FC5} = {38082226-D417-473C-913C-15E9B50C1664}
+		{2943B7AC-B244-40A4-A6CC-A671D772EE75} = {38082226-D417-473C-913C-15E9B50C1664}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B0B0C4B0-C33B-47FB-8A09-9719B40A4C99}

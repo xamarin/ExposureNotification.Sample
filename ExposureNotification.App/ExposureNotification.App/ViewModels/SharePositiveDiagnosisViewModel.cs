@@ -23,6 +23,19 @@ namespace ExposureNotification.App.ViewModels
 		public AsyncCommand SubmitDiagnosisCommand
 			=> new AsyncCommand(async () =>
 			{
+				// Check the parameters
+				if (string.IsNullOrEmpty(DiagnosisUid))
+				{
+					await UserDialogs.Instance.AlertAsync("Please provide a valid Diagnosis ID", "Invalid Diagnosis ID", "OK");
+					return;
+				}
+				if (!DiagnosisTimestamp.HasValue || DiagnosisTimestamp.Value > DateTime.Now)
+				{
+					await UserDialogs.Instance.AlertAsync("Please provide a valid Test Date", "Invalid Test Date", "OK");
+					return;
+				}
+
+				// Verify the UID
 				using var dialog = UserDialogs.Instance.Loading("Verifying Diagnosis...");
 				IsEnabled = false;
 				try
@@ -40,9 +53,9 @@ namespace ExposureNotification.App.ViewModels
 					return;
 				}
 
+				// Submit the UID
 				dialog.Title = "Submitting Diagnosis...";
 				IsEnabled = false;
-
 				try
 				{
 					var enabled = await Xamarin.ExposureNotifications.ExposureNotification.IsEnabledAsync();
@@ -52,19 +65,6 @@ namespace ExposureNotification.App.ViewModels
 						dialog.Hide();
 
 						await UserDialogs.Instance.AlertAsync("Please enable Exposure Notifications before submitting a diagnosis.", "Exposure Notifications Disabled", "OK");
-						return;
-					}
-
-					if (string.IsNullOrEmpty(DiagnosisUid))
-					{
-						dialog.Hide();
-						await UserDialogs.Instance.AlertAsync("Please provide a valid Diagnosis ID", "Invalid Diagnosis ID", "OK");
-						return;
-					}
-
-					if (!DiagnosisTimestamp.HasValue || DiagnosisTimestamp.Value > DateTime.Now)
-					{
-						await UserDialogs.Instance.AlertAsync("Please provide a valid Test Date", "Invalid Test Date", "OK");
 						return;
 					}
 

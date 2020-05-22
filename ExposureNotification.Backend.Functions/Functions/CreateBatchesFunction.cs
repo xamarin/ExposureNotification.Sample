@@ -2,22 +2,31 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using ExposureNotification.Backend.Signing;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
 using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 
 namespace ExposureNotification.Backend.Functions
 {
-	public static class CreateBatchesFunction
+	public class CreateBatchesFunction
 	{
 		const string dirNumberMetadataKey = "dir_number";
 		const string batchNumberMetadataKey = "batch_number";
 		const string batchRegionMetadataKey = "batch_region";
 
+		readonly ISigner signer;
+
+		public CreateBatchesFunction(ISigner signer)
+		{
+			this.signer = signer;
+		}
+
 		// Every 6 hours "0 0 */6 * * *"
 		[FunctionName("CreateBatchesFunction")]
-		public static async Task Run([TimerTrigger("0 0 */6 * * *")] TimerInfo myTimer, ILogger log, ISigner signer)
+		public async Task Run([HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req, ILogger log)
 		{
 			var cloudStorageAccount = CloudStorageAccount.Parse(Startup.BlobStorageConnectionString);
 			var cloudBlobClient = cloudStorageAccount.CreateCloudBlobClient();
