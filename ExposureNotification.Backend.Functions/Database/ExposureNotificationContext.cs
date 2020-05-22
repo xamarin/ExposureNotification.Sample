@@ -2,7 +2,7 @@
 
 namespace ExposureNotification.Backend.Database
 {
-	class ExposureNotificationContext : DbContext
+	public class ExposureNotificationContext : DbContext
 	{
 		public ExposureNotificationContext(DbContextOptions options)
 			: base(options)

@@ -1,13 +1,14 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using ExposureNotification.Backend.Database;
 using ExposureNotification.Backend.Signing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace ExposureNotification.Backend.Functions
 {
@@ -17,26 +18,36 @@ namespace ExposureNotification.Backend.Functions
 		const string batchNumberMetadataKey = "batch_number";
 		const string batchRegionMetadataKey = "batch_region";
 
+		readonly ExposureNotificationStorage storage;
+		readonly IOptions<Settings> settings;
 		readonly ISigner signer;
 
-		public CreateBatchesFunction(ISigner signer)
+		public CreateBatchesFunction(ExposureNotificationStorage storage, IOptions<Settings> settings, ISigner signer)
 		{
+			this.storage = storage;
+			this.settings = settings;
 			this.signer = signer;
 		}
 
-		// Every 6 hours "0 0 */6 * * *"
+		// Every 6 hours
 		[FunctionName("CreateBatchesFunction")]
-		public async Task Run([HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req, ILogger log)
+		public Task RunTimed([TimerTrigger("0 0 */6 * * *")] TimerInfo myTimer) => CreateBatchFiles();
+
+		// Every 6 hours
+		[FunctionName("batch")]
+		public Task RunRequest([HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req) => CreateBatchFiles();
+
+		async Task CreateBatchFiles()
 		{
-			var cloudStorageAccount = CloudStorageAccount.Parse(Startup.BlobStorageConnectionString);
+			var cloudStorageAccount = CloudStorageAccount.Parse(settings.Value.BlobStorageConnectionString);
 			var cloudBlobClient = cloudStorageAccount.CreateCloudBlobClient();
 
-			foreach (var region in Startup.SupportedRegions)
+			foreach (var region in settings.Value.SupportedRegions)
 			{
 				// We base the container name off a global configurable prefix
 				// and also the region name, so we end up having one container per
 				// region which can help with azure scaling/region allocation
-				var containerName = $"{Startup.BlobStorageContainerNamePrefix}{region}";
+				var containerName = $"{settings.Value.BlobStorageContainerNamePrefix}{region}";
 
 				// Get our container
 				var cloudBlobContainer = cloudBlobClient.GetContainerReference(containerName);
@@ -67,10 +78,10 @@ namespace ExposureNotification.Backend.Functions
 				var nextDirNumber = highestDirNumber + 1;
 
 				// Load all signer infos
-				var signerInfos = await Startup.GetAllSignerInfosAsync();
+				var signerInfos = await storage.GetAllSignerInfosAsync();
 
 				// Create batch files from all the keys in the database
-				await Startup.Database.CreateBatchFilesAsync(region, async export =>
+				await storage.CreateBatchFilesAsync(region, async export =>
 				{
 					// Don't process a batch without keys
 					if (export == null || (export.Keys != null && export.Keys.Count() <= 0))

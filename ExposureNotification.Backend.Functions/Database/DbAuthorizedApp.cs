@@ -34,5 +34,18 @@ namespace ExposureNotification.Backend.Database
 		public string DeviceCheckTeamId { get; set; }
 
 		public string DeviceCheckPrivateKey { get; set; }
+
+		// Utils
+
+		public static DevicePlatform ParsePlatform(string platform) =>
+			platform.Equals("android", StringComparison.OrdinalIgnoreCase)
+				? DevicePlatform.Android
+				: DevicePlatform.iOS;
+
+		public enum DevicePlatform
+		{
+			iOS,
+			Android
+		}
 	}
 }
