@@ -10,9 +10,9 @@ namespace ExposureNotification.App.ViewModels
 	public class SharePositiveDiagnosisViewModel : ViewModelBase
 	{
 		public SharePositiveDiagnosisViewModel()
-        {
+		{
 			IsEnabled = true;
-        }
+		}
 		public string DiagnosisUid { get; set; }
 
 		public DateTime? DiagnosisTimestamp { get; set; } = DateTime.Now;
@@ -71,9 +71,9 @@ namespace ExposureNotification.App.ViewModels
 					UserDialogs.Instance.Alert("Please try again later.", "Failed", "OK");
 				}
 				finally
-                {
+				{
 					IsEnabled = true;
-                }
+				}
 			});
 	}
 }
