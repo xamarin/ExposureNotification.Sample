@@ -58,6 +58,23 @@ namespace ExposureNotification.Backend.Database
 			return Task.FromResult(si);
 		}
 
+		public Task<DbAuthorizedApp> GetAuthorizedAppAsync(string packagename, string platform)
+		{
+			// TODO: load this from a DB or config
+			var apps = new List<DbAuthorizedApp>
+			{
+				new DbAuthorizedApp
+				{
+					PackageName = "com.xamarin.exposurenotificationsample",
+					Platform = "android",
+				}
+			};
+
+			var app = apps.FirstOrDefault(a => a.PackageName == packagename && a.Platform == platform);
+
+			return Task.FromResult(app);
+		}
+
 		public void DeleteAllKeysAsync()
 		{
 			using (var ctx = new ExposureNotificationContext(dbContextOptions))
