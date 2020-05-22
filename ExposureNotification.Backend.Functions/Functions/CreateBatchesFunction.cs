@@ -33,7 +33,7 @@ namespace ExposureNotification.Backend.Functions
 		[FunctionName("CreateBatchesFunction")]
 		public Task RunTimed([TimerTrigger("0 0 */6 * * *")] TimerInfo myTimer) => CreateBatchFiles();
 
-		// Every 6 hours
+		// On demand
 		[FunctionName("batch")]
 		public Task RunRequest([HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req) => CreateBatchFiles();
 
