@@ -146,6 +146,7 @@ namespace ExposureNotification.Backend.Functions.Tests
 					AppBundleId = "com.xamarin.exposurenotificationsample.tests",
 					VerificationKeyId = "TestServer",
 					VerificationKeyVersion = "2",
+					AzureVaultSecretIdentifier = "https://exposurenotifications.vault.azure.net/secrets/sample/94b11196ccfb4747a66674d4110d175c"
 				}
 			};
 
