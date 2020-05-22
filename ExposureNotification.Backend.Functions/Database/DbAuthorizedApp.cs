@@ -33,6 +33,6 @@ namespace ExposureNotification.Backend.Database
 
 		public string DeviceCheckTeamId { get; set; }
 
-		public string DeviceCheckPrivateKeyAzureVaultSecretIdentifier { get; set; }
+		public string DeviceCheckPrivateKey { get; set; }
 	}
 }

@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using ExposureNotification.Backend.Database;
+using ExposureNotification.Backend.DeviceVerification;
 using ExposureNotification.Backend.Signing;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Azure.KeyVault;
@@ -48,6 +50,43 @@ namespace ExposureNotification.Backend.Functions
 					initialize.Database.EnsureCreated();
 				});
 		}
+
+		// TODO: load this from a DB or config
+		internal static Task<List<DbSignerInfo>> GetAllSignerInfosAsync()
+		{
+			var si = new List<DbSignerInfo>
+			{
+				new DbSignerInfo
+				{
+					AndroidPackage = "com.xamarin.exposurenotificationsample",
+					AppBundleId = "com.xamarin.exposurenotificationsample",
+					VerificationKeyId = "ExampleServer_k1",
+					VerificationKeyVersion = "1",
+				}
+			};
+
+			return Task.FromResult(si);
+		}
+
+		// TODO: load this from a DB or config
+		internal static DbAuthorizedApp GetAuthorizedApp(Verify.DevicePlatform platform) =>
+			platform switch
+			{
+				Verify.DevicePlatform.Android => new DbAuthorizedApp
+				{
+					PackageName = "com.companyname.ExposureNotification.app",
+					Platform = "android",
+				},
+				Verify.DevicePlatform.iOS => new DbAuthorizedApp
+				{
+					PackageName = "com.companyname.ExposureNotification.App",
+					Platform = "ios",
+					DeviceCheckKeyId = AppleDeviceCheckKeyId,
+					DeviceCheckTeamId = AppleDeviceCheckTeamId,
+					DeviceCheckPrivateKey = AppleDeviceCheckP8FileContents
+				},
+				_ => throw new ArgumentOutOfRangeException(nameof(platform))
+			};
 
 		internal static string SqlServerConnectionString { get; private set; }
 

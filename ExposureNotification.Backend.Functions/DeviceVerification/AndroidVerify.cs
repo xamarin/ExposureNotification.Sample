@@ -4,14 +4,26 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
+using ExposureNotification.Backend.Database;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json.Linq;
 
 namespace ExposureNotification.Backend.DeviceVerification
 {
 	public static class AndroidVerify
 	{
-		public static AttestationStatement VerifyPayload(string signedAttestationStatement)
+		public static async Task<bool> VerifyToken(string token, byte[] expectedNonce, DateTimeOffset requestTime, DbAuthorizedApp app)
+		{
+			var claims = ParsePayload(token);
+
+			// Validate the nonce.
+			if (claims.Nonce != expectedNonce)
+				return false;
+
+			return true;
+		}
+
+		public static AndroidAttestationStatement ParsePayload(string signedAttestationStatement)
 		{
 			// First parse the token and get the embedded keys.
 			JwtSecurityToken token;
@@ -57,7 +69,7 @@ namespace ExposureNotification.Backend.DeviceVerification
 
 			// Parse and use the data JSON.
 			var claimsDictionary = token.Claims.ToDictionary(x => x.Type, x => x.Value);
-			return new AttestationStatement(claimsDictionary);
+			return new AndroidAttestationStatement(claimsDictionary);
 		}
 
 		static string GetHostName(X509SecurityKey securityKey)

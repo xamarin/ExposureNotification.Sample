@@ -1,26 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
 using System.Threading.Tasks;
-using ExposureNotification.Backend.DeviceVerification;
 using ExposureNotification.Backend.Functions;
+using ExposureNotification.Backend.Network;
 
 namespace ExposureNotification.Backend.DeviceVerification
 {
-	internal static class Verify
+	static class Verify
 	{
-		public static async Task<bool> VerifyDevice(string token, DevicePlatform platform)
+		public static Task<bool> VerifyDevice(SelfDiagnosisSubmission submission, DateTimeOffset requestTime, DevicePlatform platform)
 		{
-			if (platform == DevicePlatform.Android)
-			{
-				var s = AndroidVerify.VerifyPayload(token);
-				return s.BasicIntegrity;
-			}
+			var auth = Startup.GetAuthorizedApp(platform);
 
-			return await AppleVerify.VerifyToken(token, Startup.AppleDeviceCheckTeamId, Startup.AppleDeviceCheckKeyId, Startup.AppleDeviceCheckP8FileContents);
+			return platform switch
+			{
+				DevicePlatform.Android => AndroidVerify.VerifyToken(submission.DeviceVerificationPayload, submission.GetAndroidNonce(), requestTime, auth),
+				DevicePlatform.iOS => AppleVerify.VerifyToken(submission.DeviceVerificationPayload, requestTime, auth),
+				_ => Task.FromResult(false),
+			};
 		}
 
 		public enum DevicePlatform

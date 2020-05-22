@@ -50,9 +50,9 @@ namespace ExposureNotification.Backend.Functions.Tests
 		}
 
 		[Fact]
-		public void VerifyPayloadTest()
+		public void ParsePayloadTest()
 		{
-			var claims = AndroidVerify.VerifyPayload(actualSubmission.DeviceVerificationPayload);
+			var claims = AndroidVerify.ParsePayload(actualSubmission.DeviceVerificationPayload);
 			var nonce = submission.GetAndroidNonce();
 
 			Assert.Equal(Convert.ToBase64String(nonce), Convert.ToBase64String(claims.Nonce));

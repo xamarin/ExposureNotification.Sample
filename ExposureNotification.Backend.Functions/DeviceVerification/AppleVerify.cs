@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using ExposureNotification.Backend.Database;
 using Newtonsoft.Json.Linq;
 
 namespace ExposureNotification.Backend.DeviceVerification
@@ -15,11 +16,11 @@ namespace ExposureNotification.Backend.DeviceVerification
 	{
 		const string appleDeviceCheckUrl = "https://api.development.devicecheck.apple.com/v1/validate_device_token";
 
-		public static async Task<bool> VerifyToken(string token, string teamId, string keyId, string p8FileContents)
+		public static async Task<bool> VerifyToken(string token, DateTimeOffset requestTime, DbAuthorizedApp app)
 		{
 			var http = new HttpClient();
 
-			var timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+			var timestamp = requestTime.ToUnixTimeMilliseconds();
 			var id = Guid.NewGuid().ToString();
 
 			var json = new JObject();
@@ -31,12 +32,12 @@ namespace ExposureNotification.Backend.DeviceVerification
 			Console.WriteLine(str);
 			//var json = "{\"device_token\":\"" + token + "\",\"transaction_id\":\"" + id + "\",\"timestamp\":" + timestamp + "}";
 
-			var jwt = GenerateClientSecretJWT(keyId, teamId, p8FileContents);
+			var jwt = GenerateClientSecretJWT(requestTime, app.DeviceCheckKeyId, app.DeviceCheckTeamId, app.DeviceCheckPrivateKey);
 
 			var req = new HttpRequestMessage(HttpMethod.Post, appleDeviceCheckUrl);
 			req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
 			req.Content = new StringContent(str);
-			
+
 			var response = await http.SendAsync(req);
 
 			if (response.StatusCode != System.Net.HttpStatusCode.OK)
@@ -45,21 +46,19 @@ namespace ExposureNotification.Backend.DeviceVerification
 			return true;
 		}
 
-		static string GenerateClientSecretJWT(string keyId, string teamId, string p8FileContents)
+		static string GenerateClientSecretJWT(DateTimeOffset requestTime, string keyId, string teamId, string p8FileContents)
 		{
-			var now = new DateTimeOffset(DateTime.UtcNow);
-
 			var headers = new Dictionary<string, object>
-				{
-					{  "alg", "ES256" },
-					{  "kid", keyId }
-				};
+			{
+				{ "alg", "ES256" },
+				{ "kid", keyId }
+			};
 
 			var payload = new Dictionary<string, object>
-				{
-					{ "iss", teamId },
-					{ "iat", now.ToUnixTimeMilliseconds() }
-				};
+			{
+				{ "iss", teamId },
+				{ "iat", requestTime.ToUnixTimeMilliseconds() }
+			};
 
 			var secretKey = CleanP8Key(p8FileContents);
 

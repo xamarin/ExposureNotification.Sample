@@ -4,9 +4,9 @@ using System.Globalization;
 
 namespace ExposureNotification.Backend.DeviceVerification
 {
-	public sealed class AttestationStatement
+	public sealed class AndroidAttestationStatement
 	{
-		public AttestationStatement(Dictionary<string, string> claims)
+		public AndroidAttestationStatement(Dictionary<string, string> claims)
 		{
 			Claims = claims;
 
