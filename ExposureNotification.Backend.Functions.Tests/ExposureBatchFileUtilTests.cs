@@ -42,26 +42,26 @@ namespace ExposureNotification.Backend.Functions.Tests
 			Assert.Equal("2", info.VerificationKeyVersion);
 		}
 
-		//[Fact]
-		//public async Task ValidateFileSignature()
-		//{
-		//	var expectedExport = GenerateRandomExport();
-		//	using var stream = await ExposureBatchFileUtil.CreateSignedFileAsync(expectedExport, TestSignatures, Signer);
+		[Fact]
+		public async Task ValidateFileSignature()
+		{
+			var expectedExport = GenerateRandomExport();
+			using var stream = await ExposureBatchFileUtil.CreateSignedFileAsync(expectedExport, TestSignatures, Signer);
 
-		//	using var zipFile = new ZipArchive(stream);
-		//	using var exportSig = zipFile.GetSignature();
+			using var zipFile = new ZipArchive(stream);
+			using var exportSig = zipFile.GetSignature();
 
-		//	var signatureList = TEKSignatureList.Parser.ParseFrom(exportSig);
-		//	Assert.NotNull(signatureList);
+			var signatureList = TEKSignatureList.Parser.ParseFrom(exportSig);
+			Assert.NotNull(signatureList);
 
-		//	var signature = Assert.Single(signatureList.Signatures);
-		//	Assert.NotEmpty(signature.Signature.ToByteArray());
+			var signature = Assert.Single(signatureList.Signatures);
+			Assert.NotEmpty(signature.Signature.ToByteArray());
 
-		//	var info = signature.SignatureInfo;
-		//	Assert.Equal("1.2.840.10045.4.3.2", info.SignatureAlgorithm);
-		//	Assert.Equal("TestServer", info.VerificationKeyId);
-		//	Assert.Equal("2", info.VerificationKeyVersion);
-		//}
+			var info = signature.SignatureInfo;
+			Assert.Equal("1.2.840.10045.4.3.2", info.SignatureAlgorithm);
+			Assert.Equal("TestServer", info.VerificationKeyId);
+			Assert.Equal("2", info.VerificationKeyVersion);
+		}
 
 		[Fact]
 		public async Task CanCreateStream()
