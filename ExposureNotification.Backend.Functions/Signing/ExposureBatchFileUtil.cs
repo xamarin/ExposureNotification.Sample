@@ -18,6 +18,15 @@ namespace ExposureNotification.Backend.Functions
 
 		public static async Task<Stream> CreateSignedFileAsync(TemporaryExposureKeyExport export, IEnumerable<DbSignerInfo> signerInfos, ISigner signer)
 		{
+			export.SignatureInfos.AddRange(signerInfos.Select(sigInfo => new SignatureInfo
+			{
+				AndroidPackage = sigInfo.AndroidPackage,
+				AppBundleId = sigInfo.AppBundleId,
+				SignatureAlgorithm = SignatureAlgorithm,
+				VerificationKeyId = sigInfo.VerificationKeyId,
+				VerificationKeyVersion = sigInfo.VerificationKeyVersion,
+			}));
+
 			var ms = new MemoryStream();
 
 			using (var zipFile = new ZipArchive(ms, ZipArchiveMode.Create, true))
