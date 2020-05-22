@@ -67,7 +67,7 @@ namespace ExposureNotification.Backend.Functions
 				var nextDirNumber = highestDirNumber + 1;
 
 				// Load all signer infos
-				var signerInfos = await Startup.Database.GetAllSignerInfosAsync();
+				var signerInfos = await Startup.GetAllSignerInfosAsync();
 
 				// Create batch files from all the keys in the database
 				await Startup.Database.CreateBatchFilesAsync(region, async export =>

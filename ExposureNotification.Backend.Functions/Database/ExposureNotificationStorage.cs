@@ -41,23 +41,6 @@ namespace ExposureNotification.Backend.Database
 			}
 		}
 
-		public Task<List<DbSignerInfo>> GetAllSignerInfosAsync()
-		{
-			// TODO: load this from a DB or config
-			var si = new List<DbSignerInfo>
-			{
-				new DbSignerInfo
-				{
-					AndroidPackage = "com.xamarin.exposurenotification.sampleapp",
-					AppBundleId = "com.xamarin.exposurenotification.sampleapp",
-					VerificationKeyId = "ExampleServer_k1",
-					VerificationKeyVersion = "1",
-				}
-			};
-
-			return Task.FromResult(si);
-		}
-
 		public Task<DbAuthorizedApp> GetAuthorizedAppAsync(string packagename, string platform)
 		{
 			// TODO: load this from a DB or config

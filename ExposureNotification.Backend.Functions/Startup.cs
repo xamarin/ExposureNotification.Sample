@@ -24,23 +24,23 @@ namespace ExposureNotification.Backend.Functions
 
 		public override async void Configure(IFunctionsHostBuilder builder)
 		{
-			SqlServerConnectionString = await GetKeyVaultSecret(GetEnv("DbConnectionStringSecretId"));
-			BlobStorageConnectionString = await GetKeyVaultSecret(GetEnv("BlobStorageConnectionStringSecretId"));
-			BlobStorageContainerNamePrefix = GetEnv("BlobStorageContainerNamePrefix", string.Empty);
-			DeleteKeysFromDbAfterBatching = GetEnv("DeleteKeysFromDbAfterBatching", "false").Equals("true", StringComparison.OrdinalIgnoreCase);
-			DisableDeviceVerification = GetEnv("DisableDeviceVerification", "false").Equals("true", StringComparison.OrdinalIgnoreCase);
-			SupportedRegions = GetEnv("ExposureKeyRegions").Split(separators);
-			
+			BlobStorageConnectionString = await GetKeyVaultSecret(GetEnv("EN_BlobStorageConnectionString_VaultSecretId"));
+			BlobStorageContainerNamePrefix = GetEnv("EN_BlobStorageContainerNamePrefix", string.Empty);
+			DbConnectionString = await GetKeyVaultSecret(GetEnv("EN_DbConnectionString_VaultSecretId"));
+			DeleteKeysFromDbAfterBatching = GetEnv("EN_DeleteKeysFromDbAfterBatching", "false").Equals("true", StringComparison.OrdinalIgnoreCase);
+			DisableDeviceVerification = GetEnv("EN_DisableDeviceVerification", "false").Equals("true", StringComparison.OrdinalIgnoreCase);
+			SupportedRegions = GetEnv("EN_SupportedRegions").Split(separators);
+
 			builder.Services.AddTransient<ISigner, Signer>();
 
 			Database = new ExposureNotificationStorage(
 				builder =>
 				{
-					if (string.IsNullOrEmpty(SqlServerConnectionString))
+					if (string.IsNullOrEmpty(DbConnectionString))
 						builder.UseInMemoryDatabase(inMemoryDatabaseName)
 							.ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
 					else
-						builder.UseSqlServer(SqlServerConnectionString);
+						builder.UseSqlServer(DbConnectionString);
 				},
 				initialize =>
 				{
@@ -50,20 +50,16 @@ namespace ExposureNotification.Backend.Functions
 
 		// TODO: load this from a DB or config
 		internal static Task<List<DbSignerInfo>> GetAllSignerInfosAsync()
-		{
-			var si = new List<DbSignerInfo>
-			{
+			=> Task.FromResult(new List<DbSignerInfo> {
 				new DbSignerInfo
 				{
 					AndroidPackage = "com.xamarin.exposurenotification.sampleapp",
 					AppBundleId = "com.xamarin.exposurenotification.sampleapp",
 					VerificationKeyId = "ExampleServer_k1",
 					VerificationKeyVersion = "1",
+					AzureVaultSecretIdentifier = "EN_SigningKey_VaultSecretId"
 				}
-			};
-
-			return Task.FromResult(si);
-		}
+			});
 
 		// TODO: load this from a DB or config
 		internal static DbAuthorizedApp GetAuthorizedApp(Verify.DevicePlatform platform) =>
@@ -85,7 +81,7 @@ namespace ExposureNotification.Backend.Functions
 				_ => throw new ArgumentOutOfRangeException(nameof(platform))
 			};
 
-		internal static string SqlServerConnectionString { get; private set; }
+		internal static string DbConnectionString { get; private set; }
 
 		internal static string BlobStorageConnectionString { get; private set; }
 
