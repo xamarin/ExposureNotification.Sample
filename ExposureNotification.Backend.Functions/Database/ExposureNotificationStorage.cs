@@ -48,8 +48,8 @@ namespace ExposureNotification.Backend.Database
 			{
 				new DbSignerInfo
 				{
-					AndroidPackage = "com.xamarin.exposurenotificationsample",
-					AppBundleId = "com.xamarin.exposurenotificationsample",
+					AndroidPackage = "com.xamarin.exposurenotification.sampleapp",
+					AppBundleId = "com.xamarin.exposurenotification.sampleapp",
 					VerificationKeyId = "ExampleServer_k1",
 					VerificationKeyVersion = "1",
 				}
@@ -65,7 +65,7 @@ namespace ExposureNotification.Backend.Database
 			{
 				new DbAuthorizedApp
 				{
-					PackageName = "com.xamarin.exposurenotificationsample",
+					PackageName = "com.xamarin.exposurenotification.sampleapp",
 					Platform = "android",
 				}
 			};

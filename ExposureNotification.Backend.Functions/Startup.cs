@@ -55,8 +55,8 @@ namespace ExposureNotification.Backend.Functions
 			{
 				new DbSignerInfo
 				{
-					AndroidPackage = "com.xamarin.exposurenotificationsample",
-					AppBundleId = "com.xamarin.exposurenotificationsample",
+					AndroidPackage = "com.xamarin.exposurenotification.sampleapp",
+					AppBundleId = "com.xamarin.exposurenotification.sampleapp",
 					VerificationKeyId = "ExampleServer_k1",
 					VerificationKeyVersion = "1",
 				}
@@ -71,12 +71,12 @@ namespace ExposureNotification.Backend.Functions
 			{
 				Verify.DevicePlatform.Android => new DbAuthorizedApp
 				{
-					PackageName = "com.companyname.ExposureNotification.app",
+					PackageName = "com.xamarin.exposurenotification.sampleapp",
 					Platform = "android",
 				},
 				Verify.DevicePlatform.iOS => new DbAuthorizedApp
 				{
-					PackageName = "com.companyname.ExposureNotification.App",
+					PackageName = "com.xamarin.exposurenotification.sampleapp",
 					Platform = "ios",
 					DeviceCheckKeyId = "YOURKEYID",
 					DeviceCheckTeamId = "YOURTEAMID",
