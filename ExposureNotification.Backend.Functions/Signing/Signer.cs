@@ -14,14 +14,12 @@ namespace ExposureNotification.Backend.Signing
 	{
 		// TODO: You need to sign this with the key and mechanism
 		// that google/apple shared with you
-		public async Task<byte[]> GenerateSignatureAsync(byte[] contents, DbSignerInfo signerInfo)
+		public Task<byte[]> GenerateSignatureAsync(byte[] contents, DbSignerInfo signerInfo)
 		{
 			// This is actually am Elliptic Curve certificate (ECDSA) with a P-256 curve
 			// It's been encoded to a base64 string
-			var keyVaultSecret = await Startup.GetKeyVaultSecret(signerInfo.AzureVaultSecretIdentifier);
-
 			// Turn this into a certificate object
-			var keyVaultCert = new X509Certificate2(Convert.FromBase64String(keyVaultSecret));
+			var keyVaultCert = new X509Certificate2(Convert.FromBase64String(signerInfo.SigningKeyBase64String));
 
 			// Get the private key to use for creating the signature
 			var ecdsaPrivateKey = keyVaultCert.GetECDsaPrivateKey();
@@ -29,7 +27,7 @@ namespace ExposureNotification.Backend.Signing
 			// Create our signature based on the contents
 			var signature = ecdsaPrivateKey.SignData(contents, HashAlgorithmName.SHA256);
 
-			return signature;
+			return Task.FromResult(signature);
 		}
 	}
 }

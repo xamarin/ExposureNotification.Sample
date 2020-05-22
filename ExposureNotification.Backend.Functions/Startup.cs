@@ -9,6 +9,7 @@ using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 [assembly: FunctionsStartup(typeof(ExposureNotification.Backend.Functions.Startup))]
@@ -30,6 +31,7 @@ namespace ExposureNotification.Backend.Functions
 			DeleteKeysFromDbAfterBatching = GetEnv("EN_DeleteKeysFromDbAfterBatching", "false").Equals("true", StringComparison.OrdinalIgnoreCase);
 			DisableDeviceVerification = GetEnv("EN_DisableDeviceVerification", "false").Equals("true", StringComparison.OrdinalIgnoreCase);
 			SupportedRegions = GetEnv("EN_SupportedRegions").Split(separators);
+			SigningKeyBase64String = await GetKeyVaultSecret(GetEnv("EN_SigningKeyBase64String_VaultSecretId"));
 
 			builder.Services.AddTransient<ISigner, Signer>();
 
@@ -57,7 +59,7 @@ namespace ExposureNotification.Backend.Functions
 					AppBundleId = "com.xamarin.exposurenotification.sampleapp",
 					VerificationKeyId = "ExampleServer_k1",
 					VerificationKeyVersion = "1",
-					AzureVaultSecretIdentifier = "EN_SigningKey_VaultSecretId"
+					SigningKeyBase64String = SigningKeyBase64String
 				}
 			});
 
@@ -92,6 +94,8 @@ namespace ExposureNotification.Backend.Functions
 		internal static bool DeleteKeysFromDbAfterBatching { get; private set; }
 
 		internal static bool DisableDeviceVerification { get; private set; }
+
+		internal static string SigningKeyBase64String { get; private set; }
 
 		static string GetEnv(string name, string nullValue = null)
 			=> Environment.GetEnvironmentVariable(name, EnvironmentVariableTarget.Process) ?? nullValue;
