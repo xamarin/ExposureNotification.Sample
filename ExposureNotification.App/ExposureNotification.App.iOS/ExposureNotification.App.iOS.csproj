@@ -66,6 +66,7 @@
     <Compile Include="Main.cs" />
     <Compile Include="AppDelegate.cs" />
     <Compile Include="Renderers\DefaultPageRenderer.cs" />
+    <Compile Include="Services\DeviceChecker.cs" />
     <None Include="Entitlements.plist" />
     <None Include="Info.plist" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -142,6 +143,10 @@
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
   <ItemGroup>
+    <ProjectReference Include="..\..\ExposureNotification.Backend.Network\ExposureNotification.Backend.Network.csproj">
+      <Project>{2943B7AC-B244-40A4-A6CC-A671D772EE75}</Project>
+      <Name>ExposureNotification.Backend.Network</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Xamarin.ExposureNotification\Xamarin.ExposureNotification.csproj">
       <Project>{455bd53e-c845-4530-be1f-27e871c256fe}</Project>
       <Name>Xamarin.ExposureNotification</Name>
