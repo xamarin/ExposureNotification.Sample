@@ -84,7 +84,7 @@ namespace ExposureNotification.Backend.Database
 				throw new InvalidOperationException();
 
 			// Duplicate the key for each region so it gets included in the batch files for that region
-			foreach (var region in settings.SupportedRegions)
+			foreach (var region in diagnosis.Regions)
 			{
 				var dbKeys = diagnosis.Keys.Select(k => DbTemporaryExposureKey.FromKey(k, region)).ToList();
 
