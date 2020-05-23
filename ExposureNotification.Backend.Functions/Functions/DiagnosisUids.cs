@@ -20,8 +20,8 @@ namespace ExposureNotification.Backend.Functions
 			this.storage = storage;
 		}
 
-		[FunctionName("DiagnosisUids")]
-		public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "put", "delete", Route = null)] HttpRequest req)
+		[FunctionName("ManageDiagnosisUids")]
+		public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "put", "delete", Route = "manage/diagnosis-uids")] HttpRequest req)
 		{
 			var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
 

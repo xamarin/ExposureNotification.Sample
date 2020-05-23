@@ -84,8 +84,10 @@ namespace ExposureNotification.Backend.Database
 				throw new InvalidOperationException();
 
 			// Duplicate the key for each region so it gets included in the batch files for that region
-			foreach (var region in diagnosis.Regions)
+			foreach (var supporedRegion in diagnosis.Regions)
 			{
+				var region = supporedRegion.ToUpperInvariant();
+
 				var dbKeys = diagnosis.Keys.Select(k => DbTemporaryExposureKey.FromKey(k, region)).ToList();
 
 				// Add the new keys to the db
@@ -107,6 +109,8 @@ namespace ExposureNotification.Backend.Database
 
 		public Task<bool> HasKeysAsync(string region)
 		{
+			region = region.ToUpperInvariant();
+
 			var cutoffMsEpoch = DateTimeOffset.UtcNow.AddDays(-14).ToUnixTimeMilliseconds();
 
 			return context.TemporaryExposureKeys.AnyAsync(k =>
@@ -117,6 +121,8 @@ namespace ExposureNotification.Backend.Database
 
 		public async Task<int> CreateBatchFilesAsync(string region, Func<TemporaryExposureKeyExport, Task> processExport)
 		{
+			region = region.ToUpperInvariant();
+
 			using var transaction = context.Database.BeginTransaction();
 
 			var cutoffMsEpoch = DateTimeOffset.UtcNow.AddDays(-14).ToUnixTimeMilliseconds();

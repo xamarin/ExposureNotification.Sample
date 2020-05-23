@@ -29,7 +29,7 @@ namespace ExposureNotification.Backend.Functions
 		}
 
 		// Every 6 hours
-		[FunctionName("CreateBatchesTimedFunction")]
+		[FunctionName("CreateBatchesTimed")]
 		public Task RunTimed([TimerTrigger("0 0 */6 * * *")] TimerInfo myTimer, ILogger logger)
 		{
 			logger.LogInformation("Starting timed batching...");
@@ -38,8 +38,8 @@ namespace ExposureNotification.Backend.Functions
 		}
 
 		// On demand
-		[FunctionName("CreateBatchesOnDemandFunction")]
-		public Task RunRequest([HttpTrigger(AuthorizationLevel.Function, "get", Route = "dev/batch")] HttpRequest req, ILogger logger)
+		[FunctionName("CreateBatchesOnDemand")]
+		public Task RunRequest([HttpTrigger(AuthorizationLevel.Function, "get", Route = "manage/start-batch")] HttpRequest req, ILogger logger)
 		{
 			logger.LogInformation("Starting on-demand batching...");
 
@@ -66,7 +66,7 @@ namespace ExposureNotification.Backend.Functions
 				// We base the container name off a global configurable prefix
 				// and also the region name, so we end up having one container per
 				// region which can help with azure scaling/region allocation
-				var containerName = $"{settings.Value.BlobStorageContainerNamePrefix}{region}";
+				var containerName = $"{settings.Value.BlobStorageContainerNamePrefix}{region.ToLowerInvariant()}";
 
 				logger.LogInformation("Batch may be saved to container '{0}'.", containerName);
 

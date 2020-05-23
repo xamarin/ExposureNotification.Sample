@@ -80,7 +80,7 @@ namespace ExposureNotification.Backend.Functions
 				settings.DeleteKeysFromDbAfterBatching = enConfig.GetValue<bool>("DeleteKeysFromDbAfterBatching");
 				settings.DisableDeviceVerification = enConfig.GetValue<bool>("DisableDeviceVerification");
 				settings.SigningKeyBase64String = enConfig["SigningKey"];
-				settings.SupportedRegions = enConfig["SupportedRegions"].Split(separators);
+				settings.SupportedRegions = enConfig["SupportedRegions"]?.ToUpperInvariant()?.Split(separators) ?? new string[0];
 			});
 
 			logger.LogInformation("Setting up database...");

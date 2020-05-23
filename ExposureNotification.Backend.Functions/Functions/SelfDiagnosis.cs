@@ -24,7 +24,7 @@ namespace ExposureNotification.Backend.Functions
 			this.settings = settings;
 		}
 
-		[FunctionName("Diagnosis")]
+		[FunctionName("UploadSelfDiagnosis")]
 		public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "selfdiagnosis")] HttpRequest req)
 		{
 			var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
