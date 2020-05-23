@@ -24,6 +24,10 @@ namespace ExposureNotification.App.iOS
 		public override bool FinishedLaunching(UIApplication app, NSDictionary options)
 		{
 			global::Xamarin.Forms.Forms.Init();
+
+
+			Plugin.LocalNotification.NotificationCenter.AskPermission();
+
 			LoadApplication(new App());
 
 			UIApplication.SharedApplication.SetMinimumBackgroundFetchInterval(UIApplication.BackgroundFetchIntervalMinimum);
@@ -31,13 +35,9 @@ namespace ExposureNotification.App.iOS
 			return base.FinishedLaunching(app, options);
 		}
 
-		public override void PerformFetch(UIApplication application, Action<UIBackgroundFetchResult> completionHandler)
+		public override void WillEnterForeground(UIApplication uiApplication)
 		{
-			// Get updated keys from server
-			Xamarin.ExposureNotifications.ExposureNotification.UpdateKeysFromServer()
-				.ContinueWith(t =>
-					completionHandler(t.IsFaulted ? UIBackgroundFetchResult.Failed
-						: t.Result ? UIBackgroundFetchResult.NewData : UIBackgroundFetchResult.NoData));
+			Plugin.LocalNotification.NotificationCenter.ResetApplicationIconBadgeNumber(uiApplication);
 		}
 	}
 }

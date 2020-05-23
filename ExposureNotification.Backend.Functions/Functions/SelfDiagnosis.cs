@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using Xamarin.ExposureNotifications;
+using Newtonsoft.Json.Linq;
 
 namespace ExposureNotification.Backend.Functions
 {
@@ -22,7 +23,9 @@ namespace ExposureNotification.Backend.Functions
 			// Verify the diagnosis uid
 			if (req.Method.Equals("post", StringComparison.OrdinalIgnoreCase))
 			{
-				var diagnosisUid = requestBody;
+				var j = JObject.Parse(requestBody);
+
+				var diagnosisUid = j.Value<string>("diagnosisUid");
 
 				if (!await Startup.Database.CheckIfDiagnosisUidExistsAsync(diagnosisUid))
 					return new ForbidResult();

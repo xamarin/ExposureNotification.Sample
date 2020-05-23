@@ -10,7 +10,7 @@ namespace Xamarin.ExposureNotifications
 {
 	public class TemporaryExposureKeyBatches : ITemporaryExposureKeyBatches, IDisposable
 	{
-		const int diagnosisFileMaxKeys = 18_000;
+		public const int MaxKeysPerFile = 17_000;
 
 		readonly string cacheRoot;
 
@@ -37,11 +37,11 @@ namespace Xamarin.ExposureNotifications
 			var sequence = keys;
 			while (sequence.Any())
 			{
-				var batch = sequence.Take(diagnosisFileMaxKeys);
-				sequence = sequence.Skip(diagnosisFileMaxKeys);
+				var batch = sequence.Take(MaxKeysPerFile);
+				sequence = sequence.Skip(MaxKeysPerFile);
 
-				var file = new Proto.File();
-				file.Key.AddRange(batch.Select(k => new Proto.Key
+				var file = new TemporaryExposureKeyBatch();
+				file.Key.AddRange(batch.Select(k => new TemporaryExposureKeyBatchKey
 				{
 					KeyData = ByteString.CopyFrom(k.KeyData),
 					RollingStartNumber = (uint)k.RollingStartLong,
@@ -53,27 +53,21 @@ namespace Xamarin.ExposureNotifications
 			}
 		}
 
-		public Task AddBatchAsync(params Proto.File[] files)
-			=> AddBatchAsync((IEnumerable<Proto.File>)files);
-
-		public Task AddBatchAsync(IEnumerable<Proto.File> files)
+		public Task AddBatchAsync(TemporaryExposureKeyBatch file)
 		{
-			if (files?.Any() != true)
+			if (file == null || file.Key == null || file.Key.Count <= 0)
 				return Task.CompletedTask;
 
 			if (!Directory.Exists(cacheRoot))
 				Directory.CreateDirectory(cacheRoot);
 
-			foreach (var file in files)
-			{
-				var batchFile = Path.Combine(cacheRoot, Guid.NewGuid().ToString());
+			var batchFile = Path.Combine(cacheRoot, Guid.NewGuid().ToString());
 
-				using var stream = File.Create(batchFile);
-				using var coded = new CodedOutputStream(stream);
-				file.WriteTo(coded);
+			using var stream = File.Create(batchFile);
+			using var coded = new CodedOutputStream(stream);
+			file.WriteTo(coded);
 
-				Files.Add(batchFile);
-			}
+			Files.Add(batchFile);
 
 			return Task.CompletedTask;
 		}

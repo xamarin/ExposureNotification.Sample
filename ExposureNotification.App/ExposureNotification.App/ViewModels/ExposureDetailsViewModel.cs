@@ -1,22 +1,41 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Windows.Input;
+using MvvmHelpers.Commands;
 using Newtonsoft.Json;
 using Xamarin.ExposureNotifications;
 using Xamarin.Forms;
 
 namespace ExposureNotification.App.ViewModels
 {
-	public class ExposureDetailsViewModel : BaseViewModel
+	[QueryProperty(nameof(ExposureInfoParameter), "info")]
+	public class ExposureDetailsViewModel : ViewModelBase
 	{
-		public ExposureDetailsViewModel(ExposureInfo info)
-			=> ExposureInfo = info;
+		public ExposureDetailsViewModel()
+		{
+		}
 
-		public ICommand CancelCommand
-			=> new Command(async () =>
-				await Navigation.PopModalAsync(true));
+		public string ExposureInfoParameter
+        {
+			set
+            {
+				var json = Uri.UnescapeDataString(value ?? string.Empty);
+				if (!string.IsNullOrWhiteSpace(json))
+				{
+					ExposureInfo = JsonConvert.DeserializeObject<ExposureInfo>(json);
+					OnPropertyChanged(nameof(ExposureInfo));
+				}
+            }
+        }
 
-		public ExposureInfo ExposureInfo { get; set; }
+		public AsyncCommand CancelCommand
+			=> new AsyncCommand(() => GoToAsync(".."));
+
+		public ExposureInfo ExposureInfo { get; set; } = new ExposureInfo();
+
+		public DateTime When
+			=> ExposureInfo.Timestamp;
+
+		public TimeSpan Duration
+			=> ExposureInfo.Duration;
 	}
 }

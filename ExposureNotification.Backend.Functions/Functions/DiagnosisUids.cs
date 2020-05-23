@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 
-namespace ExposureNotification.Backend.Functions.Functions
+namespace ExposureNotification.Backend.Functions
 {
 	public static class DiagnosisUids
 	{

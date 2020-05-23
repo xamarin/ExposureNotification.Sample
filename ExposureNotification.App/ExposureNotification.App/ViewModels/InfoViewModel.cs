@@ -1,61 +1,51 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Threading.Tasks;
 using System.Windows.Input;
+using Acr.UserDialogs;
 using ExposureNotification.App.Services;
-using Xamarin.Essentials;
+using ExposureNotification.App.Views;
+using MvvmHelpers.Commands;
 using Xamarin.Forms;
 
 namespace ExposureNotification.App.ViewModels
 {
-	public class InfoViewModel : BaseViewModel
+	public class InfoViewModel : ViewModelBase
 	{
 		public InfoViewModel()
 		{
-			//Xamarin.ExposureNotifications.ExposureNotification.IsEnabledAsync()
-			//	.ContinueWith(t =>
-			//	{
-			//		IsEnabled = t.Result;
-			//	});
+			Xamarin.ExposureNotifications.ExposureNotification.IsEnabledAsync()
+				.ContinueWith(async t =>
+				{
+					if (!t.Result)
+						await Disabled();
+				});
 		}
 
-		public bool IsEnabled
-        {
-			get => LocalStateManager.Instance.LastIsEnabled;
-			set
-            {
-				LocalStateManager.Instance.LastIsEnabled = value;
-				LocalStateManager.Save();
-				NotifyPropertyChanged(nameof(IsEnabled));
-            }
-        }
-
-		public bool IsWelcomed
+		Task Disabled()
 		{
-			get => LocalStateManager.Instance.IsWelcomed;
-			set
-			{
-				LocalStateManager.Instance.IsWelcomed = value;
-				LocalStateManager.Save();
-				NotifyPropertyChanged(nameof(IsWelcomed));
-			}
+			LocalStateManager.Instance.LastIsEnabled = false;
+			LocalStateManager.Instance.IsWelcomed = false;
+			LocalStateManager.Save();
+
+			return GoToAsync($"//{nameof(WelcomePage)}");
 		}
 
-		public ICommand EnableDisableCommand
-			=> new Command(async () =>
+		public AsyncCommand DisableCommand
+			=> new AsyncCommand(async () =>
 			{
-				var enabled = await Xamarin.ExposureNotifications.ExposureNotification.IsEnabledAsync();
+				try
+				{
+					using (UserDialogs.Instance.Loading(string.Empty))
+					{
+						var enabled = await Xamarin.ExposureNotifications.ExposureNotification.IsEnabledAsync();
 
-				if (enabled)
-					await Xamarin.ExposureNotifications.ExposureNotification.StopAsync();
-				else
-					await Xamarin.ExposureNotifications.ExposureNotification.StartAsync();
+						if (enabled)
+							await Xamarin.ExposureNotifications.ExposureNotification.StopAsync();
+					}
+				}
+				finally
+				{
+					await Disabled();
+				}
 			});
-
-		public ICommand GetStartedCommand
-			=> new Command(() => IsWelcomed = true);
-
-		public ICommand NotNowCommand
-			=> new Command(() => IsWelcomed = false);
 	}
 }

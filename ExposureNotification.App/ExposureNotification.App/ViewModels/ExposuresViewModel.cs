@@ -1,24 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Text;
 using ExposureNotification.App.Services;
+using ExposureNotification.App.Views;
+using MvvmHelpers.Commands;
+using Newtonsoft.Json;
+using Xamarin.ExposureNotifications;
 using Xamarin.Forms;
 
 namespace ExposureNotification.App.ViewModels
 {
-	public class ExposuresViewModel : BaseViewModel, IDisposable
+	public class ExposuresViewModel : ViewModelBase
 	{
 		public ExposuresViewModel()
-		{
-			MessagingCenter.Instance.Subscribe<ExposureNotificationHandler>(this, "exposure_info_changed", h =>
-				Device.BeginInvokeOnMainThread(() =>
-					{
-						ExposureInformation.Clear();
-						foreach (var i in LocalStateManager.Instance.ExposureInformation)
-							ExposureInformation.Add(i);
-					}));
-		}
+        {
+
+        }
 
 		public bool EnableNotifications
 		{
@@ -31,15 +27,11 @@ namespace ExposureNotification.App.ViewModels
 		}
 
 		public ObservableCollection<Xamarin.ExposureNotifications.ExposureInfo> ExposureInformation
-			=> new ObservableCollection<Xamarin.ExposureNotifications.ExposureInfo>
-			{
-#if DEBUG
-				new Xamarin.ExposureNotifications.ExposureInfo(DateTime.Now.AddDays(-7), TimeSpan.FromMinutes(30), 70, 6, Xamarin.ExposureNotifications.RiskLevel.High),
-				new Xamarin.ExposureNotifications.ExposureInfo(DateTime.Now.AddDays(-3), TimeSpan.FromMinutes(10), 40, 3, Xamarin.ExposureNotifications.RiskLevel.Low),
-#endif
-			};
+			=> LocalStateManager.Instance.ExposureInformation;
 
-		public void Dispose()
-			=> MessagingCenter.Instance.Unsubscribe<ExposureNotificationHandler>(this, "exposure_info_changed");
+		bool navigating;
+
+		public AsyncCommand<ExposureInfo> ExposureSelectedCommand => new AsyncCommand<ExposureInfo>((info) =>
+		   GoToAsync($"{nameof(ExposureDetailsPage)}?info={JsonConvert.SerializeObject(info)}"));
 	}
 }

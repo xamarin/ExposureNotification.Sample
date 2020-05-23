@@ -1,6 +1,7 @@
-﻿using System;
+﻿using ExposureNotification.App.Styles;
+using ExposureNotification.App.Views;
+using Plugin.LocalNotification;
 using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
 
 namespace ExposureNotification.App
 {
@@ -10,11 +11,27 @@ namespace ExposureNotification.App
 		{
 			InitializeComponent();
 
+#if DEBUG
+			// For debug mode, set the mock api provider to interact
+			// with some fake data
+			Xamarin.ExposureNotifications.ExposureNotification.OverrideNativeImplementation(
+				new Services.TestNativeImplementation());
+#endif
+			// Local Notification tap event listener
+			NotificationCenter.Current.NotificationTapped += OnNotificationTapped;
+
+			// Initialize the library which schedules background tasks, etc
+			Xamarin.ExposureNotifications.ExposureNotification.Init();
+
 			MainPage = new AppShell();
 		}
 
+		void OnNotificationTapped(NotificationTappedEventArgs e)
+			=> Shell.Current.GoToAsync($"//{nameof(ExposuresPage)}", false);
+
 		protected override void OnStart()
 		{
+			OnResume();
 		}
 
 		protected override void OnSleep()
@@ -23,6 +40,7 @@ namespace ExposureNotification.App
 
 		protected override void OnResume()
 		{
+			ThemeHelper.ChangeTheme(true);
 		}
 	}
 }

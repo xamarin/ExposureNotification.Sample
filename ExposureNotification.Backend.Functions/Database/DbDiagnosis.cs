@@ -9,5 +9,8 @@ namespace ExposureNotification.Backend
 
 		[Key]
 		public string DiagnosisUid { get; set; }
+
+
+		public int KeyCount { get; set; }
 	}
 }
