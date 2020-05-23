@@ -105,7 +105,17 @@ namespace ExposureNotification.Backend.Database
 			await transaction.CommitAsync();
 		}
 
-		public async Task CreateBatchFilesAsync(string region, Func<TemporaryExposureKeyExport, Task> processExport)
+		public Task<bool> HasKeysAsync(string region)
+		{
+			var cutoffMsEpoch = DateTimeOffset.UtcNow.AddDays(-14).ToUnixTimeMilliseconds();
+
+			return context.TemporaryExposureKeys.AnyAsync(k =>
+				k.Region == region &&
+				!k.Processed &&
+				k.TimestampMsSinceEpoch >= cutoffMsEpoch);
+		}
+
+		public async Task<int> CreateBatchFilesAsync(string region, Func<TemporaryExposureKeyExport, Task> processExport)
 		{
 			using var transaction = context.Database.BeginTransaction();
 
@@ -149,6 +159,8 @@ namespace ExposureNotification.Backend.Database
 			await context.SaveChangesAsync();
 
 			await transaction.CommitAsync();
+
+			return batchFileCount;
 		}
 
 		// TODO: load this from a DB or config

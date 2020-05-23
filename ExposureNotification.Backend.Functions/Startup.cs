@@ -1,6 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using ExposureNotification.Backend.Database;
-using ExposureNotification.Backend.Signing;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.Services.AppAuthentication;
@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.AzureKeyVault;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 [assembly: FunctionsStartup(typeof(ExposureNotification.Backend.Functions.Startup))]
 
@@ -21,6 +22,18 @@ namespace ExposureNotification.Backend.Functions
 
 		public override void Configure(IFunctionsHostBuilder builder)
 		{
+			var loggerFactory = LoggerFactory.Create(builder =>
+			{
+				builder
+					.AddConsole()
+					.AddAzureWebAppDiagnostics();
+			});
+
+			var logger = loggerFactory.CreateLogger("Startup");
+			logger.LogInformation("Starting setup...");
+
+			builder.Services.AddLogging();
+
 			// load the basics
 			var configBuilder = new ConfigurationBuilder()
 				.SetBasePath(Directory.GetCurrentDirectory())
@@ -28,22 +41,34 @@ namespace ExposureNotification.Backend.Functions
 				.AddEnvironmentVariables();
 			var config = configBuilder.Build();
 
+			logger.LogInformation("Loaded basic configuration.");
+
 			if (config.GetValue<bool>("EN:SkipKeyVault") == false)
 			{
-				// use that to load the keyvault
-				var azureServiceTokenProvider = new AzureServiceTokenProvider();
-				var keyVaultClient = new KeyVaultClient(
-					new KeyVaultClient.AuthenticationCallback(
-						azureServiceTokenProvider.KeyVaultTokenCallback));
-				configBuilder.AddAzureKeyVault(
-					$"https://{config["EN:KeyVaultName"]}.vault.azure.net/",
-					keyVaultClient,
-					new DefaultKeyVaultSecretManager());
-				config = configBuilder.Build();
+				logger.LogInformation("Adding KeyVault configurations...");
+
+				try
+				{
+					// use that to load the keyvault
+					var azureServiceTokenProvider = new AzureServiceTokenProvider();
+					var keyVaultClient = new KeyVaultClient(
+						new KeyVaultClient.AuthenticationCallback(
+							azureServiceTokenProvider.KeyVaultTokenCallback));
+					configBuilder.AddAzureKeyVault(
+						$"https://{config["EN:KeyVaultName"]}.vault.azure.net/",
+						keyVaultClient,
+						new DefaultKeyVaultSecretManager());
+					config = configBuilder.Build();
+				}
+				catch (Exception ex)
+				{
+					logger.LogError(ex, "Error adding KeyVault configurations.");
+				}
 			}
 
-			var enConfig = config.GetSection("EN");
+			logger.LogInformation("Reading configuation...");
 
+			var enConfig = config.GetSection("EN");
 			var conn = enConfig["DbConnectionString"];
 
 			// now set things up for reals
@@ -58,6 +83,8 @@ namespace ExposureNotification.Backend.Functions
 				settings.SupportedRegions = enConfig["SupportedRegions"].Split(separators);
 			});
 
+			logger.LogInformation("Setting up database...");
+
 			// set up the database
 			builder.Services.AddDbContext<ExposureNotificationContext>(builder =>
 			{
@@ -70,6 +97,8 @@ namespace ExposureNotification.Backend.Functions
 
 			// set up database "repository"
 			builder.Services.AddTransient<ExposureNotificationStorage>();
+
+			logger.LogInformation("All done.");
 		}
 	}
 }

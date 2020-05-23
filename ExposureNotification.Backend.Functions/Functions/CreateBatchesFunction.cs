@@ -8,6 +8,7 @@ using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace ExposureNotification.Backend.Functions
@@ -28,24 +29,46 @@ namespace ExposureNotification.Backend.Functions
 		}
 
 		// Every 6 hours
-		[FunctionName("CreateBatchesFunction")]
-		public Task RunTimed([TimerTrigger("0 0 */6 * * *")] TimerInfo myTimer) => CreateBatchFiles();
+		[FunctionName("CreateBatchesTimedFunction")]
+		public Task RunTimed([TimerTrigger("0 0 */6 * * *")] TimerInfo myTimer, ILogger logger)
+		{
+			logger.LogInformation("Starting timed batching...");
+
+			return CreateBatchFiles(logger);
+		}
 
 		// On demand
-		[FunctionName("batch")]
-		public Task RunRequest([HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest req) => CreateBatchFiles();
-
-		async Task CreateBatchFiles()
+		[FunctionName("CreateBatchesOnDemandFunction")]
+		public Task RunRequest([HttpTrigger(AuthorizationLevel.Function, "get", Route = "dev/batch")] HttpRequest req, ILogger logger)
 		{
+			logger.LogInformation("Starting on-demand batching...");
+
+			return CreateBatchFiles(logger);
+		}
+
+		async Task CreateBatchFiles(ILogger logger)
+		{
+			var supportedRegions = settings.Value.SupportedRegions;
+			if (supportedRegions?.Any() != true)
+				logger.LogWarning("No supported regions.");
+
 			var cloudStorageAccount = CloudStorageAccount.Parse(settings.Value.BlobStorageConnectionString);
 			var cloudBlobClient = cloudStorageAccount.CreateCloudBlobClient();
 
-			foreach (var region in settings.Value.SupportedRegions)
+			foreach (var region in supportedRegions)
 			{
+				if (!await storage.HasKeysAsync(region))
+				{
+					logger.LogInformation("No keys found for region '{0}'.", region);
+					continue;
+				}
+
 				// We base the container name off a global configurable prefix
 				// and also the region name, so we end up having one container per
 				// region which can help with azure scaling/region allocation
 				var containerName = $"{settings.Value.BlobStorageContainerNamePrefix}{region}";
+
+				logger.LogInformation("Batch may be saved to container '{0}'.", containerName);
 
 				// Get our container
 				var cloudBlobContainer = cloudBlobClient.GetContainerReference(containerName);
@@ -75,15 +98,20 @@ namespace ExposureNotification.Backend.Functions
 				// Actual next is plus one
 				var nextDirNumber = highestDirNumber + 1;
 
+				logger.LogInformation("Batch may be saved to path '{0}/{1}'.", containerName, nextDirNumber);
+
 				// Load all signer infos
 				var signerInfos = await storage.GetAllSignerInfosAsync();
 
 				// Create batch files from all the keys in the database
-				await storage.CreateBatchFilesAsync(region, async export =>
+				var batchFileCount = await storage.CreateBatchFilesAsync(region, async export =>
 				{
 					// Don't process a batch without keys
 					if (export == null || (export.Keys != null && export.Keys.Count() <= 0))
+					{
+						logger.LogWarning("For some reason, a batch was started when there were no keys to put in that batch...");
 						return;
+					}
 
 					// Filename is inferable as batch number
 					var batchFileName = $"{nextDirNumber}/{export.BatchNum}.dat";
@@ -101,6 +129,8 @@ namespace ExposureNotification.Backend.Functions
 					await blockBlob.UploadFromStreamAsync(signedFileStream);
 					await blockBlob.SetMetadataAsync();
 				});
+
+				logger.LogInformation("Saved {0} batch files of keys to '{1}/{2}'.", batchFileCount, containerName, nextDirNumber);
 			}
 		}
 	}
