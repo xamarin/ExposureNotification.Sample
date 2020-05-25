@@ -130,7 +130,8 @@ namespace ExposureNotification.Backend.Database
 			var keys = context.TemporaryExposureKeys
 				.Where(k => k.Region == region
 							&& !k.Processed
-							&& k.TimestampMsSinceEpoch >= cutoffMsEpoch);
+							&& k.TimestampMsSinceEpoch >= cutoffMsEpoch)
+				.OrderBy(k => k.Id); // Randomize the order
 
 			// How many keys do we need to put in batchfiles
 			var totalCount = await keys.CountAsync();
