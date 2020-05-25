@@ -23,7 +23,7 @@ namespace Xamarin.ExposureNotifications
 		static IExposureNotificationClient instance;
 
 		static IExposureNotificationClient Instance
-			=> instance ??= Nearby.GetExposureNotificationClient(Xamarin.Essentials.Platform.CurrentActivity);
+			=> instance ??= Nearby.GetExposureNotificationClient(Application.Context);
 
 		static async Task<ExposureConfiguration> GetConfigurationAsync()
 		{
