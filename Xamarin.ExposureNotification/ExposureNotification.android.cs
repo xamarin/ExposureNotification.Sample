@@ -44,24 +44,24 @@ namespace Xamarin.ExposureNotifications
 		}
 
 		const int requestCodeStartExposureNotification = 1111;
-		//public static final int REQUEST_CODE_GET_TEMP_EXPOSURE_KEY_HISTORY = 2222;
+		const int requestCodeGetTempExposureKeyHistory = 2222;
 
 		static TaskCompletionSource<object> tcsResolveConnection;
 
 		public static void OnActivityResult(int requestCode, Result resultCode, global::Android.Content.Intent data)
 		{
-			if (requestCode == requestCodeStartExposureNotification)
+			if (requestCode == requestCodeStartExposureNotification || requestCode == requestCodeGetTempExposureKeyHistory)
 			{
 				if (resultCode == Result.Ok)
 					tcsResolveConnection?.TrySetResult(null);
 				else
-					tcsResolveConnection.TrySetException(new AccessDeniedException("Failed to resolve enabing Exposure Notifications"));
+					tcsResolveConnection.TrySetException(new AccessDeniedException("Failed to resolve Exposure Notifications API"));
 			}
 		}
 
 		static PropertyInfo apiExceptionMStatusPropertyInfo = null;
 
-		static async Task<T> ResolveApi<T>(Func<Task<T>> apiCall)
+		static async Task<T> ResolveApi<T>(int requestCode, Func<Task<T>> apiCall)
 		{
 			try
 			{
@@ -73,13 +73,13 @@ namespace Xamarin.ExposureNotifications
 				{
 					tcsResolveConnection = new TaskCompletionSource<object>();
 
-					apiExceptionMStatusPropertyInfo ??= 
+					apiExceptionMStatusPropertyInfo ??=
 						apiEx.GetType().GetProperty("MStatus", BindingFlags.Instance | BindingFlags.NonPublic);
-					
+
 					var val = (Java.Lang.Object)apiExceptionMStatusPropertyInfo.GetValue(apiEx);
 					var statuses = val.JavaCast<Statuses>();
 
-					statuses.StartResolutionForResult(Essentials.Platform.CurrentActivity, requestCodeStartExposureNotification);
+					statuses.StartResolutionForResult(Essentials.Platform.CurrentActivity, requestCode);
 
 					await tcsResolveConnection.Task;
 
@@ -91,21 +91,21 @@ namespace Xamarin.ExposureNotifications
 		}
 
 		static Task PlatformStart()
-			=> ResolveApi<object>(async () =>
+			=> ResolveApi<object>(requestCodeStartExposureNotification, async () =>
 				{
 					await Instance.StartAsync();
 					return null;
 				});
 
 		static Task PlatformStop()
-			=> ResolveApi<object>(async () =>
+			=> ResolveApi<object>(requestCodeStartExposureNotification, async () =>
 				{
 					await Instance.StopAsync();
 					return null;
 				});
 
 		static Task<bool> PlatformIsEnabled()
-			=> ResolveApi<bool>(() =>
+			=> ResolveApi<bool>(requestCodeStartExposureNotification, () =>
 				Instance.IsEnabledAsync());
 
 		public static void ConfigureBackgroundWorkRequest(TimeSpan repeatInterval, Action<PeriodicWorkRequest.Builder> requestBuilder)
@@ -158,17 +158,18 @@ namespace Xamarin.ExposureNotifications
 				Guid.NewGuid().ToString());
 		}
 
-		static async Task<IEnumerable<TemporaryExposureKey>> PlatformGetTemporaryExposureKeys()
-		{
-			var exposureKeyHistory = await Instance.GetTemporaryExposureKeyHistoryAsync();
+		static Task<IEnumerable<TemporaryExposureKey>> PlatformGetTemporaryExposureKeys()
+			=> ResolveApi<IEnumerable<TemporaryExposureKey>>(requestCodeGetTempExposureKeyHistory, async () =>
+				{
+					var exposureKeyHistory = await Instance.GetTemporaryExposureKeyHistoryAsync();
 
-			return exposureKeyHistory.Select(k =>
-				new TemporaryExposureKey(
-					k.GetKeyData(),
-					k.RollingStartIntervalNumber,
-					TimeSpan.Zero, // TODO: TimeSpan.FromMinutes(k.RollingDuration * 10),
-					k.TransmissionRiskLevel.FromNative()));
-		}
+					return exposureKeyHistory.Select(k =>
+						new TemporaryExposureKey(
+							k.GetKeyData(),
+							k.RollingStartIntervalNumber,
+							TimeSpan.Zero, // TODO: TimeSpan.FromMinutes(k.RollingDuration * 10),
+							k.TransmissionRiskLevel.FromNative()));
+				});
 
 		internal static async Task<IEnumerable<ExposureInfo>> PlatformGetExposureInformationAsync(string token)
 		{
