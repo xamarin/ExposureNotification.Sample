@@ -13,6 +13,7 @@ using Android.Gms.Nearby.Connection;
 using Android.Runtime;
 using Java.Nio.FileNio;
 using System.Reflection;
+using Android.Bluetooth;
 
 [assembly: UsesPermission(Android.Manifest.Permission.Bluetooth)]
 [assembly: UsesPermission(Android.Manifest.Permission.AccessNetworkState)]
@@ -198,6 +199,18 @@ namespace Xamarin.ExposureNotifications
 				summary.DaysSinceLastExposure,
 				(ulong)summary.MatchedKeyCount,
 				(byte)summary.MaximumRiskScore);
+		}
+
+		static async Task<Status> PlatformGetStatusAsync()
+		{
+			var bt = BluetoothAdapter.DefaultAdapter;
+
+			if (bt == null || !bt.IsEnabled)
+				return Status.BluetoothOff;
+
+			var status = await Instance.IsEnabledAsync();
+
+			return status ? Status.Active : Status.Disabled;
 		}
 	}
 

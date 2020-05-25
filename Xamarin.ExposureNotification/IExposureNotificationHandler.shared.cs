@@ -30,5 +30,7 @@ namespace Xamarin.ExposureNotifications
 		Task<(ExposureDetectionSummary summary, IEnumerable<ExposureInfo> info)> DetectExposuresAsync(IEnumerable<string> files);
 
 		Task<IEnumerable<TemporaryExposureKey>> GetSelfTemporaryExposureKeysAsync();
+
+		Task<Status> GetStatusAsync();
 	}
 }
