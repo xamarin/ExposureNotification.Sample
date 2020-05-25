@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Windows.Input;
 using MvvmHelpers.Commands;
 using Newtonsoft.Json;
 using Xamarin.ExposureNotifications;
@@ -15,17 +14,17 @@ namespace ExposureNotification.App.ViewModels
 		}
 
 		public string ExposureInfoParameter
-        {
+		{
 			set
-            {
+			{
 				var json = Uri.UnescapeDataString(value ?? string.Empty);
 				if (!string.IsNullOrWhiteSpace(json))
 				{
 					ExposureInfo = JsonConvert.DeserializeObject<ExposureInfo>(json);
 					OnPropertyChanged(nameof(ExposureInfo));
 				}
-            }
-        }
+			}
+		}
 
 		public AsyncCommand CancelCommand
 			=> new AsyncCommand(() => GoToAsync(".."));

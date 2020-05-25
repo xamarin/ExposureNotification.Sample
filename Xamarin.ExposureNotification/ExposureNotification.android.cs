@@ -112,7 +112,7 @@ namespace Xamarin.ExposureNotifications
 				});
 
 		static Task<bool> PlatformIsEnabled()
-			=> ResolveApi<bool>(requestCodeStartExposureNotification, () =>
+			=> ResolveApi(requestCodeStartExposureNotification, () =>
 				Instance.IsEnabledAsync());
 
 		public static void ConfigureBackgroundWorkRequest(TimeSpan repeatInterval, Action<PeriodicWorkRequest.Builder> requestBuilder)
@@ -151,7 +151,7 @@ namespace Xamarin.ExposureNotifications
 				ExistingPeriodicWorkPolicy.Replace,
 				workRequest);
 
-			return System.Threading.Tasks.Task.CompletedTask;
+			return Task.CompletedTask;
 		}
 
 		// Tells the local API when new diagnosis keys have been obtained from the server
@@ -166,7 +166,7 @@ namespace Xamarin.ExposureNotifications
 		}
 
 		static Task<IEnumerable<TemporaryExposureKey>> PlatformGetTemporaryExposureKeys()
-			=> ResolveApi<IEnumerable<TemporaryExposureKey>>(requestCodeGetTempExposureKeyHistory, async () =>
+			=> ResolveApi(requestCodeGetTempExposureKeyHistory, async () =>
 				{
 					var exposureKeyHistory = await Instance.GetTemporaryExposureKeyHistoryAsync();
 

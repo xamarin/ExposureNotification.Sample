@@ -1,20 +1,18 @@
 ﻿using System;
-using System.Windows.Input;
 using ExposureNotification.App.Resources;
 using ExposureNotification.App.Services;
 using ExposureNotification.App.Views;
 using MvvmHelpers.Commands;
 using Xamarin.Essentials;
-using Xamarin.Forms;
 
 namespace ExposureNotification.App.ViewModels
 {
 	public class NotifyOthersViewModel : ViewModelBase
 	{
 		public NotifyOthersViewModel()
-        {
+		{
 			IsEnabled = true;
-        }
+		}
 
 		public bool DiagnosisPending
 			=> (LocalStateManager.Instance.LatestDiagnosis?.DiagnosisDate ?? DateTimeOffset.MinValue)
