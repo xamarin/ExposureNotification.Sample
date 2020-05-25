@@ -20,4 +20,4 @@ jobs:
       - name: Build
         run: msbuild -t:Build ./ExposureNotification.sln
       - name: Run Tests
-        run: dotnet test ./ExposureNotification.Tests/ExposureNotification.Tests.csproj
+        run: dotnet test ./ExposureNotification.Backend.Functions.Tests/ExposureNotification.Backend.Functions.Tests.csproj

@@ -4,13 +4,15 @@ namespace Xamarin.ExposureNotifications
 {
 	public class TemporaryExposureKey
 	{
+		// static readonly DateTimeOffset epoch = new DateTimeOffset(1970, 1, 1, 0, 0, 0, 0, TimeSpan.Zero);
+
 		public TemporaryExposureKey()
 		{
 		}
 
 		public TemporaryExposureKey(byte[] keyData, DateTimeOffset rollingStart, TimeSpan rollingDuration, RiskLevel transmissionRisk)
 		{
-			KeyData = keyData;
+			Key = keyData;
 			RollingStart = rollingStart;
 			RollingDuration = rollingDuration;
 			TransmissionRiskLevel = transmissionRisk;
@@ -18,13 +20,13 @@ namespace Xamarin.ExposureNotifications
 
 		internal TemporaryExposureKey(byte[] keyData, long rollingStart, TimeSpan rollingDuration, RiskLevel transmissionRisk)
 		{
-			KeyData = keyData;
+			Key = keyData;
 			RollingStart = DateTimeOffset.FromUnixTimeSeconds(rollingStart * (60 * 10));
 			RollingDuration = rollingDuration;
 			TransmissionRiskLevel = transmissionRisk;
 		}
 
-		public byte[] KeyData { get; set; }
+		public byte[] Key { get; set; }
 
 		public DateTimeOffset RollingStart { get; set; }
 
@@ -32,7 +34,11 @@ namespace Xamarin.ExposureNotifications
 
 		public RiskLevel TransmissionRiskLevel { get; set; }
 
-		internal long RollingStartLong
-			=> RollingStart.ToUnixTimeSeconds() / (60 * 10);
+		// public string KeyBase64 =>
+		//	Convert.ToBase64String(Key);
+		// public long RollingStartTenMinuteIntervalsSinceEpoch =>
+		//	(long)((RollingStart - epoch).TotalMinutes / 10);
+		// public int RollingDurationTenMinuteIntervals =>
+		//	(int)(RollingDuration.TotalMinutes / 10);
 	}
 }

@@ -10,9 +10,9 @@ namespace ExposureNotification.App.ViewModels
 	public class SharePositiveDiagnosisViewModel : ViewModelBase
 	{
 		public SharePositiveDiagnosisViewModel()
-        {
+		{
 			IsEnabled = true;
-        }
+		}
 		public string DiagnosisUid { get; set; }
 
 		public DateTime? DiagnosisTimestamp { get; set; } = DateTime.Now;
@@ -23,26 +23,21 @@ namespace ExposureNotification.App.ViewModels
 		public AsyncCommand SubmitDiagnosisCommand
 			=> new AsyncCommand(async () =>
 			{
-				using var dialog = UserDialogs.Instance.Loading("Verifying Diagnosis...");
-				IsEnabled = false;
-				try
+				// Check the parameters
+				if (string.IsNullOrEmpty(DiagnosisUid))
 				{
-					// Check the diagnosis is valid on the server before asking the native api's for the keys
-					if (!await ExposureNotificationHandler.VerifyDiagnosisUid(DiagnosisUid))
-						throw new Exception();
+					await UserDialogs.Instance.AlertAsync("Please provide a valid Diagnosis ID", "Invalid Diagnosis ID", "OK");
+					return;
 				}
-				catch
+				if (!DiagnosisTimestamp.HasValue || DiagnosisTimestamp.Value > DateTime.Now)
 				{
-					dialog.Hide();
-
-					await UserDialogs.Instance.AlertAsync("Your diagnosis cannot be verified at this time to be submitted.", "Verification Failed", "OK");
-					IsEnabled = true;
+					await UserDialogs.Instance.AlertAsync("Please provide a valid Test Date", "Invalid Test Date", "OK");
 					return;
 				}
 
-				dialog.Title = "Submitting Diagnosis...";
+				// Submit the UID
+				using var dialog = UserDialogs.Instance.Loading("Submitting Diagnosis...");
 				IsEnabled = false;
-
 				try
 				{
 					var enabled = await Xamarin.ExposureNotifications.ExposureNotification.IsEnabledAsync();
@@ -52,19 +47,6 @@ namespace ExposureNotification.App.ViewModels
 						dialog.Hide();
 
 						await UserDialogs.Instance.AlertAsync("Please enable Exposure Notifications before submitting a diagnosis.", "Exposure Notifications Disabled", "OK");
-						return;
-					}
-
-					if (string.IsNullOrEmpty(DiagnosisUid))
-					{
-						dialog.Hide();
-						await UserDialogs.Instance.AlertAsync("Please provide a valid Diagnosis ID", "Invalid Diagnosis ID", "OK");
-						return;
-					}
-
-					if (!DiagnosisTimestamp.HasValue || DiagnosisTimestamp.Value > DateTime.Now)
-					{
-						await UserDialogs.Instance.AlertAsync("Please provide a valid Test Date", "Invalid Test Date", "OK");
 						return;
 					}
 
@@ -89,9 +71,9 @@ namespace ExposureNotification.App.ViewModels
 					UserDialogs.Instance.Alert("Please try again later.", "Failed", "OK");
 				}
 				finally
-                {
+				{
 					IsEnabled = true;
-                }
+				}
 			});
 	}
 }

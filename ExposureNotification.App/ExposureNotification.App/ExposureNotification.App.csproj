@@ -29,6 +29,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\..\ExposureNotification.Backend.Network\ExposureNotification.Backend.Network.csproj" />
 		<ProjectReference Include="..\..\Xamarin.ExposureNotification\Xamarin.ExposureNotification.csproj" />
 	</ItemGroup>
 

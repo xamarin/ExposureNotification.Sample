@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if DEBUG
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
@@ -43,7 +44,7 @@ namespace ExposureNotification.App.Services
 			return keys;
 		}
 
-		public Task<(ExposureDetectionSummary summary, IEnumerable<ExposureInfo> info)> DetectExposuresAsync(TemporaryExposureKeyBatches batches)
+		public Task<(ExposureDetectionSummary summary, IEnumerable<ExposureInfo> info)> DetectExposuresAsync(IEnumerable<string> files)
 		{
 			var summary = new ExposureDetectionSummary(10, 2, 5);
 
@@ -69,3 +70,4 @@ namespace ExposureNotification.App.Services
 		}
 	}
 }
+#endif

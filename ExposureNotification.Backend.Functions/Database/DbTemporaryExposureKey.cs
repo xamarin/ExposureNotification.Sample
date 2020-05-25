@@ -1,27 +1,24 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using ExposureNotification.Backend.Network;
+using ExposureNotification.Backend.Proto;
 using Google.Protobuf;
-using Xamarin.ExposureNotifications;
 
-namespace ExposureNotification.Backend
+namespace ExposureNotification.Backend.Database
 {
-	class DbTemporaryExposureKey
+	public class DbTemporaryExposureKey
 	{
-		public const string DefaultRegion = "default";
-
 		[Key, Column(Order = 0)]
 		public string Id { get; set; } = Guid.NewGuid().ToString();
 
 		public bool Processed { get; set; } = false;
 
-		public string Region { get; set; } = DefaultRegion;
+		public string Region { get; set; }
 
 		public string Base64KeyData { get; set; }
 
 		public long TimestampMsSinceEpoch { get; set; }
-
-		public long TestDateMsSinceEpoch { get; set; }
 
 		public long RollingStartSecondsSinceEpoch { get; set; }
 
@@ -30,30 +27,23 @@ namespace ExposureNotification.Backend
 		public int TransmissionRiskLevel { get; set; }
 
 		public TemporaryExposureKey ToKey()
-			=> new TemporaryExposureKey(
-				Convert.FromBase64String(Base64KeyData),
-				DateTimeOffset.FromUnixTimeSeconds(RollingStartSecondsSinceEpoch),
-				TimeSpan.FromMinutes(RollingDuration),
-				(RiskLevel)TransmissionRiskLevel);
-
-		public static DbTemporaryExposureKey FromKey(TemporaryExposureKey key, long testDateMsSinceEpoch)
-			=> new DbTemporaryExposureKey
+			=> new TemporaryExposureKey()
 			{
-				Base64KeyData = Convert.ToBase64String(key.KeyData),
-				TimestampMsSinceEpoch = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-				TestDateMsSinceEpoch = testDateMsSinceEpoch,
-				RollingStartSecondsSinceEpoch = key.RollingStart.ToUnixTimeSeconds(),
-				RollingDuration = (int)key.RollingDuration.TotalMinutes,
-				TransmissionRiskLevel = (int)key.TransmissionRiskLevel
+				KeyData = ByteString.CopyFrom(Convert.FromBase64String(Base64KeyData)),
+				RollingStartIntervalNumber = (int)RollingStartSecondsSinceEpoch,
+				RollingPeriod = RollingDuration,
+				TransmissionRiskLevel = TransmissionRiskLevel
 			};
 
-		public TemporaryExposureKeyBatchKey ToProtoKey()
-			=> new TemporaryExposureKeyBatchKey
+		public static DbTemporaryExposureKey FromKey(ExposureKey key, string region)
+			=> new DbTemporaryExposureKey
 			{
-				KeyData = ByteString.FromBase64(Base64KeyData),
-				RollingStartNumber = (uint)RollingStartSecondsSinceEpoch,
-				RollingPeriod = (uint)RollingDuration,
-				TransmissionRiskLevel = TransmissionRiskLevel
+				Base64KeyData = key.Key,
+				TimestampMsSinceEpoch = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+				RollingStartSecondsSinceEpoch = key.RollingStart,
+				RollingDuration = key.RollingDuration,
+				TransmissionRiskLevel = key.TransmissionRisk,
+				Region = region
 			};
 	}
 }

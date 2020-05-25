@@ -1,6 +1,10 @@
 
 # Xamarin Exposure Notification
 
+![Nuget](https://img.shields.io/nuget/v/Xamarin.ExposureNotification?label=Cross-Platform)
+![Nuget](https://img.shields.io/nuget/v/Xamarin.GooglePlayServices.Nearby.ExposureNotification?label=Android)
+![Nuget](https://img.shields.io/nuget/v/Xamarin.iOS.ExposureNotification?label=iOS)
+
 [Read our Planning Document with more details about how Exposure Notifications work](https://github.com/xamarin/xamarin.exposurenotification/blob/master/Exposure%20Notification%20Planning.pdf)
 
 Apple and Google are both creating API’s for a compatible BLE based Contact Tracing implementation which relies heavily on generating and storing rolling unique identifiers on a device, which are broadcast to nearby devices.  Devices which detect nearby identifiers then store these identifiers as they come into range (or contact) with for up to 14 days.
@@ -13,16 +17,60 @@ Devices continually request the keys submitted by diagnosed people from the back
 
 This project contains the cross platform wrapper API around the native Android and iOS API's.  The sample app uses this library to implement the exposure notification code one time for both platforms.
 
-## Sample App
-
-A sample Mobile app and Back end server to use the API.
-
-## Bindings to Native API's - NuGet
+### Bindings to Native APIs _(NuGet)_
 
 We also have NuGet packages available with bindings to the native Android and iOS Exposure Notifaction API's
 
- - iOS https://www.nuget.org/packages/Xamarin.iOS.ExposureNotification/ (Requires XCode 11.5 beta1 or newer)
- - Android https://www.nuget.org/packages/Xamarin.GooglePlayServices.Nearby.ExposureNotification/
+ - iOS: [Xamarin.iOS.ExposureNotification](https://www.nuget.org/packages/Xamarin.iOS.ExposureNotification/) (Requires XCode 11.5 beta1 or newer)
+ - Android: [Xamarin.GooglePlayServices.Nearby.ExposureNotification](https://www.nuget.org/packages/Xamarin.GooglePlayServices.Nearby.ExposureNotification/)
+
+
+# Sample
+
+Tere is a sample implementation of the mobile app and backend.
+
+## Mobile App
+
+A sample mobile app to use the API.
+
+## Server
+
+A sample backend to handle diagnosis submissions.
+
+## Requirements
+
+The server requires a few things:
+
+* **Azure Functions**  
+  This is the core processing logic.
+* **Blob Storage**  
+  This is to store the signed batch files.
+* **SQL Server**  
+  This is to store the temporary keys until they are batched.
+* **KeyVault** _(optional)_  
+  This can be used to store any secrets to keep them out of the portal.
+
+## Functions
+
+App functions:
+
+* `/api/selfdiagnosis`  
+  Submit a diagnosis from the app.
+
+Management functions:
+
+* `/api/manage/start-batch`  
+  Start the batch job on demand. _The `CreateBatchesTimed` job does run periodically._
+* `/api/manage/diagnosis-uids`  
+  Add/remove diagnosis UIDs from the health provider.
+* `CreateBatchesTimed`  
+  A timed job that runs every 6 hours to create batch files.
+
+Development functions:
+
+* `/api/dev/dummy-keys`  
+  A development-only function to populate the database with fake self-diagnosis submissions.
+
 
 # Contributing
 
