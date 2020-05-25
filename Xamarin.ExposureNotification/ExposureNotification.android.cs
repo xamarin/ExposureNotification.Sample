@@ -12,6 +12,7 @@ using Android.Gms.Common.Apis;
 using Android.Gms.Nearby.Connection;
 using Android.Runtime;
 using Java.Nio.FileNio;
+using System.Reflection;
 
 [assembly: UsesPermission(Android.Manifest.Permission.Bluetooth)]
 [assembly: UsesPermission(Android.Manifest.Permission.AccessNetworkState)]
@@ -58,11 +59,13 @@ namespace Xamarin.ExposureNotifications
 			}
 		}
 
-		static async Task ResolveApi(Func<Task> apiCall)
+		static PropertyInfo apiExceptionMStatusPropertyInfo = null;
+
+		static async Task<T> ResolveApi<T>(Func<Task<T>> apiCall)
 		{
 			try
 			{
-				await apiCall();
+				return await apiCall();
 			}
 			catch (ApiException apiEx)
 			{
@@ -70,51 +73,40 @@ namespace Xamarin.ExposureNotifications
 				{
 					tcsResolveConnection = new TaskCompletionSource<object>();
 
-					var statusProperty = apiEx.GetType().GetProperty("MStatus", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-					var val = (Java.Lang.Object)statusProperty.GetValue(apiEx);
+					apiExceptionMStatusPropertyInfo ??= 
+						apiEx.GetType().GetProperty("MStatus", BindingFlags.Instance | BindingFlags.NonPublic);
+					
+					var val = (Java.Lang.Object)apiExceptionMStatusPropertyInfo.GetValue(apiEx);
 					var statuses = val.JavaCast<Statuses>();
 
 					statuses.StartResolutionForResult(Essentials.Platform.CurrentActivity, requestCodeStartExposureNotification);
 
 					await tcsResolveConnection.Task;
 
-					await apiCall();
+					return await apiCall();
 				}
 			}
+
+			return default;
 		}
 
 		static Task PlatformStart()
-			=> ResolveApi(() => Instance.StartAsync());
+			=> ResolveApi<object>(() =>
+				{
+					Instance.StartAsync();
+					return null;
+				});
 
 		static Task PlatformStop()
-			=> ResolveApi(() => Instance.StopAsync());
-
-		static async Task<bool> PlatformIsEnabled()
-		{
-			try
-			{
-				return await Instance.IsEnabledAsync();
-			}
-			catch (ApiException apiEx)
-			{
-				if (apiEx.StatusCode == 6) // Resolution required
+			=> ResolveApi<object>(() =>
 				{
-					tcsResolveConnection = new TaskCompletionSource<object>();
+					Instance.StopAsync();
+					return null;
+				});
 
-					var statusProperty = apiEx.GetType().GetProperty("MStatus", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-					var val = (Java.Lang.Object)statusProperty.GetValue(apiEx);
-					var statuses = val.JavaCast<Statuses>();
-
-					statuses.StartResolutionForResult(Essentials.Platform.CurrentActivity, requestCodeStartExposureNotification);
-
-					await tcsResolveConnection.Task;
-
-					return await Instance.IsEnabledAsync();
-				}
-			}
-
-			return false;
-		}
+		static Task<bool> PlatformIsEnabled()
+			=> ResolveApi<bool>(() =>
+				Instance.IsEnabledAsync());
 
 		public static void ConfigureBackgroundWorkRequest(TimeSpan repeatInterval, Action<PeriodicWorkRequest.Builder> requestBuilder)
 		{
