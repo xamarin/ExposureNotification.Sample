@@ -41,9 +41,11 @@ namespace ExposureNotification.Backend.Functions
 				.AddEnvironmentVariables();
 			var config = configBuilder.Build();
 
+			var vault = config["EN-KeyVaultName"];
+
 			logger.LogInformation("Loaded basic configuration.");
 
-			if (config.GetValue<bool>("EN:SkipKeyVault") == false)
+			if (config.GetValue<bool>("EN-SkipKeyVault") == false)
 			{
 				logger.LogInformation("Adding KeyVault configurations...");
 
@@ -55,7 +57,7 @@ namespace ExposureNotification.Backend.Functions
 						new KeyVaultClient.AuthenticationCallback(
 							azureServiceTokenProvider.KeyVaultTokenCallback));
 					configBuilder.AddAzureKeyVault(
-						$"https://{config["EN:KeyVaultName"]}.vault.azure.net/",
+						$"https://{config["EN-KeyVaultName"]}.vault.azure.net/",
 						keyVaultClient,
 						new DefaultKeyVaultSecretManager());
 					config = configBuilder.Build();
@@ -68,19 +70,18 @@ namespace ExposureNotification.Backend.Functions
 
 			logger.LogInformation("Reading configuation...");
 
-			var enConfig = config.GetSection("EN");
-			var conn = enConfig["DbConnectionString"];
+			var conn = config["EN-DbConnectionString"];
 
 			// now set things up for reals
 			builder.Services.Configure<Settings>(settings =>
 			{
-				settings.BlobStorageConnectionString = enConfig["BlobStorageConnectionString"];
-				settings.BlobStorageContainerNamePrefix = enConfig["BlobStorageContainerNamePrefix"];
+				settings.BlobStorageConnectionString = config["EN-BlobStorageConnectionString"];
+				settings.BlobStorageContainerNamePrefix = config["EN-BlobStorageContainerNamePrefix"];
 				settings.DbConnectionString = conn;
-				settings.DeleteKeysFromDbAfterBatching = enConfig.GetValue<bool>("DeleteKeysFromDbAfterBatching");
-				settings.DisableDeviceVerification = enConfig.GetValue<bool>("DisableDeviceVerification");
-				settings.SigningKeyBase64String = enConfig["SigningKey"];
-				settings.SupportedRegions = enConfig["SupportedRegions"]?.ToUpperInvariant()?.Split(separators) ?? new string[0];
+				settings.DeleteKeysFromDbAfterBatching = config.GetValue<bool>("EN-DeleteKeysFromDbAfterBatching");
+				settings.DisableDeviceVerification = config.GetValue<bool>("EN-DisableDeviceVerification");
+				settings.SigningKeyBase64String = config["EN-SigningKey"];
+				settings.SupportedRegions = config["EN-SupportedRegions"]?.ToUpperInvariant()?.Split(separators) ?? new string[0];
 			});
 
 			logger.LogInformation("Setting up database...");
