@@ -40,7 +40,7 @@ namespace Xamarin.ExposureNotifications
 				DaysSinceLastExposureWeight = c.DaysSinceLastExposureWeight,
 				DurationWeight = c.DurationWeight,
 				TransmissionRiskWeight = c.TransmissionWeight,
-				MinimumRiskScore = (byte)c.MinimumRiskScore,				
+				MinimumRiskScore = (byte)c.MinimumRiskScore,
 			};
 
 			nc.SetValueForKey(
