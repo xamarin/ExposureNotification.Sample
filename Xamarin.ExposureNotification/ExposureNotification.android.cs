@@ -13,8 +13,8 @@ using Android.Gms.Nearby.Connection;
 using Android.Runtime;
 using Java.Nio.FileNio;
 
-
 [assembly: UsesPermission(Android.Manifest.Permission.Bluetooth)]
+[assembly: UsesPermission(Android.Manifest.Permission.AccessNetworkState)]
 
 namespace Xamarin.ExposureNotifications
 {
