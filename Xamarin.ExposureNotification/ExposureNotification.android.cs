@@ -69,7 +69,7 @@ namespace Xamarin.ExposureNotifications
 			}
 			catch (ApiException apiEx)
 			{
-				if (apiEx.StatusCode == 6) // Resolution required
+				if (apiEx.StatusCode == CommonStatusCodes.ResolutionRequired) // Resolution required
 				{
 					tcsResolveConnection = new TaskCompletionSource<object>();
 
