@@ -118,6 +118,19 @@ namespace Xamarin.ExposureNotifications
 
 		internal static Task<IEnumerable<TemporaryExposureKey>> GetSelfTemporaryExposureKeysAsync()
 			=> nativeImplementation != null ? nativeImplementation.GetSelfTemporaryExposureKeysAsync() : PlatformGetTemporaryExposureKeys();
+
+		public static Task<Status> GetStatusAsync()
+			=> nativeImplementation != null ? nativeImplementation.GetStatusAsync() : PlatformGetStatusAsync();
+	}
+
+	public enum Status
+	{
+		Unknown,
+		Disabled,
+		Active,
+		BluetoothOff,
+		Restricted,
+		NotAuthorized
 	}
 
 	public class Configuration
