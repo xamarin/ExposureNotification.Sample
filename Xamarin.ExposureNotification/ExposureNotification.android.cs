@@ -47,26 +47,6 @@ namespace Xamarin.ExposureNotifications
 
 		static TaskCompletionSource<object> tcsResolveConnection;
 
-		static async Task PlatformStart()
-		{
-			try
-			{
-				await Instance.StartAsync();
-			}
-			catch (ApiException apiEx)
-			{
-				if (apiEx.StatusCode == 6) // Resolution required
-				{
-					tcsResolveConnection = new TaskCompletionSource<object>();
-
-					apiEx.JavaCast<ConnectionResolution>()
-						.Status.StartResolutionForResult(Essentials.Platform.CurrentActivity, requestCodeStartExposureNotification);
-
-					await tcsResolveConnection.Task;
-				}
-			}
-		}
-
 		public static void OnActivityResult(int requestCode, Result resultCode, global::Android.Content.Intent data)
 		{
 			if (resultCode == Result.Ok)
@@ -75,11 +55,63 @@ namespace Xamarin.ExposureNotifications
 				tcsResolveConnection.TrySetException(new AccessDeniedException("Failed to resolve enabing Exposure Notifications"));
 		}
 
-		static Task PlatformStop()
-			=> Instance.StopAsync();
+		static async Task ResolveApi(Func<Task> apiCall)
+		{
+			try
+			{
+				await apiCall();
+			}
+			catch (ApiException apiEx)
+			{
+				if (apiEx.StatusCode == 6) // Resolution required
+				{
+					tcsResolveConnection = new TaskCompletionSource<object>();
 
-		static Task<bool> PlatformIsEnabled()
-			=> Instance.IsEnabledAsync();
+					var statusProperty = apiEx.GetType().GetProperty("MStatus", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+					var val = (Java.Lang.Object)statusProperty.GetValue(apiEx);
+					var statuses = val.JavaCast<Statuses>();
+
+					statuses.StartResolutionForResult(Essentials.Platform.CurrentActivity, requestCodeStartExposureNotification);
+
+					await tcsResolveConnection.Task;
+
+					await apiCall();
+				}
+			}
+		}
+
+		static Task PlatformStart()
+			=> ResolveApi(() => Instance.StartAsync());
+
+		static Task PlatformStop()
+			=> ResolveApi(() => Instance.StopAsync());
+
+		static async Task<bool> PlatformIsEnabled()
+		{
+			try
+			{
+				return await Instance.IsEnabledAsync();
+			}
+			catch (ApiException apiEx)
+			{
+				if (apiEx.StatusCode == 6) // Resolution required
+				{
+					tcsResolveConnection = new TaskCompletionSource<object>();
+
+					var statusProperty = apiEx.GetType().GetProperty("MStatus", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+					var val = (Java.Lang.Object)statusProperty.GetValue(apiEx);
+					var statuses = val.JavaCast<Statuses>();
+
+					statuses.StartResolutionForResult(Essentials.Platform.CurrentActivity, requestCodeStartExposureNotification);
+
+					await tcsResolveConnection.Task;
+
+					return await Instance.IsEnabledAsync();
+				}
+			}
+
+			return false;
+		}
 
 		public static void ConfigureBackgroundWorkRequest(TimeSpan repeatInterval, Action<PeriodicWorkRequest.Builder> requestBuilder)
 		{
@@ -117,7 +149,7 @@ namespace Xamarin.ExposureNotifications
 				ExistingPeriodicWorkPolicy.Replace,
 				workRequest);
 
-			return Task.CompletedTask;
+			return System.Threading.Tasks.Task.CompletedTask;
 		}
 
 		// Tells the local API when new diagnosis keys have been obtained from the server
