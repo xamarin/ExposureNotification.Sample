@@ -12,15 +12,15 @@ namespace ExposureNotification.App.ViewModels
 	{
 		public WelcomeViewModel()
 		{
-			//Xamarin.ExposureNotifications.ExposureNotification.IsEnabledAsync()
-			//	.ContinueWith(async t =>
-			//	{
-			//		if (t.Result)
-			//		{
-			//			IsEnabled = true;
-			//			await GoToAsync($"//{nameof(InfoPage)}");
-			//		}
-			//	});
+			Xamarin.ExposureNotifications.ExposureNotification.IsEnabledAsync()
+				.ContinueWith(async t =>
+				{
+					if (t.Result)
+					{
+						IsEnabled = true;
+						await GoToAsync($"//{nameof(InfoPage)}");
+					}
+				});
 		}
 
 		public new bool IsEnabled
