@@ -20,7 +20,7 @@ jobs:
 
     test:
       name: Run Tests
-      runs-on: windows-latest
+      runs-on: windows-latest  # using Windows to work around https://github.com/dotnet/runtime/issues/23635
       steps:
       - name: Checkout
         uses: actions/checkout@v2
