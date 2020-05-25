@@ -49,10 +49,13 @@ namespace Xamarin.ExposureNotifications
 
 		public static void OnActivityResult(int requestCode, Result resultCode, global::Android.Content.Intent data)
 		{
-			if (resultCode == Result.Ok)
-				tcsResolveConnection?.TrySetResult(null);
-			else
-				tcsResolveConnection.TrySetException(new AccessDeniedException("Failed to resolve enabing Exposure Notifications"));
+			if (requestCode == requestCodeStartExposureNotification)
+			{
+				if (resultCode == Result.Ok)
+					tcsResolveConnection?.TrySetResult(null);
+				else
+					tcsResolveConnection.TrySetException(new AccessDeniedException("Failed to resolve enabing Exposure Notifications"));
+			}
 		}
 
 		static async Task ResolveApi(Func<Task> apiCall)
