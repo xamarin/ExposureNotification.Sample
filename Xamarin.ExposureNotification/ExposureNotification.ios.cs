@@ -149,6 +149,26 @@ namespace Xamarin.ExposureNotifications
 				TimeSpan.FromMinutes(k.RollingPeriod * 10),
 				k.TransmissionRiskLevel.FromNative()));
 		}
+
+		static async Task<Status> PlatformGetStatusAsync()
+		{
+			var m = await GetManagerAsync();
+
+			switch (m.ExposureNotificationStatus)
+			{
+				case ENStatus.Active:
+					return Status.Active;
+				case ENStatus.BluetoothOff:
+					return Status.BluetoothOff;
+				case ENStatus.Disabled:
+					return Status.Disabled;
+				case ENStatus.Restricted:
+					return Status.Restricted;
+				case ENStatus.Unknown:
+				default:
+					return Status.Unknown;
+			}
+		}
 	}
 
 	static partial class Utils

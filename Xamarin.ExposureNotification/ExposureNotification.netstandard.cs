@@ -23,5 +23,8 @@ namespace Xamarin.ExposureNotifications
 
 		static Task<IEnumerable<TemporaryExposureKey>> PlatformGetTemporaryExposureKeys()
 			=> throw new PlatformNotSupportedException();
+
+		static Task<Status> PlatformGetStatusAsync()
+			=> throw new PlatformNotSupportedException();
 	}
 }
