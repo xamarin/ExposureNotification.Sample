@@ -100,14 +100,14 @@ namespace Xamarin.ExposureNotifications
 			=> ResolveApi<object>(requestCodeStartExposureNotification, async () =>
 				{
 					await Instance.StartAsync();
-					return null;
+					return default;
 				});
 
 		static Task PlatformStop()
 			=> ResolveApi<object>(requestCodeStartExposureNotification, async () =>
 				{
 					await Instance.StopAsync();
-					return null;
+					return default;
 				});
 
 		static Task<bool> PlatformIsEnabled()
