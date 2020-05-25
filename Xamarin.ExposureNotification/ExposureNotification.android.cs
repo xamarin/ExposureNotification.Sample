@@ -8,6 +8,11 @@ using Android.Gms.Nearby.ExposureNotification;
 using Nearby = Android.Gms.Nearby.NearbyClass;
 using AndroidRiskLevel = Android.Gms.Nearby.ExposureNotification.RiskLevel;
 using AndroidX.Work;
+using Android.Gms.Common.Apis;
+using Android.Gms.Nearby.Connection;
+using Android.Runtime;
+using Java.Nio.FileNio;
+
 
 [assembly: UsesPermission(Android.Manifest.Permission.Bluetooth)]
 
@@ -18,7 +23,7 @@ namespace Xamarin.ExposureNotifications
 		static IExposureNotificationClient instance;
 
 		static IExposureNotificationClient Instance
-			=> instance ??= Nearby.GetExposureNotificationClient(Application.Context);
+			=> instance ??= Nearby.GetExposureNotificationClient(Xamarin.Essentials.Platform.CurrentActivity);
 
 		static async Task<ExposureConfiguration> GetConfigurationAsync()
 		{
@@ -37,14 +42,44 @@ namespace Xamarin.ExposureNotifications
 				.Build();
 		}
 
-		static Task PlatformStart()
-			=> Instance.StartAsync();
+		const int requestCodeStartExposureNotification = 1111;
+		//public static final int REQUEST_CODE_GET_TEMP_EXPOSURE_KEY_HISTORY = 2222;
+
+		static TaskCompletionSource<object> tcsResolveConnection;
+
+		static async Task PlatformStart()
+		{
+			try
+			{
+				await Instance.StartAsync();
+			}
+			catch (ApiException apiEx)
+			{
+				if (apiEx.StatusCode == 6) // Resolution required
+				{
+					tcsResolveConnection = new TaskCompletionSource<object>();
+
+					apiEx.JavaCast<ConnectionResolution>()
+						.Status.StartResolutionForResult(Essentials.Platform.CurrentActivity, requestCodeStartExposureNotification);
+
+					await tcsResolveConnection.Task;
+				}
+			}
+		}
+
+		public static void OnActivityResult(int requestCode, Result resultCode, global::Android.Content.Intent data)
+		{
+			if (resultCode == Result.Ok)
+				tcsResolveConnection?.TrySetResult(null);
+			else
+				tcsResolveConnection.TrySetException(new AccessDeniedException("Failed to resolve enabing Exposure Notifications"));
+		}
 
 		static Task PlatformStop()
 			=> Instance.StopAsync();
 
-		static async Task<bool> PlatformIsEnabled()
-			=> await Instance.IsEnabledAsync();
+		static Task<bool> PlatformIsEnabled()
+			=> Instance.IsEnabledAsync();
 
 		public static void ConfigureBackgroundWorkRequest(TimeSpan repeatInterval, Action<PeriodicWorkRequest.Builder> requestBuilder)
 		{
@@ -75,7 +110,7 @@ namespace Xamarin.ExposureNotifications
 				bgRepeatInterval);
 
 			bgRequestBuilder.Invoke(workRequestBuilder);
-			
+
 			var workRequest = workRequestBuilder.Build();
 
 			workManager.EnqueueUniquePeriodicWork("exposurenotification",
