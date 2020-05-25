@@ -4,7 +4,7 @@ on:
   pull_request:
   push:
   release:
-    types: [ published ]
+    types: [published]
 
 jobs:
     build:
@@ -15,14 +15,9 @@ jobs:
       steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: NuGet Restore
+        run: msbuild -t:Restore ./ExposureNotification.sln
       - name: Build
-        run: msbuild /restore ./ExposureNotification.sln
-
-    test:
-      name: Run Tests
-      runs-on: windows-latest  # using Windows to work around https://github.com/dotnet/runtime/issues/23635
-      steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+        run: msbuild -t:Build ./ExposureNotification.sln
       - name: Run Tests
-        run: dotnet test ./ExposureNotification.Backend.Functions.Tests/ExposureNotification.Backend.Functions.Tests.csproj
+        run: dotnet test ./ExposureNotification.Tests/ExposureNotification.Tests.csproj

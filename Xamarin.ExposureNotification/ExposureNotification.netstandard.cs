@@ -15,16 +15,13 @@ namespace Xamarin.ExposureNotifications
 		static Task<bool> PlatformIsEnabled()
 			=> throw new PlatformNotSupportedException();
 
-		static Task PlatformScheduleFetch()
+		static async Task PlatformScheduleFetch()
 			=> throw new PlatformNotSupportedException();
 
 		static Task<(ExposureDetectionSummary, IEnumerable<ExposureInfo>)> PlatformDetectExposuresAsync(IEnumerable<TemporaryExposureKey> diagnosisKeys)
 			=> throw new PlatformNotSupportedException();
 
 		static Task<IEnumerable<TemporaryExposureKey>> PlatformGetTemporaryExposureKeys()
-			=> throw new PlatformNotSupportedException();
-
-		static Task<Status> PlatformGetStatusAsync()
 			=> throw new PlatformNotSupportedException();
 	}
 }

@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Google.Protobuf;
+using Xamarin.Essentials;
 
 namespace Xamarin.ExposureNotifications
 {
@@ -79,58 +82,42 @@ namespace Xamarin.ExposureNotifications
 		// Call this when the app needs to update the local keys
 		public static async Task<bool> UpdateKeysFromServer()
 		{
-			var processedAnyFiles = false;
+			using var batches = new TemporaryExposureKeyBatches();
 
-			await Handler?.FetchExposureKeyBatchFilesFromServerAsync(async downloadedFiles =>
+			await Handler?.FetchExposureKeysFromServerAsync(batches);
+
+			if (!batches.Files.Any())
+				return false;
+
+			if (nativeImplementation != null)
 			{
-				if (!downloadedFiles.Any())
-					return;
+				var r = await nativeImplementation.DetectExposuresAsync(batches);
 
-				if (nativeImplementation != null)
-				{
-					var r = await nativeImplementation.DetectExposuresAsync(downloadedFiles);
+				var hasMatches = (r.summary?.MatchedKeyCount ?? 0) > 0;
 
-					var hasMatches = (r.summary?.MatchedKeyCount ?? 0) > 0;
+				if (hasMatches)
+					await Handler.ExposureDetectedAsync(r.summary, r.info);
 
-					if (hasMatches)
-						await Handler.ExposureDetectedAsync(r.summary, r.info);
-				}
-				else
-				{
+				return true;
+			}
+
 #if __IOS__
-					// On iOS we need to check this ourselves and invoke the handler
-					var (summary, info) = await PlatformDetectExposuresAsync(downloadedFiles);
+			// On iOS we need to check this ourselves and invoke the handler
+			var (summary, info) = await PlatformDetectExposuresAsync(batches.Files);
 
-					// Check that the summary has any matches before notifying the callback
-					if (summary?.MatchedKeyCount > 0)
-						await Handler.ExposureDetectedAsync(summary, info);
+			// Check that the summary has any matches before notifying the callback
+			if (summary?.MatchedKeyCount > 0)
+				await Handler.ExposureDetectedAsync(summary, info);
 #elif __ANDROID__
-					// on Android this will happen in the broadcast receiver
-					await PlatformDetectExposuresAsync(downloadedFiles);
+			// on Android this will happen in the broadcast receiver
+			await PlatformDetectExposuresAsync(batches.Files);
 #endif
-				}
 
-				processedAnyFiles = true;
-			});
-
-			return processedAnyFiles;
+			return true;
 		}
 
 		internal static Task<IEnumerable<TemporaryExposureKey>> GetSelfTemporaryExposureKeysAsync()
 			=> nativeImplementation != null ? nativeImplementation.GetSelfTemporaryExposureKeysAsync() : PlatformGetTemporaryExposureKeys();
-
-		public static Task<Status> GetStatusAsync()
-			=> nativeImplementation != null ? nativeImplementation.GetStatusAsync() : PlatformGetStatusAsync();
-	}
-
-	public enum Status
-	{
-		Unknown,
-		Disabled,
-		Active,
-		BluetoothOff,
-		Restricted,
-		NotAuthorized
 	}
 
 	public class Configuration

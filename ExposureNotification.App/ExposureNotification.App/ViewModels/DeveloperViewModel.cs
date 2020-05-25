@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Text;
+using System.Windows.Input;
 using Acr.UserDialogs;
 using ExposureNotification.App.Services;
 using MvvmHelpers.Commands;
@@ -11,17 +12,17 @@ namespace ExposureNotification.App.ViewModels
 	public class DeveloperViewModel : ViewModelBase
 	{
 		public DeveloperViewModel()
-		{
+        {
 
-		}
+        }
 
 		public string NativeImplementationName
 			=> Xamarin.ExposureNotifications.ExposureNotification.OverridesNativeImplementation
 				? "TEST" : "LIVE";
-
+        
 		public string CurrentBatchFileIndex
-			=> string.Join(", ", LocalStateManager.Instance.ServerBatchNumbers.Select(p => $"{p.Key}={p.Value}"));
-
+			=> LocalStateManager.Instance.ServerBatchNumber.ToString();
+      
 		public AsyncCommand ResetSelfDiagnosis
 			=> new AsyncCommand(() =>
 			{
@@ -80,7 +81,7 @@ namespace ExposureNotification.App.ViewModels
 		public AsyncCommand ResetBatchFileIndex
 			=> new AsyncCommand(() =>
 			{
-				LocalStateManager.Instance.ServerBatchNumbers = new Dictionary<string, ulong>(LocalState.DefaultServerBatchNumbers);
+				LocalStateManager.Instance.ServerBatchNumber = 0;
 				LocalStateManager.Save();
 				OnPropertyChanged(nameof(CurrentBatchFileIndex));
 				return UserDialogs.Instance.AlertAsync("Reset Batch file index!");
@@ -96,5 +97,6 @@ namespace ExposureNotification.App.ViewModels
 					OnPropertyChanged(nameof(CurrentBatchFileIndex));
 				}
 			});
+
 	}
 }

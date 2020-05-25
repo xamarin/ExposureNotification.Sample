@@ -69,14 +69,13 @@
     </PackageReference>
     <PackageReference Include="Plugin.LocalNotification" Version="5.0.3" />
     <PackageReference Include="Xamarin.AndroidX.Work.Runtime" Version="2.3.4.1" />
-    <PackageReference Include="Xamarin.GooglePlayServices.SafetyNet" Version="117.0.0-preview02" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Services\SafetyNetAttestor.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\AboutResources.txt" />
     <None Include="Properties\AndroidManifest.xml" />
   </ItemGroup>
   <ItemGroup>
@@ -100,10 +99,6 @@
     <Folder Include="Resources\drawable\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\ExposureNotification.Backend.Network\ExposureNotification.Backend.Network.csproj">
-      <Project>{2943B7AC-B244-40A4-A6CC-A671D772EE75}</Project>
-      <Name>ExposureNotification.Backend.Network</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\Xamarin.ExposureNotification\Xamarin.ExposureNotification.csproj">
       <Project>{455bd53e-c845-4530-be1f-27e871c256fe}</Project>
       <Name>Xamarin.ExposureNotification</Name>

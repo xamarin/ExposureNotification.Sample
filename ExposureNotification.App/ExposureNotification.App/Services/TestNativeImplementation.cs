@@ -1,5 +1,4 @@
-﻿#if DEBUG
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xamarin.Essentials;
@@ -44,10 +43,7 @@ namespace ExposureNotification.App.Services
 			return keys;
 		}
 
-		public Task<Status> GetStatusAsync()
-			=> Task.FromResult(Preferences.Get("fake_enabled", false) ? Status.Active : Status.Disabled);
-
-		public Task<(ExposureDetectionSummary summary, IEnumerable<ExposureInfo> info)> DetectExposuresAsync(IEnumerable<string> files)
+		public Task<(ExposureDetectionSummary summary, IEnumerable<ExposureInfo> info)> DetectExposuresAsync(TemporaryExposureKeyBatches batches)
 		{
 			var summary = new ExposureDetectionSummary(10, 2, 5);
 
@@ -73,4 +69,3 @@ namespace ExposureNotification.App.Services
 		}
 	}
 }
-#endif

@@ -14,7 +14,7 @@ using Android.Content.Res;
 
 namespace ExposureNotification.App.Droid
 {
-	[Activity(Label = "Exposure Notifications", Icon = "@mipmap/icon", Theme = "@style/MainTheme",
+	[Activity(Label = "Exposure Notifications", Icon = "@mipmap/icon", Theme = "@style/MainTheme", 
 		MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.UiMode | ConfigChanges.Orientation)]
 	public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
 	{
@@ -51,17 +51,10 @@ namespace ExposureNotification.App.Droid
 			base.OnNewIntent(intent);
 		}
 
-		public override void OnConfigurationChanged(Configuration newConfig)
-		{
+        public override void OnConfigurationChanged(Configuration newConfig)
+        {
 			ThemeHelper.ChangeTheme();
-			base.OnConfigurationChanged(newConfig);
-		}
-
-		protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
-		{
-			base.OnActivityResult(requestCode, resultCode, data);
-
-			Xamarin.ExposureNotifications.ExposureNotification.OnActivityResult(requestCode, resultCode, data);
-		}
-	}
+            base.OnConfigurationChanged(newConfig);
+        }
+    }
 }

@@ -1,136 +1,93 @@
 using System;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
-using ExposureNotification.Backend.Database;
-using ExposureNotification.Backend.Signing;
-using Microsoft.AspNetCore.Http;
+using Google.Protobuf;
 using Microsoft.Azure.Storage;
 using Microsoft.Azure.Storage.Blob;
 using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using Xamarin.ExposureNotifications;
 
 namespace ExposureNotification.Backend.Functions
 {
-	public class CreateBatchesFunction
+	public static class CreateBatchesFunction
 	{
-		const string dirNumberMetadataKey = "dir_number";
 		const string batchNumberMetadataKey = "batch_number";
 		const string batchRegionMetadataKey = "batch_region";
 
-		readonly ExposureNotificationStorage storage;
-		readonly IOptions<Settings> settings;
-
-		public CreateBatchesFunction(ExposureNotificationStorage storage, IOptions<Settings> settings)
-		{
-			this.storage = storage;
-			this.settings = settings;
-		}
-
 		// Every 6 hours
-		[FunctionName("CreateBatchesTimed")]
-		public Task RunTimed([TimerTrigger("0 0 */6 * * *")] TimerInfo myTimer, ILogger logger)
+		[FunctionName("CreateBatchesFunction")]
+		public static async Task Run([TimerTrigger("0 0 */6 * * *")]TimerInfo myTimer, ILogger log)
 		{
-			logger.LogInformation("Starting timed batching...");
-
-			return CreateBatchFiles(logger);
-		}
-
-		// On demand
-		[FunctionName("CreateBatchesOnDemand")]
-		public Task RunRequest([HttpTrigger(AuthorizationLevel.Function, "get", Route = "manage/start-batch")] HttpRequest req, ILogger logger)
-		{
-			logger.LogInformation("Starting on-demand batching...");
-
-			return CreateBatchFiles(logger);
-		}
-
-		async Task CreateBatchFiles(ILogger logger)
-		{
-			var supportedRegions = settings.Value.SupportedRegions;
-			if (supportedRegions?.Any() != true)
-				logger.LogWarning("No supported regions.");
-
-			var cloudStorageAccount = CloudStorageAccount.Parse(settings.Value.BlobStorageConnectionString);
+			var cloudStorageAccount = CloudStorageAccount.Parse(Startup.BlobStorageConnectionString);
 			var cloudBlobClient = cloudStorageAccount.CreateCloudBlobClient();
 
-			foreach (var region in supportedRegions)
+			foreach (var region in Startup.ExposureKeyRegions)
 			{
-				if (!await storage.HasKeysAsync(region))
-				{
-					logger.LogInformation("No keys found for region '{0}'.", region);
-					continue;
-				}
-
 				// We base the container name off a global configurable prefix
 				// and also the region name, so we end up having one container per
 				// region which can help with azure scaling/region allocation
-				var containerName = $"{settings.Value.BlobStorageContainerNamePrefix}{region.ToLowerInvariant()}";
+				var containerName = $"{Startup.BlobStorageContainerNamePrefix}{region}";
 
-				logger.LogInformation("Batch may be saved to container '{0}'.", containerName);
-
-				// Get our container
 				var cloudBlobContainer = cloudBlobClient.GetContainerReference(containerName);
 
 				// Make sure the container exists
 				await cloudBlobContainer.CreateIfNotExistsAsync(BlobContainerPublicAccessType.Blob, new BlobRequestOptions(), new OperationContext());
 
-				// Find all the root level directories
-				var rootBlobs = cloudBlobContainer.ListBlobs()
-					.Where(b => string.IsNullOrEmpty(b.Parent?.Prefix))
-					.OfType<CloudBlobDirectory>()
-					.ToList();
+				// Look at existing batch files
+				var existingFiles = await cloudBlobContainer.ListBlobsSegmentedAsync(string.Empty, true, BlobListingDetails.Metadata, null, null, null, null);
 
-				var highestDirNumber = 0;
+				// Start at batch number 1, and increment as we find files for newer batches
+				var nextBatchNumber = 1;
 
-				foreach (var rb in rootBlobs)
+				foreach (var blob in existingFiles.Results)
 				{
-					var trimmedPrefix = rb.Prefix.Trim('/');
-
-					if (trimmedPrefix.Contains('/'))
-						continue;
-
-					if (int.TryParse(trimmedPrefix, out var num))
-						highestDirNumber = Math.Max(highestDirNumber, num);
+					if (blob is CloudBlockBlob blockBlob)
+					{
+						// Batch number is stored as metadata (but also is the filename)
+						if (int.TryParse(blockBlob.Metadata[batchNumberMetadataKey], out var bn))
+						{
+							var potentialNext = bn + 1;
+							if (potentialNext > nextBatchNumber)
+								nextBatchNumber = potentialNext;
+						}
+					}
 				}
 
-				// Actual next is plus one
-				var nextDirNumber = highestDirNumber + 1;
+				// Keep track of number of keys in each batch request
+				var keysInBatch = 0;
 
-				logger.LogInformation("Batch may be saved to path '{0}/{1}'.", containerName, nextDirNumber);
-
-				// Load all signer infos
-				var signerInfos = await storage.GetAllSignerInfosAsync();
-
-				// Create batch files from all the keys in the database
-				var batchFileCount = await storage.CreateBatchFilesAsync(region, async export =>
+				do
 				{
-					// Don't process a batch without keys
-					if (export == null || (export.Keys != null && export.Keys.Count() <= 0))
+					keysInBatch = await Startup.Database.GetNextBatchAsync(nextBatchNumber, region, async batchFile =>
 					{
-						logger.LogWarning("For some reason, a batch was started when there were no keys to put in that batch...");
-						return;
-					}
+						// Don't process a batch without keys
+						if (batchFile == null || (batchFile.Key != null && batchFile.Key.Count() <= 0))
+							return;
 
-					// Filename is inferable as batch number
-					var batchFileName = $"{nextDirNumber}/{export.BatchNum}.dat";
+						// Filename is inferable as batch number
+						var batchFileName = $"{nextBatchNumber}.dat";
 
-					var blockBlob = cloudBlobContainer.GetBlockBlobReference(batchFileName);
+						var blockBlob = cloudBlobContainer.GetBlockBlobReference(batchFileName);
 
-					// Write the proto buf to a memory stream
-					using var signedFileStream = await ExposureBatchFileUtil.CreateSignedFileAsync(export, signerInfos);
+						// Write the proto buf to a memory stream
+						using var memoryStream = new MemoryStream();
+						batchFile.WriteTo(memoryStream);
+						memoryStream.Seek(0, SeekOrigin.Begin);
 
-					// Set the batch number and region as metadata
-					blockBlob.Metadata[dirNumberMetadataKey] = nextDirNumber.ToString();
-					blockBlob.Metadata[batchNumberMetadataKey] = export.BatchNum.ToString();
-					blockBlob.Metadata[batchRegionMetadataKey] = region;
+						// Set the batch number and region as metadata
+						blockBlob.Metadata[batchNumberMetadataKey] = nextBatchNumber.ToString();
+						blockBlob.Metadata[batchRegionMetadataKey] = region;
 
-					await blockBlob.UploadFromStreamAsync(signedFileStream);
-					await blockBlob.SetMetadataAsync();
-				});
+						await blockBlob.UploadFromStreamAsync(memoryStream);
+						await blockBlob.SetMetadataAsync();
+					});
 
-				logger.LogInformation("Saved {0} batch files of keys to '{1}/{2}'.", batchFileCount, containerName, nextDirNumber);
+					nextBatchNumber++;
+				} // While we have a full batch, there might be more so request more
+				while (keysInBatch >= TemporaryExposureKeyBatches.MaxKeysPerFile);
 			}
 		}
 	}

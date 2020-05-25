@@ -1,13 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace ExposureNotification.Backend.Database
+namespace ExposureNotification.Backend
 {
-	public class ExposureNotificationContext : DbContext
+	class ExposureNotificationContext : DbContext
 	{
-		public ExposureNotificationContext()
-		{
-		}
-
 		public ExposureNotificationContext(DbContextOptions options)
 			: base(options)
 		{

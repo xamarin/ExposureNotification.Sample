@@ -1,25 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using ExposureNotification.App.Services;
-using ExposureNotification.Backend.Network;
 using Newtonsoft.Json;
 using Plugin.LocalNotification;
-using Xamarin.Essentials;
 using Xamarin.ExposureNotifications;
 using Xamarin.Forms;
+using Xamarin.Forms.Internals;
 
 namespace ExposureNotification.App
 {
-	[Xamarin.Forms.Internals.Preserve] // Ensure this isn't linked out
+	[Preserve] // Ensure this isn't linked out
 	public class ExposureNotificationHandler : IExposureNotificationHandler
 	{
-		const string apiUrlBase = "http://10.0.2.2:7071/api/";
-		const string apiUrlBlobStorageBase = "http://10.0.2.2:10000/devstoreaccount1";
-		const string blobStorageContainerNamePrefix = "region-";
+		public const string DefaultRegion = "default";
+
+		const string apiUrlBase = "https://exposurenotificationfunctions.azurewebsites.net/api/";
+		const string apiUrlBlobStorageBase = "https://exposurenotifications.blob.core.windows.net/";
+		const string blobStorageContainerNamePrefix = "";
 
 		static readonly HttpClient http = new HttpClient();
 
@@ -56,103 +55,64 @@ namespace ExposureNotification.App
 		}
 
 		// this will be called when they keys need to be collected from the server
-		public async Task FetchExposureKeyBatchFilesFromServerAsync(Func<IEnumerable<string>, Task> submitBatches)
+		public async Task FetchExposureKeysFromServerAsync(ITemporaryExposureKeyBatches batches)
 		{
 			// This is "default" by default
-			var rightNow = DateTimeOffset.UtcNow;
+			var region = LocalStateManager.Instance.Region ?? DefaultRegion;
 
-			try
+			var checkForMore = true;
+			do
 			{
-				foreach (var serverRegion in LocalStateManager.Instance.ServerBatchNumbers.ToArray())
+				try
 				{
-					// Find next directory to start checking
-					var dirNumber = serverRegion.Value + 1;
+					// Find next batch number
+					var batchNumber = LocalStateManager.Instance.ServerBatchNumber + 1;
 
-					// For all the directories
-					while (true)
-					{
-						// Download all the files for this directory
-						var (batchNumber, downloadedFiles) = await DownloadBatchAsync(serverRegion.Key, dirNumber);
-						if (batchNumber == 0)
-							break;
-
-						// Process the current directory, if there were any files
-						if (downloadedFiles.Count > 0)
-						{
-							await submitBatches(downloadedFiles);
-
-							// delete all temporary files
-							foreach (var file in downloadedFiles)
-							{
-								try
-								{
-									File.Delete(file);
-								}
-								catch
-								{
-									// no-op
-								}
-							}
-						}
-
-						// Update the preferences
-						LocalStateManager.Instance.ServerBatchNumbers[serverRegion.Key] = dirNumber;
-						LocalStateManager.Save();
-
-						dirNumber++;
-					}
-				}
-			}
-			catch (Exception ex)
-			{
-				// any expections, bail out and wait for the next time
-
-				// TODO: log the error on some server!
-				Console.WriteLine(ex);
-			}
-
-			async Task<(int, List<string>)> DownloadBatchAsync(string region, ulong dirNumber)
-			{
-				var downloadedFiles = new List<string>();
-				var batchNumber = 0;
-
-				// For all the batches in a directory
-				while (true)
-				{
 					// Build the blob storage url for the given batch file we are on next
-					var url = $"{apiUrlBlobStorageBase}/{blobStorageContainerNamePrefix}{region.ToLowerInvariant()}/{dirNumber}/{batchNumber + 1}.dat";
+					var url = $"{apiUrlBlobStorageBase}/{blobStorageContainerNamePrefix}{region}/{batchNumber}.dat";
 
 					var response = await http.GetAsync(url);
 
 					// If we get a 404, there are no newer batch files available to download
 					if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+					{
+						checkForMore = false;
 						break;
+					}
 
 					response.EnsureSuccessStatusCode();
 
 					// Skip batch files which are older than 14 days
-					if (response.Content.Headers.LastModified.HasValue && response.Content.Headers.LastModified < rightNow.AddDays(-14))
+					if (response.Content.Headers.LastModified.HasValue)
 					{
-						// If the first one is too old, the fake download it and pretend there was only one
-						// We can do this because each batch was created at the same time
-						batchNumber++;
-						break;
+						if (response.Content.Headers.LastModified < DateTimeOffset.UtcNow.AddDays(-14))
+						{
+							LocalStateManager.Instance.ServerBatchNumber = batchNumber;
+							LocalStateManager.Save();
+							checkForMore = true;
+							continue;
+						}
 					}
 
-					var tmpFile = Path.Combine(FileSystem.CacheDirectory, Guid.NewGuid().ToString() + ".zip");
-
-					// Read the batch file stream into a temporary file
+					// Read the batch file stream
 					using var responseStream = await response.Content.ReadAsStreamAsync();
-					using var fileStream = File.Create(tmpFile);
-					await responseStream.CopyToAsync(fileStream);
 
-					downloadedFiles.Add(tmpFile);
+					// Parse into a Proto.File
+					var batchFile = TemporaryExposureKeyBatch.Parser.ParseFrom(responseStream);
 
-					batchNumber++;
+					// Submit to the batch processor
+					await batches.AddBatchAsync(batchFile);
+
+					// Update the number we are on
+					LocalStateManager.Instance.ServerBatchNumber = batchNumber;
+					LocalStateManager.Save();
 				}
-
-				return (batchNumber, downloadedFiles);
-			}
+				catch (Exception ex)
+				{
+					Console.WriteLine(ex);
+					checkForMore = false;
+				}
+			} while (checkForMore);
 		}
 
 		// this will be called when the user is submitting a diagnosis and the local keys need to go to the server
@@ -163,49 +123,63 @@ namespace ExposureNotification.App
 			if (pendingDiagnosis == null || string.IsNullOrEmpty(pendingDiagnosis.DiagnosisUid))
 				throw new InvalidOperationException();
 
-			var selfDiag = await CreateSubmissionAsync();
-
-			var url = $"{apiUrlBase.TrimEnd('/')}/selfdiagnosis";
-
-			var json = JsonConvert.SerializeObject(selfDiag);
-
-			using var http = new HttpClient();
-			var response = await http.PutAsync(url, new StringContent(json));
-
-			response.EnsureSuccessStatusCode();
-
-			// Update pending status
-			pendingDiagnosis.Shared = true;
-			LocalStateManager.Save();
-
-			async Task<SelfDiagnosisSubmission> CreateSubmissionAsync()
+			try
 			{
-				// Create the network keys
-				var keys = temporaryExposureKeys.Select(k => new ExposureKey
+				var url = $"{apiUrlBase.TrimEnd('/')}/selfdiagnosis";
+
+				var json = JsonConvert.SerializeObject(new SelfDiagnosisSubmissionRequest
 				{
-					Key = Convert.ToBase64String(k.Key),
-					RollingStart = (long)(k.RollingStart - DateTime.UnixEpoch).TotalMinutes / 10,
-					RollingDuration = (int)(k.RollingDuration.TotalMinutes / 10),
-					TransmissionRisk = (int)k.TransmissionRiskLevel
+					DiagnosisUid = pendingDiagnosis.DiagnosisUid,
+					TestDate = pendingDiagnosis.DiagnosisDate.ToUnixTimeMilliseconds(),
+					Keys = temporaryExposureKeys
 				});
 
-				// Create the submission
-				var submission = new SelfDiagnosisSubmission(true)
-				{
-					AppPackageName = AppInfo.PackageName,
-					DeviceVerificationPayload = null,
-					Platform = DeviceInfo.Platform.ToString().ToLowerInvariant(),
-					Regions = LocalStateManager.Instance.ServerBatchNumbers.Keys.ToArray(),
-					Keys = keys.ToArray(),
-					VerificationPayload = pendingDiagnosis.DiagnosisUid,
-				};
+				var http = new HttpClient();
+				var response = await http.PutAsync(url, new StringContent(json));
 
-				// See if we can add the device verification
-				if (DependencyService.Get<IDeviceVerifier>() is IDeviceVerifier verifier)
-					submission.DeviceVerificationPayload = await verifier?.VerifyAsync(submission);
+				response.EnsureSuccessStatusCode();
 
-				return submission;
+				// Update pending status
+				pendingDiagnosis.Shared = true;
+				LocalStateManager.Save();
 			}
+			catch
+			{
+				throw;
+			}
+		}
+
+		internal static async Task<bool> VerifyDiagnosisUid(string diagnosisUid)
+		{
+			var url = $"{apiUrlBase.TrimEnd('/')}/selfdiagnosis";
+
+			var http = new HttpClient();
+
+			try
+			{
+				var json = "{\"diagnosisUid\":\"" + diagnosisUid + "\"}";
+				var response = await http.PostAsync(url, new StringContent(json));
+
+				response.EnsureSuccessStatusCode();
+
+				return true;
+			}
+			catch
+			{
+				return false;
+			}
+		}
+
+		class SelfDiagnosisSubmissionRequest
+		{
+			[JsonProperty("diagnosisUid")]
+			public string DiagnosisUid { get; set; }
+
+			[JsonProperty("testDate")]
+			public long TestDate { get; set; }
+
+			[JsonProperty("keys")]
+			public IEnumerable<TemporaryExposureKey> Keys { get; set; }
 		}
 	}
 }
