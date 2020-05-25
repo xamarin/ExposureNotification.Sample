@@ -159,5 +159,7 @@ namespace Xamarin.ExposureNotifications
 		// Scores assigned to each range of days of exposure
 		// >= 14days, 13-12, 11-10, 9-8, 7-6, 5-4, 3-2, 1-0
 		public int[] DaysSinceLastExposureScores { get; set; } = new[] { 4, 4, 4, 4, 4, 4, 4, 4 };
+
+		public int[] DurationAtAttenuationThresholds { get; set; } = new[] { 50, 70 };
 	}
 }

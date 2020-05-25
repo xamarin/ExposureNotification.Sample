@@ -30,7 +30,7 @@ namespace Xamarin.ExposureNotifications
 		{
 			var c = await Handler.GetConfigurationAsync();
 
-			return new ENExposureConfiguration
+			var nc = new ENExposureConfiguration
 			{
 				AttenuationLevelValues = c.AttenuationScores,
 				DurationLevelValues = c.DurationScores,
@@ -40,8 +40,12 @@ namespace Xamarin.ExposureNotifications
 				DaysSinceLastExposureWeight = c.DaysSinceLastExposureWeight,
 				DurationWeight = c.DurationWeight,
 				TransmissionRiskWeight = c.TransmissionWeight,
-				MinimumRiskScore = (byte)c.MinimumRiskScore
+				MinimumRiskScore = (byte)c.MinimumRiskScore,				
 			};
+
+			nc.SetValueForKey(
+				NSArray.FromObjects(c.DurationAtAttenuationThresholds.ToArray()),
+				new NSString("attenuationDurationThresholds"));
 		}
 
 		static async Task PlatformStart()

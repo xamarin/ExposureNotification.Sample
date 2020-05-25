@@ -41,6 +41,7 @@ namespace Xamarin.ExposureNotifications
 				.SetDurationWeight(c.DurationWeight)
 				.SetTransmissionRiskWeight(c.TransmissionWeight)
 				.SetMinimumRiskScore(c.MinimumRiskScore)
+				.SetDurationAtAttenuationThresholds(c.DurationAtAttenuationThresholds)
 				.Build();
 		}
 
