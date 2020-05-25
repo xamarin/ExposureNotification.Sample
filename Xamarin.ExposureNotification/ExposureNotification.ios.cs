@@ -46,6 +46,8 @@ namespace Xamarin.ExposureNotifications
 			nc.SetValueForKey(
 				NSArray.FromObjects(c.DurationAtAttenuationThresholds.ToArray()),
 				new NSString("attenuationDurationThresholds"));
+
+			return nc;
 		}
 
 		static async Task PlatformStart()
