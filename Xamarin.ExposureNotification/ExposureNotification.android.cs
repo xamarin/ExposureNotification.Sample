@@ -73,16 +73,22 @@ namespace Xamarin.ExposureNotifications
 				{
 					tcsResolveConnection = new TaskCompletionSource<object>();
 
+					// Look up the property if it's null
 					apiExceptionMStatusPropertyInfo ??=
 						apiEx.GetType().GetProperty("MStatus", BindingFlags.Instance | BindingFlags.NonPublic);
 
+					// Get the mStatus field from the java object using reflection since it's a protected property
 					var val = (Java.Lang.Object)apiExceptionMStatusPropertyInfo.GetValue(apiEx);
+					// Get the actual Statuses object back
 					var statuses = val.JavaCast<Statuses>();
 
+					// Start the resolution
 					statuses.StartResolutionForResult(Essentials.Platform.CurrentActivity, requestCode);
 
+					// Wait for the activity result to be called
 					await tcsResolveConnection.Task;
 
+					// Try the original api call again
 					return await apiCall();
 				}
 			}
