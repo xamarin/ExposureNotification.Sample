@@ -91,16 +91,16 @@ namespace Xamarin.ExposureNotifications
 		}
 
 		static Task PlatformStart()
-			=> ResolveApi<object>(() =>
+			=> ResolveApi<object>(async () =>
 				{
-					Instance.StartAsync();
+					await Instance.StartAsync();
 					return null;
 				});
 
 		static Task PlatformStop()
-			=> ResolveApi<object>(() =>
+			=> ResolveApi<object>(async () =>
 				{
-					Instance.StopAsync();
+					await Instance.StopAsync();
 					return null;
 				});
 
