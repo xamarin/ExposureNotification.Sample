@@ -159,7 +159,7 @@ namespace Xamarin.ExposureNotifications
 		}
 
 		// Tells the local API when new diagnosis keys have been obtained from the server
-		static async Task PlatformDetectExposuresAsync(IEnumerable<string> keyFiles, CancellationToken cancellationToken)
+		static async Task PlatformDetectExposuresAsync(IEnumerable<string> keyFiles, System.Threading.CancellationToken cancellationToken)
 		{
 			var config = await GetConfigurationAsync();
 
@@ -172,6 +172,13 @@ namespace Xamarin.ExposureNotifications
 		static Task<IEnumerable<TemporaryExposureKey>> PlatformGetTemporaryExposureKeys()
 			=> ResolveApi(requestCodeGetTempExposureKeyHistory, async () =>
 				{
+					var cts = new TaskCompletionSource<global::Android.Gms.Tasks.Task>();
+
+					var abc = Instance.NativeTemporaryExposureKeyHistory();
+					abc.AddOnCompleteListener(new Test(cts));
+
+					var a = await cts.Task;
+
 					var exposureKeyHistory = await Instance.GetTemporaryExposureKeyHistoryAsync();
 
 					return exposureKeyHistory.Select(k =>
@@ -181,6 +188,25 @@ namespace Xamarin.ExposureNotifications
 							TimeSpan.Zero, // TODO: TimeSpan.FromMinutes(k.RollingDuration * 10),
 							k.TransmissionRiskLevel.FromNative()));
 				});
+
+		class Test : Java.Lang.Object, global::Android.Gms.Tasks.IOnCompleteListener
+		{
+			private TaskCompletionSource<global::Android.Gms.Tasks.Task> cts;
+
+			public Test(TaskCompletionSource<global::Android.Gms.Tasks.Task> cts)
+			{
+				this.cts = cts;
+			}
+
+			public void OnComplete(global::Android.Gms.Tasks.Task task)
+			{
+				if (task.Exception != null)
+					cts.SetException(task.Exception);
+				else
+					cts.SetResult(task);
+			}
+		}
+
 
 		internal static async Task<IEnumerable<ExposureInfo>> PlatformGetExposureInformationAsync(string token)
 		{
