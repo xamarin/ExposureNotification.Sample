@@ -23,7 +23,7 @@ namespace ExposureNotification.App.ViewModels
 			}
 		}
 
-		public ObservableCollection<Xamarin.ExposureNotifications.ExposureInfo> ExposureInformation
+		public ObservableCollection<ExposureInfo> ExposureInformation
 			=> LocalStateManager.Instance.ExposureInformation;
 
 		public AsyncCommand<ExposureInfo> ExposureSelectedCommand => new AsyncCommand<ExposureInfo>((info) =>
