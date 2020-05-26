@@ -12,7 +12,7 @@ namespace Xamarin.ExposureNotifications
 		Task<Configuration> GetConfigurationAsync();
 
 		// Go fetch the keys from your server
-		Task FetchExposureKeyBatchFilesFromServerAsync(CancellationToken cancellationToken, Func<IEnumerable<string>, Task> submitBatches);
+		Task FetchExposureKeyBatchFilesFromServerAsync(Func<IEnumerable<string>, Task> submitBatches, CancellationToken cancellationToken);
 
 		// Might be exposed, check and alert user if necessary
 		Task ExposureDetectedAsync(ExposureDetectionSummary summary, IEnumerable<ExposureInfo> ExposureInfo);

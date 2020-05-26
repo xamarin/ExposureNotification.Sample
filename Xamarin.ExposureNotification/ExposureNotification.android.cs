@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Android.App;
 using Android.Bluetooth;
@@ -158,7 +159,7 @@ namespace Xamarin.ExposureNotifications
 		}
 
 		// Tells the local API when new diagnosis keys have been obtained from the server
-		static async Task PlatformDetectExposuresAsync(IEnumerable<string> keyFiles)
+		static async Task PlatformDetectExposuresAsync(IEnumerable<string> keyFiles, CancellationToken cancellationToken)
 		{
 			var config = await GetConfigurationAsync();
 

@@ -139,7 +139,7 @@ namespace Xamarin.ExposureNotifications
 		}
 
 		// Tells the local API when new diagnosis keys have been obtained from the server
-		static async Task<(ExposureDetectionSummary, IEnumerable<ExposureInfo>)> PlatformDetectExposuresAsync(IEnumerable<string> keyFiles)
+		static async Task<(ExposureDetectionSummary, IEnumerable<ExposureInfo>)> PlatformDetectExposuresAsync(IEnumerable<string> keyFiles, CancellationToken cancellationToken)
 		{
 			// Submit to the API
 			var c = await GetConfigurationAsync();
@@ -147,7 +147,9 @@ namespace Xamarin.ExposureNotifications
 
 			var detectionSummary = await m.DetectExposuresAsync(
 				c,
-				keyFiles.Select(k => new NSUrl(k, false)).ToArray());
+				keyFiles.Select(k => new NSUrl(k, false)).ToArray(),
+				out var detectProgress);
+			cancellationToken.Register(detectProgress.Cancel);
 
 			var summary = new ExposureDetectionSummary(
 				(int)detectionSummary.DaysSinceLastExposure,
@@ -158,7 +160,8 @@ namespace Xamarin.ExposureNotifications
 			IEnumerable<ExposureInfo> info = Array.Empty<ExposureInfo>();
 			if (summary?.MatchedKeyCount > 0)
 			{
-				var exposures = await m.GetExposureInfoAsync(detectionSummary, Handler.UserExplanation);
+				var exposures = await m.GetExposureInfoAsync(detectionSummary, Handler.UserExplanation, out var exposuresProgress);
+				cancellationToken.Register(exposuresProgress.Cancel);
 				info = exposures.Select(i => new ExposureInfo(
 					((DateTime)i.Date).ToLocalTime(),
 					TimeSpan.FromMinutes(i.Duration),

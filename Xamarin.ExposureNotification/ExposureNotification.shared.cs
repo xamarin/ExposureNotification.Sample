@@ -81,12 +81,14 @@ namespace Xamarin.ExposureNotifications
 		}
 
 		// Call this when the app needs to update the local keys
-		public static async Task<bool> UpdateKeysFromServer(CancellationToken cancellationToken)
+		public static async Task<bool> UpdateKeysFromServer(CancellationToken cancellationToken = default)
 		{
 			var processedAnyFiles = false;
 
-			await Handler?.FetchExposureKeyBatchFilesFromServerAsync(cancellationToken, async downloadedFiles =>
+			await Handler?.FetchExposureKeyBatchFilesFromServerAsync(async downloadedFiles =>
 			{
+				cancellationToken.ThrowIfCancellationRequested();
+
 				if (!downloadedFiles.Any())
 					return;
 
@@ -103,19 +105,19 @@ namespace Xamarin.ExposureNotifications
 				{
 #if __IOS__
 					// On iOS we need to check this ourselves and invoke the handler
-					var (summary, info) = await PlatformDetectExposuresAsync(downloadedFiles);
+					var (summary, info) = await PlatformDetectExposuresAsync(downloadedFiles, cancellationToken);
 
 					// Check that the summary has any matches before notifying the callback
 					if (summary?.MatchedKeyCount > 0)
 						await Handler.ExposureDetectedAsync(summary, info);
 #elif __ANDROID__
 					// on Android this will happen in the broadcast receiver
-					await PlatformDetectExposuresAsync(downloadedFiles);
+					await PlatformDetectExposuresAsync(downloadedFiles, cancellationToken);
 #endif
 				}
 
 				processedAnyFiles = true;
-			});
+			}, cancellationToken);
 
 			return processedAnyFiles;
 		}

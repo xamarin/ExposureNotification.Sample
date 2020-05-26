@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using ExposureNotification.App.Services;
 using ExposureNotification.Backend.Network;
@@ -56,7 +57,7 @@ namespace ExposureNotification.App
 		}
 
 		// this will be called when they keys need to be collected from the server
-		public async Task FetchExposureKeyBatchFilesFromServerAsync(Func<IEnumerable<string>, Task> submitBatches)
+		public async Task FetchExposureKeyBatchFilesFromServerAsync(Func<IEnumerable<string>, Task> submitBatches, CancellationToken cancellationToken)
 		{
 			// This is "default" by default
 			var rightNow = DateTimeOffset.UtcNow;
@@ -71,8 +72,10 @@ namespace ExposureNotification.App
 					// For all the directories
 					while (true)
 					{
+						cancellationToken.ThrowIfCancellationRequested();
+
 						// Download all the files for this directory
-						var (batchNumber, downloadedFiles) = await DownloadBatchAsync(serverRegion.Key, dirNumber);
+						var (batchNumber, downloadedFiles) = await DownloadBatchAsync(serverRegion.Key, dirNumber, cancellationToken);
 						if (batchNumber == 0)
 							break;
 
@@ -111,7 +114,7 @@ namespace ExposureNotification.App
 				Console.WriteLine(ex);
 			}
 
-			async Task<(int, List<string>)> DownloadBatchAsync(string region, ulong dirNumber)
+			async Task<(int, List<string>)> DownloadBatchAsync(string region, ulong dirNumber, CancellationToken cancellationToken)
 			{
 				var downloadedFiles = new List<string>();
 				var batchNumber = 0;
@@ -122,7 +125,7 @@ namespace ExposureNotification.App
 					// Build the blob storage url for the given batch file we are on next
 					var url = $"{apiUrlBlobStorageBase}/{blobStorageContainerNamePrefix}{region.ToLowerInvariant()}/{dirNumber}/{batchNumber + 1}.dat";
 
-					var response = await http.GetAsync(url);
+					var response = await http.GetAsync(url, cancellationToken);
 
 					// If we get a 404, there are no newer batch files available to download
 					if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
@@ -144,7 +147,7 @@ namespace ExposureNotification.App
 					// Read the batch file stream into a temporary file
 					using var responseStream = await response.Content.ReadAsStreamAsync();
 					using var fileStream = File.Create(tmpFile);
-					await responseStream.CopyToAsync(fileStream);
+					await responseStream.CopyToAsync(fileStream, cancellationToken);
 
 					downloadedFiles.Add(tmpFile);
 
