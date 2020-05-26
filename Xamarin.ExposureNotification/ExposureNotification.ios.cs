@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using BackgroundTasks;
 using ExposureNotifications;
 using Foundation;
+using UIKit;
 using Xamarin.Essentials;
 
 namespace Xamarin.ExposureNotifications
@@ -42,6 +43,10 @@ namespace Xamarin.ExposureNotifications
 				TransmissionRiskWeight = c.TransmissionWeight,
 				MinimumRiskScore = (byte)c.MinimumRiskScore
 			};
+		}
+
+		static void PlatformInit()
+		{
 		}
 
 		static async Task PlatformStart()
