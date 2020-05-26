@@ -100,6 +100,7 @@ namespace Xamarin.ExposureNotifications
 
 		static void PlatformInit()
 		{
+			_ = ScheduleFetchAsync();
 		}
 
 		static Task PlatformStart()
