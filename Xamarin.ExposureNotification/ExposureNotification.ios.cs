@@ -43,7 +43,7 @@ namespace Xamarin.ExposureNotifications
 				MinimumRiskScore = (byte)c.MinimumRiskScore,
 			};
 
-			nc.SetValueForKey(
+			nc.Metadata.SetValueForKey(
 				NSArray.FromObjects(c.DurationAtAttenuationThresholds.ToArray()),
 				new NSString("attenuationDurationThresholds"));
 
