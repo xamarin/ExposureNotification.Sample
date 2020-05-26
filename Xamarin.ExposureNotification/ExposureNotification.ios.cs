@@ -77,30 +77,58 @@ namespace Xamarin.ExposureNotifications
 
 			void scheduleBgTask()
 			{
+				if (ENManager.AuthorizationStatus != ENAuthorizationStatus.Authorized)
+					return;
+
 				var newBgTask = new BGProcessingTaskRequest(id);
 				newBgTask.RequiresNetworkConnectivity = true;
-				BGTaskScheduler.Shared.Submit(newBgTask, out _);
+				try
+				{
+					BGTaskScheduler.Shared.Submit(newBgTask, out var error);
+
+					if (error != null)
+						throw new NSErrorException(error);
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine($"[Xamarin.ExposureNotifications] There was an error submitting the background task: {ex}");
+				}
 			}
 
-			BGTaskScheduler.Shared.Register(id, null, async t =>
+			var isUpdating = false;
+			BGTaskScheduler.Shared.Register(id, null, task =>
 			{
-				if (await PlatformIsEnabled())
+				// Disallow concurrent exposure detection, because if allowed we might try to detect the same diagnosis keys more than once
+				if (isUpdating)
 				{
-					var cancelSrc = new CancellationTokenSource();
-					t.ExpirationHandler = cancelSrc.Cancel;
+					task.SetTaskCompleted(false);
+					return;
+				}
+				isUpdating = true;
 
-					Exception ex = null;
+				var cancelSrc = new CancellationTokenSource();
+				task.ExpirationHandler = cancelSrc.Cancel;
+
+				// Run the actual task on a background thread
+				Task.Run(async () =>
+				{
 					try
 					{
-						await ExposureNotification.UpdateKeysFromServer();
+						await UpdateKeysFromServer(cancelSrc.Token);
+						task.SetTaskCompleted(true);
 					}
-					catch (Exception e)
+					catch (OperationCanceledException)
 					{
-						ex = e;
+						Console.WriteLine($"[Xamarin.ExposureNotifications] Background task took too long to complete.");
+					}
+					catch (Exception ex)
+					{
+						Console.WriteLine($"[Xamarin.ExposureNotifications] There was an error running the background task: {ex}");
+						task.SetTaskCompleted(false);
 					}
 
-					t.SetTaskCompleted(ex != null);
-				}
+					isUpdating = false;
+				});
 
 				scheduleBgTask();
 			});

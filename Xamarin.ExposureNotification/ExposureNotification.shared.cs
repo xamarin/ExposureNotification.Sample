@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Xamarin.ExposureNotifications
@@ -80,11 +81,11 @@ namespace Xamarin.ExposureNotifications
 		}
 
 		// Call this when the app needs to update the local keys
-		public static async Task<bool> UpdateKeysFromServer()
+		public static async Task<bool> UpdateKeysFromServer(CancellationToken cancellationToken)
 		{
 			var processedAnyFiles = false;
 
-			await Handler?.FetchExposureKeyBatchFilesFromServerAsync(async downloadedFiles =>
+			await Handler?.FetchExposureKeyBatchFilesFromServerAsync(cancellationToken, async downloadedFiles =>
 			{
 				if (!downloadedFiles.Any())
 					return;
