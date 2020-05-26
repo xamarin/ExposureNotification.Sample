@@ -18,7 +18,7 @@ namespace ExposureNotification.App
 	[Xamarin.Forms.Internals.Preserve] // Ensure this isn't linked out
 	public class ExposureNotificationHandler : IExposureNotificationHandler
 	{
-		const string apiUrlBase = "http://exposurenotificationfunctions.azurewebsites.net/api/";
+		const string apiUrlBase = "https://exposurenotificationfunctions.azurewebsites.net/api/";
 		const string apiUrlBlobStorageBase = "https://exposurenotifications.blob.core.windows.net/";
 		const string blobStorageContainerNamePrefix = "region-";
 

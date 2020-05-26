@@ -173,14 +173,14 @@ namespace Xamarin.ExposureNotifications
 		static Task<IEnumerable<TemporaryExposureKey>> PlatformGetTemporaryExposureKeys()
 			=> ResolveApi(requestCodeGetTempExposureKeyHistory, async () =>
 				{
-					var cts = new TaskCompletionSource<global::Android.Gms.Tasks.Task>();
+					var tcs = new TaskCompletionSource<global::Android.Gms.Tasks.Task>();
 
-					var abc = Instance.NativeTemporaryExposureKeyHistory();
-					abc.AddOnCompleteListener(new Test(cts));
+					var task = Instance.NativeTemporaryExposureKeyHistory();
+					task.AddOnCompleteListener(new Test(tcs));
 
-					var a = await cts.Task;
+					var androidTask = await tcs.Task;
 
-					var exposureKeyHistory = await Instance.GetTemporaryExposureKeyHistoryAsync();
+					var exposureKeyHistory = androidTask.Result.JavaCast<JavaList<global::Android.Gms.Nearby.ExposureNotification.TemporaryExposureKey>>();
 
 					return exposureKeyHistory.Select(k =>
 						new TemporaryExposureKey(
@@ -192,22 +192,21 @@ namespace Xamarin.ExposureNotifications
 
 		class Test : Java.Lang.Object, global::Android.Gms.Tasks.IOnCompleteListener
 		{
-			private TaskCompletionSource<global::Android.Gms.Tasks.Task> cts;
+			readonly TaskCompletionSource<global::Android.Gms.Tasks.Task> tcs;
 
-			public Test(TaskCompletionSource<global::Android.Gms.Tasks.Task> cts)
+			public Test(TaskCompletionSource<global::Android.Gms.Tasks.Task> tcs)
 			{
-				this.cts = cts;
+				this.tcs = tcs;
 			}
 
 			public void OnComplete(global::Android.Gms.Tasks.Task task)
 			{
 				if (task.Exception != null)
-					cts.SetException(task.Exception);
+					tcs.SetException(task.Exception);
 				else
-					cts.SetResult(task);
+					tcs.SetResult(task);
 			}
 		}
-
 
 		internal static async Task<IEnumerable<ExposureInfo>> PlatformGetExposureInformationAsync(string token)
 		{
