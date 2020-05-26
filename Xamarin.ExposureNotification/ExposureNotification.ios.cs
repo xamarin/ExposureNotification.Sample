@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using BackgroundTasks;
 using ExposureNotifications;
 using Foundation;
+using UIKit;
 using Xamarin.Essentials;
 
 namespace Xamarin.ExposureNotifications
@@ -56,6 +57,11 @@ namespace Xamarin.ExposureNotifications
 			return nc;
 		}
 
+		static void PlatformInit()
+		{
+			_ = ScheduleFetchAsync();
+		}
+
 		static async Task PlatformStart()
 		{
 			var m = await GetManagerAsync();
@@ -74,7 +80,6 @@ namespace Xamarin.ExposureNotifications
 			return m.ExposureNotificationEnabled;
 		}
 
-
 		static Task PlatformScheduleFetch()
 		{
 			// This is a special ID suffix which iOS treats a certain way
@@ -82,32 +87,40 @@ namespace Xamarin.ExposureNotifications
 			// and iOS will throttle it sensibly for us.
 			var id = AppInfo.PackageName + ".exposure-notification";
 
-			void scheduleBgTask()
+			var isUpdating = false;
+			BGTaskScheduler.Shared.Register(id, null, task =>
 			{
-				var newBgTask = new BGProcessingTaskRequest(id);
-				newBgTask.RequiresNetworkConnectivity = true;
-				BGTaskScheduler.Shared.Submit(newBgTask, out _);
-			}
-
-			BGTaskScheduler.Shared.Register(id, null, async t =>
-			{
-				if (await PlatformIsEnabled())
+				// Disallow concurrent exposure detection, because if allowed we might try to detect the same diagnosis keys more than once
+				if (isUpdating)
 				{
-					var cancelSrc = new CancellationTokenSource();
-					t.ExpirationHandler = cancelSrc.Cancel;
+					task.SetTaskCompleted(false);
+					return;
+				}
+				isUpdating = true;
 
-					Exception ex = null;
+				var cancelSrc = new CancellationTokenSource();
+				task.ExpirationHandler = cancelSrc.Cancel;
+
+				// Run the actual task on a background thread
+				Task.Run(async () =>
+				{
 					try
 					{
-						await ExposureNotification.UpdateKeysFromServer();
+						await UpdateKeysFromServer(cancelSrc.Token);
+						task.SetTaskCompleted(true);
 					}
-					catch (Exception e)
+					catch (OperationCanceledException)
 					{
-						ex = e;
+						Console.WriteLine($"[Xamarin.ExposureNotifications] Background task took too long to complete.");
+					}
+					catch (Exception ex)
+					{
+						Console.WriteLine($"[Xamarin.ExposureNotifications] There was an error running the background task: {ex}");
+						task.SetTaskCompleted(false);
 					}
 
-					t.SetTaskCompleted(ex != null);
-				}
+					isUpdating = false;
+				});
 
 				scheduleBgTask();
 			});
@@ -115,10 +128,30 @@ namespace Xamarin.ExposureNotifications
 			scheduleBgTask();
 
 			return Task.CompletedTask;
+
+			void scheduleBgTask()
+			{
+				if (ENManager.AuthorizationStatus != ENAuthorizationStatus.Authorized)
+					return;
+
+				var newBgTask = new BGProcessingTaskRequest(id);
+				newBgTask.RequiresNetworkConnectivity = true;
+				try
+				{
+					BGTaskScheduler.Shared.Submit(newBgTask, out var error);
+
+					if (error != null)
+						throw new NSErrorException(error);
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine($"[Xamarin.ExposureNotifications] There was an error submitting the background task: {ex}");
+				}
+			}
 		}
 
 		// Tells the local API when new diagnosis keys have been obtained from the server
-		static async Task<(ExposureDetectionSummary, IEnumerable<ExposureInfo>)> PlatformDetectExposuresAsync(IEnumerable<string> keyFiles)
+		static async Task<(ExposureDetectionSummary, IEnumerable<ExposureInfo>)> PlatformDetectExposuresAsync(IEnumerable<string> keyFiles, CancellationToken cancellationToken)
 		{
 			// Submit to the API
 			var c = await GetConfigurationAsync();
@@ -126,7 +159,9 @@ namespace Xamarin.ExposureNotifications
 
 			var detectionSummary = await m.DetectExposuresAsync(
 				c,
-				keyFiles.Select(k => new NSUrl(k, false)).ToArray());
+				keyFiles.Select(k => new NSUrl(k, false)).ToArray(),
+				out var detectProgress);
+			cancellationToken.Register(detectProgress.Cancel);
 
 			var summary = new ExposureDetectionSummary(
 				(int)detectionSummary.DaysSinceLastExposure,
@@ -137,7 +172,8 @@ namespace Xamarin.ExposureNotifications
 			IEnumerable<ExposureInfo> info = Array.Empty<ExposureInfo>();
 			if (summary?.MatchedKeyCount > 0)
 			{
-				var exposures = await m.GetExposureInfoAsync(detectionSummary, Handler.UserExplanation);
+				var exposures = await m.GetExposureInfoAsync(detectionSummary, Handler.UserExplanation, out var exposuresProgress);
+				cancellationToken.Register(exposuresProgress.Cancel);
 				info = exposures.Select(i => new ExposureInfo(
 					((DateTime)i.Date).ToLocalTime(),
 					TimeSpan.FromMinutes(i.Duration),

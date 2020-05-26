@@ -1,10 +1,9 @@
-﻿using System.Threading.Tasks;
-using System.Windows.Input;
+﻿using System;
+using System.Threading.Tasks;
 using Acr.UserDialogs;
 using ExposureNotification.App.Services;
 using ExposureNotification.App.Views;
 using MvvmHelpers.Commands;
-using Xamarin.Forms;
 
 namespace ExposureNotification.App.ViewModels
 {
@@ -12,12 +11,14 @@ namespace ExposureNotification.App.ViewModels
 	{
 		public InfoViewModel()
 		{
-			Xamarin.ExposureNotifications.ExposureNotification.IsEnabledAsync()
-				.ContinueWith(async t =>
-				{
-					if (!t.Result)
-						await Disabled();
-				});
+			_ = Initialize();
+		}
+
+		async Task Initialize()
+		{
+			var enabled = await Xamarin.ExposureNotifications.ExposureNotification.IsEnabledAsync();
+			if (!enabled)
+				await Disabled();
 		}
 
 		Task Disabled()
@@ -34,13 +35,17 @@ namespace ExposureNotification.App.ViewModels
 			{
 				try
 				{
-					using (UserDialogs.Instance.Loading(string.Empty))
+					using (UserDialogs.Instance.Loading())
 					{
 						var enabled = await Xamarin.ExposureNotifications.ExposureNotification.IsEnabledAsync();
 
 						if (enabled)
 							await Xamarin.ExposureNotifications.ExposureNotification.StopAsync();
 					}
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine($"Error disabling notifications: {ex}");
 				}
 				finally
 				{

@@ -1,4 +1,5 @@
-﻿using ExposureNotification.App.Styles;
+﻿using System.Threading.Tasks;
+using ExposureNotification.App.Styles;
 using ExposureNotification.App.Views;
 using Plugin.LocalNotification;
 using Xamarin.Forms;
@@ -20,10 +21,18 @@ namespace ExposureNotification.App
 			// Local Notification tap event listener
 			NotificationCenter.Current.NotificationTapped += OnNotificationTapped;
 
-			// Initialize the library which schedules background tasks, etc
+			// Initialize the library
 			Xamarin.ExposureNotifications.ExposureNotification.Init();
 
 			MainPage = new AppShell();
+
+			_ = InitializeBackgroundTasks();
+		}
+
+		async Task InitializeBackgroundTasks()
+		{
+			if (await Xamarin.ExposureNotifications.ExposureNotification.IsEnabledAsync())
+				await Xamarin.ExposureNotifications.ExposureNotification.ScheduleFetchAsync();
 		}
 
 		void OnNotificationTapped(NotificationTappedEventArgs e)

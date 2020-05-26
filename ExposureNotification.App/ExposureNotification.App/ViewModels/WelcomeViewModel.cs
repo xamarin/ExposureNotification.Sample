@@ -1,9 +1,11 @@
-﻿using System.Windows.Input;
+﻿using System;
+using System.Threading.Tasks;
+using System.Windows.Input;
 using Acr.UserDialogs;
 using ExposureNotification.App.Services;
 using ExposureNotification.App.Views;
 using MvvmHelpers.Commands;
-using Xamarin.Forms;
+
 using Command = MvvmHelpers.Commands.Command;
 
 namespace ExposureNotification.App.ViewModels
@@ -12,15 +14,14 @@ namespace ExposureNotification.App.ViewModels
 	{
 		public WelcomeViewModel()
 		{
-			Xamarin.ExposureNotifications.ExposureNotification.IsEnabledAsync()
-				.ContinueWith(async t =>
-				{
-					if (t.Result)
-					{
-						IsEnabled = true;
-						await GoToAsync($"//{nameof(InfoPage)}");
-					}
-				});
+			_ = Initialize();
+		}
+
+		async Task Initialize()
+		{
+			IsEnabled = await Xamarin.ExposureNotifications.ExposureNotification.IsEnabledAsync();
+			if (IsEnabled)
+				await GoToAsync($"//{nameof(InfoPage)}");
 		}
 
 		public new bool IsEnabled
@@ -48,14 +49,20 @@ namespace ExposureNotification.App.ViewModels
 		public AsyncCommand EnableCommand
 			=> new AsyncCommand(async () =>
 			{
-				using (UserDialogs.Instance.Loading(string.Empty))
+				using var _ = UserDialogs.Instance.Loading();
+
+				try
 				{
 					var enabled = await Xamarin.ExposureNotifications.ExposureNotification.IsEnabledAsync();
-
 					if (!enabled)
 						await Xamarin.ExposureNotifications.ExposureNotification.StartAsync();
+
+					await GoToAsync($"//{nameof(InfoPage)}");
 				}
-				await GoToAsync($"//{nameof(InfoPage)}");
+				catch (Exception ex)
+				{
+					Console.WriteLine($"Unable to start notifications: {ex}");
+				}
 			});
 
 		public ICommand GetStartedCommand

@@ -60,11 +60,12 @@ namespace ExposureNotification.App.Services
 
 		public void AddDiagnosis(string diagnosisUid, DateTimeOffset submissionDate)
 		{
-			var existing = PositiveDiagnoses?.Where(d => d.DiagnosisUid.Equals(diagnosisUid, StringComparison.OrdinalIgnoreCase))
-				.OrderByDescending(d => d.DiagnosisDate).FirstOrDefault();
-
-			if (existing != null)
+			var existing = PositiveDiagnoses.Any(d => d.DiagnosisUid.Equals(diagnosisUid, StringComparison.OrdinalIgnoreCase));
+			if (existing)
 				return;
+
+			// Remove ones that were not submitted as the new one is better
+			PositiveDiagnoses.RemoveAll(d => !d.Shared);
 
 			PositiveDiagnoses.Add(new PositiveDiagnosisState
 			{
@@ -74,18 +75,18 @@ namespace ExposureNotification.App.Services
 		}
 
 		public void ClearDiagnosis()
-			=> PositiveDiagnoses?.Clear();
+			=> PositiveDiagnoses.Clear();
 
 		public PositiveDiagnosisState LatestDiagnosis
-			=> PositiveDiagnoses?
+			=> PositiveDiagnoses
 				.Where(d => d.Shared)
-				.OrderByDescending(p => p.DiagnosisDate)?
+				.OrderByDescending(p => p.DiagnosisDate)
 				.FirstOrDefault();
 
 		public PositiveDiagnosisState PendingDiagnosis
-			=> PositiveDiagnoses?
+			=> PositiveDiagnoses
 				.Where(d => !d.Shared)
-				.OrderByDescending(p => p.DiagnosisDate)?
+				.OrderByDescending(p => p.DiagnosisDate)
 				.FirstOrDefault();
 	}
 

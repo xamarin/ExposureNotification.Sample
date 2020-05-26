@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Android.App;
-using Android.Gms.Nearby.ExposureNotification;
-
-using Nearby = Android.Gms.Nearby.NearbyClass;
-using AndroidRiskLevel = Android.Gms.Nearby.ExposureNotification.RiskLevel;
-using AndroidX.Work;
-using Android.Gms.Common.Apis;
-using Android.Gms.Nearby.Connection;
-using Android.Runtime;
-using Java.Nio.FileNio;
-using System.Reflection;
 using Android.Bluetooth;
+using Android.Gms.Common.Apis;
+using Android.Gms.Nearby.ExposureNotification;
+using Android.Runtime;
+using AndroidX.Work;
+using Java.Nio.FileNio;
+
+using AndroidRiskLevel = Android.Gms.Nearby.ExposureNotification.RiskLevel;
+using Nearby = Android.Gms.Nearby.NearbyClass;
 
 [assembly: UsesPermission(Android.Manifest.Permission.Bluetooth)]
 [assembly: UsesPermission(Android.Manifest.Permission.AccessNetworkState)]
@@ -98,6 +98,11 @@ namespace Xamarin.ExposureNotifications
 			return default;
 		}
 
+		static void PlatformInit()
+		{
+			_ = ScheduleFetchAsync();
+		}
+
 		static Task PlatformStart()
 			=> ResolveApi<object>(requestCodeStartExposureNotification, async () =>
 				{
@@ -156,7 +161,7 @@ namespace Xamarin.ExposureNotifications
 		}
 
 		// Tells the local API when new diagnosis keys have been obtained from the server
-		static async Task PlatformDetectExposuresAsync(IEnumerable<string> keyFiles)
+		static async Task PlatformDetectExposuresAsync(IEnumerable<string> keyFiles, System.Threading.CancellationToken cancellationToken)
 		{
 			var config = await GetConfigurationAsync();
 
