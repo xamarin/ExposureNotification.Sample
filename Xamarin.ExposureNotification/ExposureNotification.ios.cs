@@ -79,33 +79,12 @@ namespace Xamarin.ExposureNotifications
 			return m.ExposureNotificationEnabled;
 		}
 
-
 		static Task PlatformScheduleFetch()
 		{
 			// This is a special ID suffix which iOS treats a certain way
 			// we can basically request infinite background tasks
 			// and iOS will throttle it sensibly for us.
 			var id = AppInfo.PackageName + ".exposure-notification";
-
-			void scheduleBgTask()
-			{
-				if (ENManager.AuthorizationStatus != ENAuthorizationStatus.Authorized)
-					return;
-
-				var newBgTask = new BGProcessingTaskRequest(id);
-				newBgTask.RequiresNetworkConnectivity = true;
-				try
-				{
-					BGTaskScheduler.Shared.Submit(newBgTask, out var error);
-
-					if (error != null)
-						throw new NSErrorException(error);
-				}
-				catch (Exception ex)
-				{
-					Console.WriteLine($"[Xamarin.ExposureNotifications] There was an error submitting the background task: {ex}");
-				}
-			}
 
 			var isUpdating = false;
 			BGTaskScheduler.Shared.Register(id, null, task =>
@@ -148,6 +127,26 @@ namespace Xamarin.ExposureNotifications
 			scheduleBgTask();
 
 			return Task.CompletedTask;
+
+			void scheduleBgTask()
+			{
+				if (ENManager.AuthorizationStatus != ENAuthorizationStatus.Authorized)
+					return;
+
+				var newBgTask = new BGProcessingTaskRequest(id);
+				newBgTask.RequiresNetworkConnectivity = true;
+				try
+				{
+					BGTaskScheduler.Shared.Submit(newBgTask, out var error);
+
+					if (error != null)
+						throw new NSErrorException(error);
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine($"[Xamarin.ExposureNotifications] There was an error submitting the background task: {ex}");
+				}
+			}
 		}
 
 		// Tells the local API when new diagnosis keys have been obtained from the server
