@@ -43,9 +43,15 @@ namespace Xamarin.ExposureNotifications
 				MinimumRiskScore = (byte)c.MinimumRiskScore,
 			};
 
-			nc.Metadata.SetValueForKey(
-				NSArray.FromObjects(c.DurationAtAttenuationThresholds.ToArray()),
-				new NSString("attenuationDurationThresholds"));
+			if (c.DurationAtAttenuationThresholds != null)
+			{
+				if (c.DurationAtAttenuationThresholds.Length < 2)
+					throw new ArgumentOutOfRangeException(nameof(c.DurationAtAttenuationThresholds), "Must be an array of length 2");
+
+				var nsArr = NSArray.FromObjects(2, c.DurationAtAttenuationThresholds[0], c.DurationAtAttenuationThresholds[1]);
+				nc.Metadata ??= new NSMutableDictionary();
+				nc.Metadata.SetValueForKey(nsArr, new NSString("attenuationDurationThresholds"));
+			}
 
 			return nc;
 		}
