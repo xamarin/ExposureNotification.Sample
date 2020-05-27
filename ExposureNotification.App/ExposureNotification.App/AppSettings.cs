@@ -18,18 +18,17 @@ namespace ExposureNotification.App
 		{
 			var assembly = Assembly.GetExecutingAssembly();
 			using (var file = assembly.GetManifestResourceStream("ExposureNotification.App.settings.json"))
-			using (var sr = new StreamReader(file))
-			{
-				var json = sr.ReadToEnd();
 
-				var j = JObject.Parse(json);
+			using var file = assembly.GetManifestResourceStream("ExposureNotification.App.settings.json");
+			using var sr = new StreamReader(file);
+			var json = sr.ReadToEnd();
+			var j = JObject.Parse(json);
 
-				ApiUrlBase = j.Value<string>("apiUrlBase");
-				BlobStorageUrlBase = j.Value<string>("blobStorageUrlBase");
-				BlobStorageContainerNamePrefix = j.Value<string>("blobStorageContainerNamePrefix");
-				SupportedRegions = j.Value<string>("supportedRegions").Split(';', ',', ':');
-				AndroidSafetyNetApiKey = j.Value<string>("androidSafetyNetApiKey");
-			}
+			ApiUrlBase = j.Value<string>("apiUrlBase");
+			BlobStorageUrlBase = j.Value<string>("blobStorageUrlBase");
+			BlobStorageContainerNamePrefix = j.Value<string>("blobStorageContainerNamePrefix");
+			SupportedRegions = j.Value<string>("supportedRegions").Split(';', ',', ':');
+			AndroidSafetyNetApiKey = j.Value<string>("androidSafetyNetApiKey");
 		}
 
 		public string ApiUrlBase { get; }
@@ -41,6 +40,5 @@ namespace ExposureNotification.App
 		public string BlobStorageContainerNamePrefix { get; }
 
 		public string AndroidSafetyNetApiKey { get; }
-
 	}
 }
