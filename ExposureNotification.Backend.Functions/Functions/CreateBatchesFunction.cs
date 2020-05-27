@@ -38,7 +38,9 @@ namespace ExposureNotification.Backend.Functions
 		}
 
 		// On demand
+#if DEBUG
 		[FunctionName("CreateBatchesOnDemand")]
+#endif
 		public Task RunRequest([HttpTrigger(AuthorizationLevel.Function, "get", Route = "manage/start-batch")] HttpRequest req, ILogger logger)
 		{
 			logger.LogInformation("Starting on-demand batching...");

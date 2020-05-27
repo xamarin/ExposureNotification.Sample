@@ -22,7 +22,9 @@ namespace ExposureNotification.Backend.Functions
 			random = new Random();
 		}
 
+#if DEBUG
 		[FunctionName("CreateDummyKeys")]
+#endif
 		public async Task Run([HttpTrigger(AuthorizationLevel.Function, "get", Route = "dev/dummy-keys")] HttpRequest req, ILogger logger)
 		{
 			logger.LogInformation("Adding dummy keys...");
