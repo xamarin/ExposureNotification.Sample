@@ -18,10 +18,6 @@ namespace ExposureNotification.App
 	[Xamarin.Forms.Internals.Preserve] // Ensure this isn't linked out
 	public class ExposureNotificationHandler : IExposureNotificationHandler
 	{
-		const string apiUrlBase = "https://exposurenotificationfunctions.azurewebsites.net/api/";
-		const string apiUrlBlobStorageBase = "https://exposurenotifications.blob.core.windows.net/";
-		const string blobStorageContainerNamePrefix = "region-";
-
 		static readonly HttpClient http = new HttpClient();
 
 		// this string should be localized
@@ -123,7 +119,7 @@ namespace ExposureNotification.App
 				while (true)
 				{
 					// Build the blob storage url for the given batch file we are on next
-					var url = $"{apiUrlBlobStorageBase}/{blobStorageContainerNamePrefix}{region.ToLowerInvariant()}/{dirNumber}/{batchNumber + 1}.dat";
+					var url = $"{AppSettings.Instance.BlobStorageUrlBase}/{AppSettings.Instance.BlobStorageContainerNamePrefix}{region.ToLowerInvariant()}/{dirNumber}/{batchNumber + 1}.dat";
 
 					var response = await http.GetAsync(url, cancellationToken);
 
@@ -168,7 +164,7 @@ namespace ExposureNotification.App
 
 			var selfDiag = await CreateSubmissionAsync();
 
-			var url = $"{apiUrlBase.TrimEnd('/')}/selfdiagnosis";
+			var url = $"{AppSettings.Instance.ApiUrlBase.TrimEnd('/')}/selfdiagnosis";
 
 			var json = JsonConvert.SerializeObject(selfDiag);
 

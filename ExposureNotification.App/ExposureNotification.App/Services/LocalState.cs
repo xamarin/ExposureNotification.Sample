@@ -42,7 +42,9 @@ namespace ExposureNotification.App.Services
 
 	public class LocalState
 	{
-		public static readonly Dictionary<string, ulong> DefaultServerBatchNumbers = new Dictionary<string, ulong> { { "ZA", 0 }, { "CA", 0 } };
+		public static Dictionary<string, ulong> DefaultServerBatchNumbers
+			=> AppSettings.Instance.SupportedRegions
+				.ToDictionary(r => r, r => (ulong)0);
 
 		public bool IsWelcomed { get; set; }
 
