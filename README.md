@@ -27,11 +27,9 @@ We also have NuGet packages available with bindings to the native Android and iO
 
 # Sample
 
-Tere is a sample implementation of the mobile app and backend.
-
 ## Mobile App
 
-A sample mobile app to use the API.
+A sample mobile app written using C# and Xamarin.Forms which accesses the native iOS and Android Exposure Notification API's and communicates with the sample server backend.
 
 ## Server
 
