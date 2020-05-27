@@ -42,7 +42,7 @@
                 "description": "Two character ISO 3166 country codes of regions the server supports. Semi-colon delimited."
             },
             "defaultValue":[
-                "us;ca"
+                "us"
             ]
         },
         "sqlAdminLogin": {
@@ -56,8 +56,7 @@
             "type": "securestring",
             "metadata": {
                 "description": "SQL admin password"
-            },
-            "defaultValue": "sqlAdmin!2$3![]"
+            }
         },
         "sqlDatabaseName": {
             "type": "string",
