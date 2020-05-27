@@ -15,8 +15,6 @@ namespace ExposureNotification.App.ViewModels
 		}
 		public string DiagnosisUid { get; set; }
 
-		public DateTime? DiagnosisTimestamp { get; set; } = DateTime.Now;
-
 		public AsyncCommand CancelCommand
 			=> new AsyncCommand(() => GoToAsync(".."));
 
@@ -27,11 +25,6 @@ namespace ExposureNotification.App.ViewModels
 				if (string.IsNullOrEmpty(DiagnosisUid))
 				{
 					await UserDialogs.Instance.AlertAsync("Please provide a valid Diagnosis ID", "Invalid Diagnosis ID", "OK");
-					return;
-				}
-				if (!DiagnosisTimestamp.HasValue || DiagnosisTimestamp.Value > DateTime.Now)
-				{
-					await UserDialogs.Instance.AlertAsync("Please provide a valid Test Date", "Invalid Test Date", "OK");
 					return;
 				}
 
@@ -51,7 +44,7 @@ namespace ExposureNotification.App.ViewModels
 					}
 
 					// Set the submitted UID
-					LocalStateManager.Instance.AddDiagnosis(DiagnosisUid, new DateTimeOffset(DiagnosisTimestamp.Value));
+					LocalStateManager.Instance.AddDiagnosis(DiagnosisUid, DateTimeOffset.UtcNow);
 					LocalStateManager.Save();
 
 					// Submit our diagnosis
