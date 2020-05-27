@@ -76,7 +76,7 @@ namespace ExposureNotification.Backend.Functions
 				var cloudBlobContainer = cloudBlobClient.GetContainerReference(containerName);
 
 				// Make sure the container exists
-				await cloudBlobContainer.CreateIfNotExistsAsync(BlobContainerPublicAccessType.Blob, new BlobRequestOptions(), new OperationContext());
+				await cloudBlobContainer.CreateIfNotExistsAsync(BlobContainerPublicAccessType.Container, new BlobRequestOptions(), new OperationContext());
 
 				// Find all the root level directories
 				var rootBlobs = cloudBlobContainer.ListBlobs()
