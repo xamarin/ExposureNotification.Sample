@@ -48,8 +48,7 @@ namespace ExposureNotification.App.Services
 
 		public bool EnableNotifications { get; set; } = true;
 
-		public Dictionary<string, ulong> ServerBatchNumbers { get; set; }
-			= AppSettings.Instance.SupportedRegionsDefaultBatchNumbers;
+		public Dictionary<string, ulong> ServerBatchNumbers { get; set; } = AppSettings.Instance.GetDefaultDefaultBatch();
 
 		public ObservableCollection<ExposureInfo> ExposureInformation { get; set; } = new ObservableCollection<ExposureInfo>();
 

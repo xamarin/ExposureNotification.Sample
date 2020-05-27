@@ -79,7 +79,7 @@ namespace ExposureNotification.App.ViewModels
 		public AsyncCommand ResetBatchFileIndex
 			=> new AsyncCommand(() =>
 			{
-				LocalStateManager.Instance.ServerBatchNumbers = AppSettings.Instance.SupportedRegionsDefaultBatchNumbers;
+				LocalStateManager.Instance.ServerBatchNumbers = AppSettings.Instance.GetDefaultDefaultBatch();
 				LocalStateManager.Save();
 				OnPropertyChanged(nameof(CurrentBatchFileIndex));
 				return UserDialogs.Instance.AlertAsync("Reset Batch file index!");
