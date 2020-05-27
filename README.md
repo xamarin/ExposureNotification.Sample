@@ -35,7 +35,7 @@ A sample mobile app written using C# and Xamarin.Forms which accesses the native
 
 ## Server
 
-A sample backend to handle diagnosis submissions.  This sample consists of Azure Functions, a EF Core Compatible Database, Azure Blob Storage, and Azure Key Vault.  You can read more about the [Server Architecture and Configuration in the Wiki] (https://github.com/xamarin/xamarin.exposurenotification/wiki/Server-Architecture-&-Configuration)
+A sample backend to handle diagnosis submissions.  This sample consists of Azure Functions, a EF Core Compatible Database, Azure Blob Storage, and Azure Key Vault.  You can read more about the [Server Architecture and Configuration in the Wiki](https://github.com/xamarin/xamarin.exposurenotification/wiki/Server-Architecture-&-Configuration)
 
 
 # Contributing
