@@ -27,6 +27,8 @@ We also have NuGet packages available with bindings to the native Android and iO
 
 # Sample
 
+![Sample App Animated Overview](https://github.com/xamarin/xamarin.exposurenotification/raw/master/exposure-notifications.gif)
+
 ## Mobile App
 
 A sample mobile app written using C# and Xamarin.Forms which accesses the native iOS and Android Exposure Notification API's and communicates with the sample server backend.
