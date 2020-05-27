@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using Newtonsoft.Json.Linq;
@@ -17,7 +18,6 @@ namespace ExposureNotification.App
 		public AppSettings()
 		{
 			var assembly = Assembly.GetExecutingAssembly();
-			using (var file = assembly.GetManifestResourceStream("ExposureNotification.App.settings.json"))
 
 			using var file = assembly.GetManifestResourceStream("ExposureNotification.App.settings.json");
 			using var sr = new StreamReader(file);
@@ -36,6 +36,9 @@ namespace ExposureNotification.App
 		public string BlobStorageUrlBase { get; }
 
 		public string[] SupportedRegions { get; }
+
+		public Dictionary<string, ulong> SupportedRegionsDefaultBatchNumbers
+			=> SupportedRegions.ToDictionary(r => r, r => (ulong)0);
 
 		public string BlobStorageContainerNamePrefix { get; }
 

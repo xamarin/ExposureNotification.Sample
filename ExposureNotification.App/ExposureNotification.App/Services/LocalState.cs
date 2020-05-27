@@ -42,17 +42,14 @@ namespace ExposureNotification.App.Services
 
 	public class LocalState
 	{
-		public static Dictionary<string, ulong> DefaultServerBatchNumbers
-			=> AppSettings.Instance.SupportedRegions
-				.ToDictionary(r => r, r => (ulong)0);
-
 		public bool IsWelcomed { get; set; }
 
 		public bool LastIsEnabled { get; set; } = false;
 
 		public bool EnableNotifications { get; set; } = true;
 
-		public Dictionary<string, ulong> ServerBatchNumbers { get; set; } = new Dictionary<string, ulong>(DefaultServerBatchNumbers);
+		public Dictionary<string, ulong> ServerBatchNumbers { get; set; }
+			= AppSettings.Instance.SupportedRegionsDefaultBatchNumbers;
 
 		public ObservableCollection<ExposureInfo> ExposureInformation { get; set; } = new ObservableCollection<ExposureInfo>();
 
