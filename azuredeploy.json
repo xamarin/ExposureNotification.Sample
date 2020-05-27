@@ -6,8 +6,7 @@
             "type": "string",
             "metadata": {
                 "description": "Function App Nam. Must be globally unique."
-            },
-            "defaultValue":"func-xam-exposure",
+            },            
             "minLength": 5,
             "maxLength": 24
         },
@@ -15,17 +14,15 @@
             "type": "string",
             "metadata": {
                 "description": "Storage Account Name (lowercase). Must be globally unique"
-            },
-            "defaultValue":"stor-xam-exposure",
+            },         
             "minLength": 3,
-            "maxLength": 24
+            "maxLength": 17
         },
         "hostingPlanName": {
             "type": "string",
             "metadata": {
                 "description": "Hosting Service Name. Globally unique."
-            },
-            "defaultValue":"host-xam-exposure",
+            },            
             "minLength": 3,
             "maxLength": 24
         },
@@ -67,8 +64,7 @@
             "type": "string",
             "metadata": {
                 "description": "Specify the name of the key vault. Must be globally unique."
-            },
-            "defaultValue": "vault-xam-exposure"
+            }            
         },
         "isDebug": {
             "type": "bool",
@@ -83,6 +79,10 @@
         "appInsightsName": "functions-app-insights",
         "containerPrefix": "[concat(parameters('blobContainerPrefix'),'-')]",
         "sqlServerName": "[concat('sqlserver-', uniqueString(resourceGroup().id))]",
+        "fullFunctionAppName": "[concat(parameters('functionAppName'),'-', uniqueString(resourceGroup().id))]",
+        "fullHostingName": "[concat(parameters('hostingPlanName'), '-', uniqueString(resourceGroup().id))]",
+        "fullStorageAccountName": "[toLower(concat(parameters('storageAccountName'), '-', uniqueString(resourceGroup().id)))]",
+        "fullKeyVaultName": "[concat(parameters('keyVaultName'), '-', uniqueString(resourceGroup().id))]",
         "sqlDatabaseEdition": "Basic",
         "sqlDatabaseCollation": "SQL_Latin1_General_CP1_CI_AS",
         "sqlDatabaseObjectiveName": "Basic",
@@ -147,10 +147,10 @@
     {  
         "type":"Microsoft.Web/serverfarms",
         "apiVersion":"2016-09-01",
-        "name":"[parameters('hostingPlanName')]",
+        "name":"[variables('fullHostingName')]",
         "location":"[resourceGroup().location]",
         "properties":{  
-            "name":"[parameters('hostingPlanName')]",
+            "name":"[variables('fullHostingName')]",
             "computeMode":"Dynamic"
         },
         "sku":{  
@@ -168,7 +168,7 @@
         "location": "[resourceGroup().location]",
         "kind": "web",
         "tags": {
-            "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('functionAppName'))]": "Resource"
+            "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', variables('fullFunctionAppName'))]": "Resource"
         },        
         "properties": {
             "applicationId": "[variables('appInsightsName')]",
@@ -176,11 +176,11 @@
         }
     },
     {
-        "name": "[parameters('storageAccountName')]",
+        "name": "[variables('fullStorageAccountName')]",
         "type": "Microsoft.Storage/storageAccounts",
         "apiVersion": "2019-06-01",
         "tags": {
-            "displayName": "[parameters('storageAccountName')]"
+            "displayName": "[variables('fullStorageAccountName')]"
         },
         "location": "[resourceGroup().location]",
         "kind": "StorageV2",
@@ -192,9 +192,9 @@
     {
         "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
         "apiVersion": "2018-07-01",
-        "name":"[concat(parameters('storageAccountName'), '/default/', variables('containerPrefix'), variables('supportedRegionArray')[copyIndex()])]",
+        "name":"[concat(variables('fullStorageAccountName'), '/default/', variables('containerPrefix'), variables('supportedRegionArray')[copyIndex()])]",
         "dependsOn": [
-            "[parameters('storageAccountName')]"
+            "[variables('fullStorageAccountName')]"
         ],
         "copy": {
             "name": "storageBlobCopy",
@@ -202,7 +202,7 @@
         }
     },
     {
-        "name": "[parameters('functionAppName')]",
+        "name": "[variables('fullFunctionAppName')]",
         "type": "Microsoft.Web/sites",
         "apiVersion": "2018-11-01",
         "location": "[resourceGroup().location]",
@@ -212,27 +212,27 @@
         "kind": "functionapp",
         "dependsOn": [
             "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]",
-            "[resourceId('Microsoft.Storage/storageAccounts', toLower(parameters('storageAccountName')))]"
+            "[resourceId('Microsoft.Storage/storageAccounts', variables('fullStorageAccountName'))]"
         ],
         "properties": {     
-            "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanName'))]",
+            "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('fullHostingName'))]",
             "siteConfig": {
                 "appSettings": [
                     {
                         "name": "AzureWebJobsDashboard",
-                        "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', toLower(parameters('storageAccountName')), ';AccountKey=', listKeys(parameters('storageAccountName'),'2015-05-01-preview').key1)]"
+                        "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('fullStorageAccountName'), ';AccountKey=', listKeys(variables('fullStorageAccountName'),'2015-05-01-preview').key1)]"
                     },
                     {
                         "name": "AzureWebJobsStorage",
-                        "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', toLower(parameters('storageAccountName')), ';AccountKey=', listKeys(parameters('storageAccountName'),'2015-05-01-preview').key1)]"
+                        "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('fullStorageAccountName'), ';AccountKey=', listKeys(variables('fullStorageAccountName'),'2015-05-01-preview').key1)]"
                     },
                     {
                         "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
-                        "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', toLower(parameters('storageAccountName')), ';AccountKey=', listKeys(parameters('storageAccountName'),'2015-05-01-preview').key1)]"
+                        "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('fullStorageAccountName'), ';AccountKey=', listKeys(variables('fullStorageAccountName'),'2015-05-01-preview').key1)]"
                     },
                     {
                         "name": "WEBSITE_CONTENTSHARE",
-                        "value": "[toLower(parameters('functionAppName'))]"
+                        "value": "[toLower(variables('fullFunctionAppName'))]"
                     },
                     {
                         "name": "FUNCTIONS_EXTENSION_VERSION",
@@ -252,11 +252,11 @@
                     },
                     {
                         "name": "[variables('configKeyVaultNameName')]",
-                        "value": "[parameters('keyVaultName')]"
+                        "value": "[variables('fullKeyVaultName')]"
                     },
                     {
                         "name": "[variables('configBlobStorageConnectionStringName')]",
-                        "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', toLower(parameters('storageAccountName')), ';AccountKey=', listKeys(parameters('storageAccountName'),'2015-05-01-preview').key1)]"
+                        "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('fullStorageAccountName'), ';AccountKey=', listKeys(variables('fullStorageAccountName'),'2015-05-01-preview').key1)]"
                     },
                     {
                         "name": "[variables('configBlobStorageContainerPrefixName')]",
@@ -287,12 +287,12 @@
         }
     },
     {
-        "name": "[parameters('keyVaultName')]",
+        "name": "[variables('fullKeyVaultName')]",
         "type": "Microsoft.KeyVault/vaults",
         "apiVersion": "2016-10-01",
         "location": "[resourceGroup().location]",
         "dependsOn": [
-            "[parameters('functionAppName')]"
+            "[variables('fullFunctionAppName')]"
         ],
         "properties": {
             "enabledForDeployment": true,
@@ -304,7 +304,7 @@
             },
             "accessPolicies": [
                 {
-                    "objectId": "[reference(concat('Microsoft.Web/sites/', parameters('functionAppName')), '2018-11-01', 'Full').identity.principalId]",
+                    "objectId": "[reference(concat('Microsoft.Web/sites/', variables('fullFunctionAppName')), '2018-11-01', 'Full').identity.principalId]",
                     "tenantId": "[subscription().tenantId]",
                     "permissions": {
                         "secrets": [
@@ -317,23 +317,23 @@
     },
     {
         "type": "Microsoft.KeyVault/vaults/secrets",
-        "name": "[concat(parameters('keyVaultName'), '/', variables('configBlobStorageConnectionStringName'))]",
+        "name": "[concat(variables('fullKeyVaultName'), '/', variables('configBlobStorageConnectionStringName'))]",
         "apiVersion": "2016-10-01",
         "location": "[resourceGroup().location]",
         "dependsOn": [
-            "[parameters('keyVaultName')]"
+            "[variables('fullKeyVaultName')]"
         ],
         "properties": {
-            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', toLower(parameters('storageAccountName')), ';AccountKey=', listKeys(parameters('storageAccountName'),'2015-05-01-preview').key1)]"
+            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('fullStorageAccountName'), ';AccountKey=', listKeys(variables('fullStorageAccountName'),'2015-05-01-preview').key1)]"
         }
     },
     {
         "type": "Microsoft.KeyVault/vaults/secrets",
-        "name": "[concat(parameters('keyVaultName'), '/', variables('configDBConnectionStringName'))]",
+        "name": "[concat(variables('fullKeyVaultName'), '/', variables('configDBConnectionStringName'))]",
         "apiVersion": "2016-10-01",
         "location": "[resourceGroup().location]",
         "dependsOn": [
-            "[parameters('keyVaultName')]"
+            "[variables('fullKeyVaultName')]"
         ],
         "properties": {
             "value": "[concat('Server=tcp:',reference(variables('sqlServerName')).fullyQualifiedDomainName,',1433;Initial Catalog=',parameters('sqlDatabaseName'),';Persist Security Info=False;User ID=',parameters('sqlAdminLogin'),';Password=',parameters('sqlAdminPassword'),';MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;')]"
@@ -341,11 +341,11 @@
     },
     {
         "type": "Microsoft.KeyVault/vaults/secrets",
-        "name": "[concat(parameters('keyVaultName'), '/', variables('configSigningKeyName'))]",
+        "name": "[concat(variables('fullKeyVaultName'), '/', variables('configSigningKeyName'))]",
         "apiVersion": "2016-10-01",
         "location": "[resourceGroup().location]",
         "dependsOn": [
-            "[parameters('keyVaultName')]"
+            "[variables('fullKeyVaultName')]"
         ],
         "properties": {
             "value": "asfd"
