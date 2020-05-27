@@ -12,7 +12,6 @@ namespace ExposureNotification.App.ViewModels
 	{
 		public DeveloperViewModel()
 		{
-
 		}
 
 		public string NativeImplementationName
@@ -80,7 +79,7 @@ namespace ExposureNotification.App.ViewModels
 		public AsyncCommand ResetBatchFileIndex
 			=> new AsyncCommand(() =>
 			{
-				LocalStateManager.Instance.ServerBatchNumbers = new Dictionary<string, ulong>(LocalState.DefaultServerBatchNumbers);
+				LocalStateManager.Instance.ServerBatchNumbers = AppSettings.Instance.GetDefaultDefaultBatch();
 				LocalStateManager.Save();
 				OnPropertyChanged(nameof(CurrentBatchFileIndex));
 				return UserDialogs.Instance.AlertAsync("Reset Batch file index!");

@@ -18,10 +18,6 @@ namespace ExposureNotification.App
 	[Xamarin.Forms.Internals.Preserve] // Ensure this isn't linked out
 	public class ExposureNotificationHandler : IExposureNotificationHandler
 	{
-		const string apiUrlBase = "https://exposurenotificationfunctions.azurewebsites.net/api/";
-		const string apiUrlBlobStorageBase = "https://exposurenotifications.blob.core.windows.net/";
-		const string blobStorageContainerNamePrefix = "region-";
-
 		static readonly HttpClient http = new HttpClient();
 
 		// this string should be localized
@@ -64,10 +60,10 @@ namespace ExposureNotification.App
 
 			try
 			{
-				foreach (var serverRegion in LocalStateManager.Instance.ServerBatchNumbers.ToArray())
+				foreach (var serverRegion in AppSettings.Instance.SupportedRegions)
 				{
 					// Find next directory to start checking
-					var dirNumber = serverRegion.Value + 1;
+					var dirNumber = LocalStateManager.Instance.ServerBatchNumbers[serverRegion] + 1;
 
 					// For all the directories
 					while (true)
@@ -75,7 +71,7 @@ namespace ExposureNotification.App
 						cancellationToken.ThrowIfCancellationRequested();
 
 						// Download all the files for this directory
-						var (batchNumber, downloadedFiles) = await DownloadBatchAsync(serverRegion.Key, dirNumber, cancellationToken);
+						var (batchNumber, downloadedFiles) = await DownloadBatchAsync(serverRegion, dirNumber, cancellationToken);
 						if (batchNumber == 0)
 							break;
 
@@ -99,7 +95,7 @@ namespace ExposureNotification.App
 						}
 
 						// Update the preferences
-						LocalStateManager.Instance.ServerBatchNumbers[serverRegion.Key] = dirNumber;
+						LocalStateManager.Instance.ServerBatchNumbers[serverRegion] = dirNumber;
 						LocalStateManager.Save();
 
 						dirNumber++;
@@ -123,7 +119,7 @@ namespace ExposureNotification.App
 				while (true)
 				{
 					// Build the blob storage url for the given batch file we are on next
-					var url = $"{apiUrlBlobStorageBase}/{blobStorageContainerNamePrefix}{region.ToLowerInvariant()}/{dirNumber}/{batchNumber + 1}.dat";
+					var url = $"{AppSettings.Instance.BlobStorageUrlBase}/{AppSettings.Instance.BlobStorageContainerNamePrefix}{region.ToLowerInvariant()}/{dirNumber}/{batchNumber + 1}.dat";
 
 					var response = await http.GetAsync(url, cancellationToken);
 
@@ -168,7 +164,7 @@ namespace ExposureNotification.App
 
 			var selfDiag = await CreateSubmissionAsync();
 
-			var url = $"{apiUrlBase.TrimEnd('/')}/selfdiagnosis";
+			var url = $"{AppSettings.Instance.ApiUrlBase.TrimEnd('/')}/selfdiagnosis";
 
 			var json = JsonConvert.SerializeObject(selfDiag);
 
@@ -198,7 +194,7 @@ namespace ExposureNotification.App
 					AppPackageName = AppInfo.PackageName,
 					DeviceVerificationPayload = null,
 					Platform = DeviceInfo.Platform.ToString().ToLowerInvariant(),
-					Regions = LocalStateManager.Instance.ServerBatchNumbers.Keys.ToArray(),
+					Regions = AppSettings.Instance.SupportedRegions,
 					Keys = keys.ToArray(),
 					VerificationPayload = pendingDiagnosis.DiagnosisUid,
 				};
