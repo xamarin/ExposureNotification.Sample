@@ -35,41 +35,7 @@ A sample mobile app written using C# and Xamarin.Forms which accesses the native
 
 ## Server
 
-A sample backend to handle diagnosis submissions.  This sample consists of Azure functions, a EF Core compatible database, Azure Blob Storage, and Azure Key Vault.  You can read more about the [Server Architecture and Configuration in the Wiki] (https://github.com/xamarin/xamarin.exposurenotification/wiki/Server-Architecture-&-Configuration)
-
-## Requirements
-
-The server requires a few things:
-
-* **Azure Functions**  
-  This is the core processing logic.
-* **Blob Storage**  
-  This is to store the signed batch files.
-* **SQL Server**  
-  This is to store the temporary keys until they are batched.
-* **KeyVault** _(optional)_  
-  This can be used to store any secrets to keep them out of the portal.
-
-## Functions
-
-App functions:
-
-* `/api/selfdiagnosis`  
-  Submit a diagnosis from the app.
-
-Management functions:
-
-* `/api/manage/start-batch`  
-  Start the batch job on demand. _The `CreateBatchesTimed` job does run periodically._
-* `/api/manage/diagnosis-uids`  
-  Add/remove diagnosis UIDs from the health provider.
-* `CreateBatchesTimed`  
-  A timed job that runs every 6 hours to create batch files.
-
-Development functions:
-
-* `/api/dev/dummy-keys`  
-  A development-only function to populate the database with fake self-diagnosis submissions.
+A sample backend to handle diagnosis submissions.  This sample consists of Azure Functions, a EF Core Compatible Database, Azure Blob Storage, and Azure Key Vault.  You can read more about the [Server Architecture and Configuration in the Wiki] (https://github.com/xamarin/xamarin.exposurenotification/wiki/Server-Architecture-&-Configuration)
 
 
 # Contributing
