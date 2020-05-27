@@ -41,9 +41,7 @@
             "metadata": {
                 "description": "Two character ISO 3166 country codes of regions the server supports. Semi-colon delimited."
             },
-            "defaultValue":[
-                "us"
-            ]
+            "defaultValue": "us;ca"            
         },
         "sqlAdminLogin": {
             "type": "string",
