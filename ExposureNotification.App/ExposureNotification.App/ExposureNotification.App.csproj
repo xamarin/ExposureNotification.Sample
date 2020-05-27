@@ -16,9 +16,7 @@
 		<EmbeddedResource Include="Resources\Fonts\fa-regular-400.ttf" />
 		<EmbeddedResource Include="Resources\Fonts\fa-solid-900.ttf" />
 		<EmbeddedResource Include="settings.json" Condition="'$(Configuration)' == 'Debug'" />
-		<EmbeddedResource Include="settings.json" Condition="'$(Configuration)' != 'Debug'">
-			<Link>local.settings.json</Link>
-		</EmbeddedResource>
+		<EmbeddedResource Include="local.settings.json" Link="settings.json" Condition="'$(Configuration)' == 'Debug' and Exists('local.settings.json')" />
 	</ItemGroup>
 
 	<ItemGroup>
