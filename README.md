@@ -35,7 +35,7 @@ A sample mobile app to use the API.
 
 ## Server
 
-A sample backend to handle diagnosis submissions.
+A sample backend to handle diagnosis submissions.  This sample consists of Azure functions, a EF Core compatible database, Azure Blob Storage, and Azure Key Vault.  You can read more about the [Server Architecture and Configuration in the Wiki] (https://github.com/xamarin/xamarin.exposurenotification/wiki/Server-Architecture-&-Configuration)
 
 ## Requirements
 
