@@ -1,0 +1,156 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "functionAppName": {
+            "type": "string",
+            "metadata": {
+                "description": "Function App Name"
+            },
+            "minLength": 5,
+            "maxLength": 24
+        },
+        "storageAccountName": {
+            "type": "string",
+            "metadata": {
+                "description": "Storage Account Name (lowercase)"
+            },
+            "minLength": 3,
+            "maxLength": 24
+        },
+        "hostingPlanName": {
+            "type": "string",
+            "metadata": {
+                "description": "Hosting Service Name"
+            },
+            "minLength": 3,
+            "maxLength": 24
+        },
+        "blobContainerPrefix": {
+            "type":"string",
+            "metadata": {
+                "description": "the prefix that will be used in the naming of containers in Blob storage for each region your app/server supports. The default is 'region'"
+            },
+            "defaultValue":"region"
+        },
+        "supportedRegions": {
+            "type": "array",
+            "metadata": {
+                "description": "Two character ISO 3166 country codes of regions the server supports."
+            },
+            "defaultValue":[
+                "us","ca"
+            ]
+        }
+    },
+    "functions": [],
+    "variables": {
+        "appInsightsName": "functions-app-insights",
+        "containerPrefix": "[concat(parameters('blobContainerPrefix'),'-')]"        
+    },
+    "resources": [
+    {  
+        "type":"Microsoft.Web/serverfarms",
+        "apiVersion":"2016-09-01",
+        "name":"[parameters('hostingPlanName')]",
+        "location":"[resourceGroup().location]",
+        "properties":{  
+            "name":"[parameters('hostingPlanName')]",
+            "computeMode":"Dynamic"
+        },
+        "sku":{  
+            "name":"Y1",
+            "tier":"Dynamic",
+            "size":"Y1",
+            "family":"Y",
+            "capacity":0
+        }
+    },
+    {
+        "name": "[variables('appInsightsName')]",
+        "type": "Microsoft.Insights/components",
+        "apiVersion": "2015-05-01",
+        "location": "[resourceGroup().location]",
+        "kind": "web",
+        "tags": {
+            "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', parameters('functionAppName'))]": "Resource"
+        },        
+        "properties": {
+            "applicationId": "[variables('appInsightsName')]",
+            "application_Type": "web"
+        }
+    },
+    {
+        "name": "[parameters('storageAccountName')]",
+        "type": "Microsoft.Storage/storageAccounts",
+        "apiVersion": "2019-06-01",
+        "tags": {
+            "displayName": "[parameters('storageAccountName')]"
+        },
+        "location": "[resourceGroup().location]",
+        "kind": "StorageV2",
+        "sku": {
+            "name": "Standard_LRS",
+            "tier": "Standard"
+        }
+    },
+    {
+        "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+        "apiVersion": "2018-07-01",
+        "name":"[concat('default/', variables('containerPrefix'), copyIndex())]",
+        "dependsOn": [
+            "[parameters('storageAccountName')]"
+        ],
+        "copy": {
+            "name": "storageBlobCopy",
+            "count": "[length(parameters('supportedRegions'))]"
+        }
+    },
+    {
+        "name": "[parameters('functionAppName')]",
+        "type": "Microsoft.Web/sites",
+        "apiVersion": "2018-11-01",
+        "location": "[resourceGroup().location]",
+        "kind": "functionapp",
+        "dependsOn": [
+            "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]",
+            "[resourceId('Microsoft.Storage/storageAccounts', toLower(parameters('storageAccountName')))]"
+        ],
+        "properties": {     
+            "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanName'))]",
+            "siteConfig": {
+                "appSettings": [
+                    {
+                        "name": "AzureWebJobsDashboard",
+                        "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', toLower(parameters('storageAccountName')), ';AccountKey=', listKeys(parameters('storageAccountName'),'2015-05-01-preview').key1)]"
+                    },
+                    {
+                        "name": "AzureWebJobsStorage",
+                        "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', toLower(parameters('storageAccountName')), ';AccountKey=', listKeys(parameters('storageAccountName'),'2015-05-01-preview').key1)]"
+                    },
+                    {
+                        "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+                        "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', toLower(parameters('storageAccountName')), ';AccountKey=', listKeys(parameters('storageAccountName'),'2015-05-01-preview').key1)]"
+                    },
+                    {
+                        "name": "WEBSITE_CONTENTSHARE",
+                        "value": "[toLower(parameters('functionAppName'))]"
+                    },
+                    {
+                        "name": "FUNCTIONS_EXTENSION_VERSION",
+                        "value": "~2"
+                    },
+                    {
+                        "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                        "value": "[reference(resourceId('microsoft.insights/components/', variables('appInsightsName')), '2015-05-01').InstrumentationKey]"
+                    },
+                    {
+                        "name": "FUNCTIONS_WORKER_RUNTIME",
+                        "value": "dotnet"
+                    }
+                ]
+            }
+        }
+    }],
+    "outputs": {}
+}
