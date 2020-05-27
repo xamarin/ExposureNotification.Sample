@@ -33,6 +33,13 @@ We also have NuGet packages available with bindings to the native Android and iO
 
 A sample mobile app written using C# and Xamarin.Forms which accesses the native iOS and Android Exposure Notification API's and communicates with the sample server backend.
 
+> NOTE: There is a Xamarin.iOS fix pending release which is required to use `BGTask` related API's on iOS.  This means in order for the periodic background fetching task to be invoked, the fix is required.  Until the fix is available in a soon to be released stable version you can install these builds to test with on macOS:
+>
+> * [xamarin.ios-13.18.2.1.pkg](https://bosstoragemirror.blob.core.windows.net/wrench/jenkins/d16-6/29c4ea73109b377a71866c53a6d43033d5c5e90b/49/package/notarized/xamarin.ios-13.18.2.1.pkg)
+> * [xamarin.mac-6.18.2.1.pkg](https://bosstoragemirror.blob.core.windows.net/wrench/jenkins/d16-6/29c4ea73109b377a71866c53a6d43033d5c5e90b/49/package/notarized/xamarin.mac-6.18.2.1.pkg)
+> See [Issue #44](https://github.com/xamarin/xamarin.exposurenotification/issues/44#issuecomment-634381146) for more details.
+
+
 ## Server
 
 A sample backend to handle diagnosis submissions.  This sample consists of Azure Functions, a EF Core Compatible Database, Azure Blob Storage, and Azure Key Vault.  You can read more about the [Server Architecture and Configuration in the Wiki](https://github.com/xamarin/xamarin.exposurenotification/wiki/Server-Architecture-&-Configuration)
