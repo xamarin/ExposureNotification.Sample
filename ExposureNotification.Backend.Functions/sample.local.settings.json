@@ -10,7 +10,7 @@
     "EN-BlobStorageConnectionString": "UseDevelopmentStorage=true",
     "EN-BlobStorageContainerNamePrefix": "region-",
     "EN-DbConnectionString": null, // use in-memory
-    "EN-DeleteKeysFromDbAfterBatching": "false",
+    "EN-DeleteKeysFromDbAfterBatching": "true",
     "EN-DisableDeviceVerification": "true",
     "EN-SigningKey": null, // placeholder for KeyVault certificate
     "EN-SupportedRegions": "ca;za"
