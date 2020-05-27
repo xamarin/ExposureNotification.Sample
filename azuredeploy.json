@@ -7,6 +7,7 @@
             "metadata": {
                 "description": "Function App Name"
             },
+            "defaultValue":"soucoupfunc",
             "minLength": 5,
             "maxLength": 24
         },
@@ -15,6 +16,7 @@
             "metadata": {
                 "description": "Storage Account Name (lowercase)"
             },
+            "defaultValue":"soucoupfuncstor",
             "minLength": 3,
             "maxLength": 24
         },
@@ -23,6 +25,7 @@
             "metadata": {
                 "description": "Hosting Service Name"
             },
+            "defaultValue":"soucoupfunchost",
             "minLength": 3,
             "maxLength": 24
         },
@@ -34,21 +37,100 @@
             "defaultValue":"region"
         },
         "supportedRegions": {
-            "type": "array",
+            "type": "string",
             "metadata": {
-                "description": "Two character ISO 3166 country codes of regions the server supports."
+                "description": "Two character ISO 3166 country codes of regions the server supports. Semi-colon delimited."
             },
             "defaultValue":[
-                "us","ca"
+                "us;ca"
             ]
+        },
+        "sqlAdminLogin": {
+            "type": "string",
+            "metadata": {
+                "description": "SQL admin username"
+            },
+            "defaultValue": "sqladmin"
+        },
+        "sqlAdminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "SQL admin password"
+            },
+            "defaultValue": "sqlAdmin!2$3![]"
+        },
+        "sqlDatabaseName": {
+            "type": "string",
+            "metadata": {
+                "description": "SQL database name"
+            },
+            "defaultValue":"exposure-db"
+        },
+        "isDebug": {
+            "type": "bool",
+            "metadata": {
+                "description": "Is this deployment currently meant for debuggin?"
+            },
+            "defaultValue": true
         }
     },
     "functions": [],
     "variables": {
         "appInsightsName": "functions-app-insights",
-        "containerPrefix": "[concat(parameters('blobContainerPrefix'),'-')]"        
+        "containerPrefix": "[concat(parameters('blobContainerPrefix'),'-')]",
+        "sqlServerName": "[concat('sqlserver', uniqueString(subscription().id, resourceGroup().id))]",
+        "sqlDatabaseEdition": "Basic",
+        "sqlDatabaseCollation": "SQL_Latin1_General_CP1_CI_AS",
+        "sqlDatabaseObjectiveName": "Basic",
+        "supportedRegionArray": "[split(parameters('supportedRegions'), ';')]"                
     },
     "resources": [
+    {
+        "name": "[variables('sqlServerName')]",
+        "type": "Microsoft.Sql/servers",
+        "apiVersion": "2019-06-01-preview",
+        "location": "[resourceGroup().location]",
+        "tags": {
+            "displayName": "SqlServer"
+        },
+        "properties": {
+            "administratorLogin": "[parameters('sqlAdminLogin')]",
+            "administratorLoginPassword": "[parameters('sqlAdminPassword')]",
+            "version": "12.0"
+        },
+        "resources": [
+            {
+                "type": "databases",
+                "name": "[parameters('sqlDatabaseName')]",
+                "apiVersion": "2019-06-01-preview",
+                "location": "[resourceGroup().location]",
+                "tags": {
+                    "displayName": "Database"
+                },
+                "properties": {
+                    "edition": "[variables('sqlDatabaseEdition')]",
+                    "collation": "[variables('sqlDatabaseCollation')]",
+                    "requestedServiceObjectiveName": "[variables('sqlDatabaseObjectiveName')]"
+                },
+                "dependsOn": [
+                    "[variables('sqlServerName')]"
+                ]                
+            },
+            {
+                "name": "AllowAzureIPs",
+                "type": "firewallRules",
+                "apiVersion": "2015-05-01-preview",
+                "location": "[resourceGroup().location]",
+                "properties": {
+                    "startIpAddress": "0.0.0.0",
+                    "endIpAddress": "0.0.0.0"
+                },
+                "dependsOn": [
+                    "[variables('sqlServerName')]"
+                ]
+            }
+        ]
+    },
     {  
         "type":"Microsoft.Web/serverfarms",
         "apiVersion":"2016-09-01",
@@ -97,13 +179,13 @@
     {
         "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
         "apiVersion": "2018-07-01",
-        "name":"[concat(parameters('storageAccountName'),'/default/', variables('containerPrefix'), copyIndex())]",
+        "name":"[concat(parameters('storageAccountName'), '/default/', variables('containerPrefix'), variables('supportedRegionArray')[copyIndex()])]",
         "dependsOn": [
             "[parameters('storageAccountName')]"
         ],
         "copy": {
             "name": "storageBlobCopy",
-            "count": "[length(parameters('supportedRegions'))]"
+            "count": "[length(variables('supportedRegionArray'))]"
         }
     },
     {
@@ -147,6 +229,42 @@
                     {
                         "name": "FUNCTIONS_WORKER_RUNTIME",
                         "value": "dotnet"
+                    },
+                    {
+                        "name": "EN-SkipKeyVault",
+                        "value": "[parameters('isDebug')]"
+                    },
+                    {
+                        "name": "EN-KeyVaultName",
+                        "value": "key value name"
+                    },
+                    {
+                        "name": "EN-BlobStorageConnectionString",
+                        "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', toLower(parameters('storageAccountName')), ';AccountKey=', listKeys(parameters('storageAccountName'),'2015-05-01-preview').key1)]"
+                    },
+                    {
+                        "name": "EN-BlobStorageContainerNamePrefix",
+                        "value": "[variables('containerPrefix')]"
+                    },
+                    {
+                        "name": "EN-DbConnectionString",
+                        "value": "[parameters('isDebug')]"
+                    },
+                    {
+                        "name": "EN-DeleteKeysFromDbAfterBatching",
+                        "value": "[not(parameters('isDebug'))]"
+                    },
+                    {
+                        "name": "EN-DisableDeviceVerification",
+                        "value": "[parameters('isDebug')]"
+                    },
+                    {
+                        "name": "EN-SigningKey",
+                        "value": "asdf"
+                    },
+                    {
+                        "name": "EN-SupportedRegions",
+                        "value": "[parameters('supportedRegions')]"
                     }
                 ]
             }
