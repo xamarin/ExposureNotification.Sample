@@ -7,16 +7,16 @@
             "metadata": {
                 "description": "Function App Nam. Must be globally unique."
             },
-            "defaultValue":"[concat('exposurefunc-', uniqueString(resourceGroup().id))]",
+            "defaultValue":"func-xam-exposure",
             "minLength": 5,
             "maxLength": 24
         },
-        "storageAccountName": {
+        "storageAccountName": { 
             "type": "string",
             "metadata": {
                 "description": "Storage Account Name (lowercase). Must be globally unique"
             },
-            "defaultValue":"[concat('exposurestore-', uniqueString(resourceGroup().id))]",
+            "defaultValue":"stor-xam-exposure",
             "minLength": 3,
             "maxLength": 24
         },
@@ -25,7 +25,7 @@
             "metadata": {
                 "description": "Hosting Service Name. Globally unique."
             },
-            "defaultValue":"[concat('exposurehost-', uniqueString(resourceGroup().id))]",
+            "defaultValue":"host-xam-exposure",
             "minLength": 3,
             "maxLength": 24
         },
@@ -68,7 +68,7 @@
             "metadata": {
                 "description": "Specify the name of the key vault. Must be globally unique."
             },
-            "defaultValue": "[concat('keyvault-', uniqueString(resourceGroup().id))]"
+            "defaultValue": "vault-xam-exposure"
         },
         "isDebug": {
             "type": "bool",
@@ -202,61 +202,13 @@
         }
     },
     {
-        "name": "[parameters('keyVaultName')]",
-        "type": "Microsoft.KeyVault/vaults",
-        "apiVersion": "2016-10-01",
-        "location": "[resourceGroup().location]",
-        "properties": {
-            "enabledForDeployment": true,
-            "enabledForTemplateDeployment": true,
-            "tenantId": "[subscription().tenantId]",
-            "sku": {
-                "name": "Standard",
-                "family": "A"
-            }
-        }
-    },
-    {
-        "type": "Microsoft.KeyVault/vaults/secrets",
-        "name": "[concat(parameters('keyVaultName'), '/', variables('configBlobStorageConnectionStringName'))]",
-        "apiVersion": "2016-10-01",
-        "location": "[resourceGroup().location]",
-        "dependsOn": [
-            "[parameters('keyVaultName')]"
-        ],
-        "properties": {
-            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', toLower(parameters('storageAccountName')), ';AccountKey=', listKeys(parameters('storageAccountName'),'2015-05-01-preview').key1)]"
-        }
-    },
-    {
-        "type": "Microsoft.KeyVault/vaults/secrets",
-        "name": "[concat(parameters('keyVaultName'), '/', variables('configDBConnectionStringName'))]",
-        "apiVersion": "2016-10-01",
-        "location": "[resourceGroup().location]",
-        "dependsOn": [
-            "[parameters('keyVaultName')]"
-        ],
-        "properties": {
-            "value": "[concat('Server=tcp:',reference(variables('sqlServerName')).fullyQualifiedDomainName,',1433;Initial Catalog=',parameters('sqlDatabaseName'),';Persist Security Info=False;User ID=',reference(variables('sqlServerName')).administratorLogin,';Password=',reference(variables('sqlServerName')).administratorLoginPassword,';MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;')]"
-        }
-    },
-    {
-        "type": "Microsoft.KeyVault/vaults/secrets",
-        "name": "[concat(parameters('keyVaultName'), '/', variables('configSigningKeyName'))]",
-        "apiVersion": "2016-10-01",
-        "location": "[resourceGroup().location]",
-        "dependsOn": [
-            "[parameters('keyVaultName')]"
-        ],
-        "properties": {
-            "value": "asfd"
-        }
-    },
-    {
         "name": "[parameters('functionAppName')]",
         "type": "Microsoft.Web/sites",
         "apiVersion": "2018-11-01",
         "location": "[resourceGroup().location]",
+        "identity": {
+            "type": "SystemAssigned"
+        },
         "kind": "functionapp",
         "dependsOn": [
             "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]",
@@ -312,7 +264,7 @@
                     },
                     {
                         "name": "[variables('configDBConnectionStringName')]",
-                        "value": "[concat('Server=tcp:',reference(variables('sqlServerName')).fullyQualifiedDomainName,',1433;Initial Catalog=',parameters('sqlDatabaseName'),';Persist Security Info=False;User ID=',reference(variables('sqlServerName')).administratorLogin,';Password=',reference(variables('sqlServerName')).administratorLoginPassword,';MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;')]"
+                        "value": "[concat('Server=tcp:',reference(variables('sqlServerName')).fullyQualifiedDomainName,',1433;Initial Catalog=',parameters('sqlDatabaseName'),';Persist Security Info=False;User ID=',parameters('sqlAdminLogin'),';Password=',parameters('sqlAdminPassword'),';MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;')]"
                     },
                     {
                         "name": "[variables('configDeleteDBAfterBatchName')]",
@@ -333,6 +285,72 @@
                 ]
             }
         }
-    }],
+    },
+    {
+        "name": "[parameters('keyVaultName')]",
+        "type": "Microsoft.KeyVault/vaults",
+        "apiVersion": "2016-10-01",
+        "location": "[resourceGroup().location]",
+        "dependsOn": [
+            "[parameters('functionAppName')]"
+        ],
+        "properties": {
+            "enabledForDeployment": true,
+            "enabledForTemplateDeployment": true,
+            "tenantId": "[subscription().tenantId]",
+            "sku": {
+                "name": "Standard",
+                "family": "A"
+            },
+            "accessPolicies": [
+                {
+                    "objectId": "[reference(concat('Microsoft.Web/sites/', parameters('functionAppName')), '2018-11-01', 'Full').identity.principalId]",
+                    "tenantId": "[subscription().tenantId]",
+                    "permissions": {
+                        "secrets": [
+                            "get","list","set"
+                        ]
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "type": "Microsoft.KeyVault/vaults/secrets",
+        "name": "[concat(parameters('keyVaultName'), '/', variables('configBlobStorageConnectionStringName'))]",
+        "apiVersion": "2016-10-01",
+        "location": "[resourceGroup().location]",
+        "dependsOn": [
+            "[parameters('keyVaultName')]"
+        ],
+        "properties": {
+            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', toLower(parameters('storageAccountName')), ';AccountKey=', listKeys(parameters('storageAccountName'),'2015-05-01-preview').key1)]"
+        }
+    },
+    {
+        "type": "Microsoft.KeyVault/vaults/secrets",
+        "name": "[concat(parameters('keyVaultName'), '/', variables('configDBConnectionStringName'))]",
+        "apiVersion": "2016-10-01",
+        "location": "[resourceGroup().location]",
+        "dependsOn": [
+            "[parameters('keyVaultName')]"
+        ],
+        "properties": {
+            "value": "[concat('Server=tcp:',reference(variables('sqlServerName')).fullyQualifiedDomainName,',1433;Initial Catalog=',parameters('sqlDatabaseName'),';Persist Security Info=False;User ID=',parameters('sqlAdminLogin'),';Password=',parameters('sqlAdminPassword'),';MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;')]"
+        }
+    },
+    {
+        "type": "Microsoft.KeyVault/vaults/secrets",
+        "name": "[concat(parameters('keyVaultName'), '/', variables('configSigningKeyName'))]",
+        "apiVersion": "2016-10-01",
+        "location": "[resourceGroup().location]",
+        "dependsOn": [
+            "[parameters('keyVaultName')]"
+        ],
+        "properties": {
+            "value": "asfd"
+        }
+    }
+    ],
     "outputs": {}
 }
