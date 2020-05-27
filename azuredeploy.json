@@ -97,7 +97,7 @@
     {
         "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
         "apiVersion": "2018-07-01",
-        "name":"[concat('default/', variables('containerPrefix'), copyIndex())]",
+        "name":"[concat(parameters('storageAccountName'),'/default/', variables('containerPrefix'), copyIndex())]",
         "dependsOn": [
             "[parameters('storageAccountName')]"
         ],
