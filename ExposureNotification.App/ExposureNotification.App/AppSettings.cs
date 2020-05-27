@@ -28,6 +28,7 @@ namespace ExposureNotification.App
 				BlobStorageUrlBase = j.Value<string>("blobStorageUrlBase");
 				BlobStorageContainerNamePrefix = j.Value<string>("blobStorageContainerNamePrefix");
 				SupportedRegions = j.Value<string>("supportedRegions").Split(';', ',', ':');
+				AndroidSafetyNetApiKey = j.Value<string>("androidSafetyNetApiKey");
 			}
 		}
 
@@ -38,5 +39,8 @@ namespace ExposureNotification.App
 		public string[] SupportedRegions { get; }
 
 		public string BlobStorageContainerNamePrefix { get; }
+
+		public string AndroidSafetyNetApiKey { get; }
+
 	}
 }

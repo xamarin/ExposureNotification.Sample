@@ -11,8 +11,6 @@ namespace ExposureNotification.App.Droid.Services
 {
 	partial class SafetyNetAttestor : IDeviceVerifier
 	{
-		readonly string safetyNetApiKey = "YOUR-KEY-HERE";
-
 		public Task<string> VerifyAsync(SelfDiagnosisSubmission submission)
 		{
 			var nonce = submission.GetAndroidNonce();
@@ -22,7 +20,7 @@ namespace ExposureNotification.App.Droid.Services
 		async Task<string> GetSafetyNetAttestationAsync(byte[] nonce)
 		{
 			using var client = SafetyNetClass.GetClient(Android.App.Application.Context);
-			using var response = await client.AttestAsync(nonce, safetyNetApiKey);
+			using var response = await client.AttestAsync(nonce, AppSettings.Instance.AndroidSafetyNetApiKey);
 			return response.JwsResult;
 		}
 	}
