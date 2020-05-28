@@ -41,15 +41,18 @@ namespace ExposureNotification.App
 			});
 
 			LocalStateManager.Save();
+			// If Enabled Local Notifications
+            if (LocalStateManager.Instance.EnableNotifications)
+            {
+				var notification = new NotificationRequest
+				{
+					NotificationId = 100,
+					Title = "Possible COVID-19 Exposure",
+					Description = "It is possible you have been exposed to someone who was a confirmed diagnosis of COVID-19.  Tap for more details."
+				};
 
-			var notification = new NotificationRequest
-			{
-				NotificationId = 100,
-				Title = "Possible COVID-19 Exposure",
-				Description = "It is possible you have been exposed to someone who was a confirmed diagnosis of COVID-19.  Tap for more details."
-			};
-
-			NotificationCenter.Current.Show(notification);
+				NotificationCenter.Current.Show(notification);
+			}
 		}
 
 		// this will be called when they keys need to be collected from the server
