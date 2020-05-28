@@ -15,8 +15,8 @@
             "metadata": {
                 "description": "Storage Account Name (lowercase). Must be globally unique"
             },         
-            "minLength": 3,
-            "maxLength": 17
+            "minLength": 0,
+            "maxLength": 9
         },
         "hostingPlanName": {
             "type": "string",
@@ -72,6 +72,14 @@
                 "description": "Is this deployment currently meant for debugging?"
             },
             "defaultValue": true
+        },
+        "repoUrl": {
+            "type": "string",
+            "defaultValue": "https://github.com/xamarin/xamarin.exposurenotification"
+        },
+        "branch": {
+            "type": "string",
+            "defaultValue": "master"
         }
     },
     "functions": [],
@@ -81,7 +89,7 @@
         "sqlServerName": "[concat('sqlserver-', uniqueString(resourceGroup().id))]",
         "fullFunctionAppName": "[concat(parameters('functionAppName'),'-', uniqueString(resourceGroup().id))]",
         "fullHostingName": "[concat(parameters('hostingPlanName'), '-', uniqueString(resourceGroup().id))]",
-        "fullStorageAccountName": "[toLower(concat(parameters('storageAccountName'), '-', uniqueString(resourceGroup().id)))]",
+        "fullStorageAccountName": "[toLower(concat(parameters('storageAccountName'), uniqueString(resourceGroup().id)))]",
         "fullKeyVaultName": "[concat(parameters('keyVaultName'), '-', uniqueString(resourceGroup().id))]",
         "sqlDatabaseEdition": "Basic",
         "sqlDatabaseCollation": "SQL_Latin1_General_CP1_CI_AS",
@@ -95,7 +103,7 @@
         "configDeleteDBAfterBatchName": "EN-DeleteKeysFromDbAfterBatching",
         "configDisableDeviceVerificationName": "EN-DisableDeviceVerification",
         "configSigningKeyName": "EN-SigningKey",
-        "configSupportedRegionsNameName": "EN-SupportedRegions"
+        "configSupportedRegionsNameName": "EN-SupportedRegions"        
     },
     "resources": [
     {
