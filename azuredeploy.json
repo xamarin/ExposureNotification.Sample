@@ -115,6 +115,8 @@
         "configDisableDeviceVerificationName": "EN-DisableDeviceVerification",
         "configSigningKeyName": "EN-SigningKey",
         "configSupportedRegionsNameName": "EN-SupportedRegions",
+        "keyVaultStart": "@Microsoft.Keyvault(SecretUri=",
+        "keyVaultEnd": ")",
         "keyVaultSecretsBaseUrl": "[concat('https://', variables('fullKeyVaultName'), '.vault.azure.net/secrets/')]"  
     },
     "resources": [
@@ -244,15 +246,15 @@
                     },
                     {
                         "name": "AzureWebJobsDashboard",
-                        "value": "[concat(variables('keyVaultSecretsBaseUrl'), variables('configBlobStorageConnectionStringName'))]"
+                        "value": "[concat(variables('keyVaultStart'), variables('keyVaultSecretsBaseUrl'), variables('configBlobStorageConnectionStringName'), variables('keyVaultEnd'))]"
                     },
                     {
                         "name": "AzureWebJobsStorage",
-                        "value": "[concat(variables('keyVaultSecretsBaseUrl'), variables('configBlobStorageConnectionStringName'))]"
+                        "value": "[concat(variables('keyVaultStart'), variables('keyVaultSecretsBaseUrl'), variables('configBlobStorageConnectionStringName'), variables('keyVaultEnd'))]"
                     },
                     {
                         "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
-                        "value": "[concat(variables('keyVaultSecretsBaseUrl'), variables('configBlobStorageConnectionStringName'))]"
+                        "value": "[concat(variables('keyVaultStart'), variables('keyVaultSecretsBaseUrl'), variables('configBlobStorageConnectionStringName'), variables('keyVaultEnd'))]"
                     },
                     {
                         "name": "WEBSITE_CONTENTSHARE",
@@ -280,7 +282,7 @@
                     },
                     {
                         "name": "[variables('configBlobStorageConnectionStringName')]",
-                        "value": "[concat(variables('keyVaultSecretsBaseUrl'), variables('configBlobStorageConnectionStringName'))]"
+                        "value": "[concat(variables('keyVaultStart'), variables('keyVaultSecretsBaseUrl'), variables('configBlobStorageConnectionStringName'), variables('keyVaultEnd'))]"
                     },
                     {
                         "name": "[variables('configBlobStorageContainerPrefixName')]",
@@ -300,7 +302,7 @@
                     },
                     {
                         "name": "[variables('configSigningKeyName')]",
-                        "value": "[concat(variables('keyVaultSecretsBaseUrl'), variables('configSigningKeyName'))]"
+                        "value": "[concat(variables('keyVaultStart'), variables('keyVaultSecretsBaseUrl'), variables('configSigningKeyName'), variables('keyVaultEnd'))]"
                     },
                     {
                         "name": "[variables('configSupportedRegionsNameName')]",
