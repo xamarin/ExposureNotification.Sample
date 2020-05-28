@@ -6,8 +6,7 @@
             "type": "string",
             "metadata": {
                 "description": "Function App Nam. Must be globally unique."
-            },            
-            "minLength": 5,
+            },                        
             "maxLength": 24
         },
         "storageAccountName": { 
@@ -227,6 +226,10 @@
             "siteConfig": {
                 "appSettings": [
                     {
+                        "name": "PROJECT",
+                        "value": "ExposureNotification.Backend.Functions"
+                    },
+                    {
                         "name": "AzureWebJobsDashboard",
                         "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('fullStorageAccountName'), ';AccountKey=', listKeys(variables('fullStorageAccountName'),'2015-05-01-preview').key1)]"
                     },
@@ -291,8 +294,44 @@
                         "value": "[parameters('supportedRegions')]"
                     }
                 ]
+            },
+            "enabled": true,
+            "hostNameSslStates": [
+                {
+                    "name": "[concat(variables('fullFunctionAppName'), '.azurewebsites.net')]",
+                    "sslState": "Disabled",
+                    "hostType": "Standard"
+                },
+                {
+                    "name": "[concat(variables('fullFunctionAppName'), '.scm.azurewebsites.net')]",
+                    "sslState": "Disabled",
+                    "hostType": "Repository"
+                }
+            ],
+            "reserved": false,
+            "scmSiteAlsoStopped": false,
+            "clientAffinityEnabled": false,
+            "clientCertEnabled": false,
+            "hostNamesDisabled": false,
+            "containerSize": 1536,
+            "dailyMemoryTimeQuota": 0,
+            "httpsOnly": false
+        },
+        "resources": [
+          {
+            "apiVersion": "2018-11-01",
+            "name": "web",
+            "type": "sourcecontrols",
+            "dependsOn": [
+              "[resourceId('Microsoft.Web/sites', variables('fullFunctionAppName'))]"
+            ],
+            "properties": {
+              "RepoUrl": "[parameters('repoUrl')]",
+              "branch": "[parameters('branch')]",
+              "IsManualIntegration": true
             }
-        }
+          }
+        ]    
     },
     {
         "name": "[variables('fullKeyVaultName')]",
