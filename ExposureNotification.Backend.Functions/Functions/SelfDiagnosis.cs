@@ -42,7 +42,11 @@ namespace ExposureNotification.Backend.Functions
 
 					// Verify the device payload (safetynet attestation on android, or device check token on iOS)
 					if (!await Verify.VerifyDevice(diagnosis, DateTimeOffset.UtcNow, platform, authApp))
-						return new BadRequestResult();
+					{
+						log.LogInformation($"Device Failed {platform} Attestation/Verification, returning OK");
+						// The suggestion from Apple/Google is to return OK here to prevent abuse
+						return new OkResult();
+					}
 				}
 
 				if (!diagnosis.Validate())
