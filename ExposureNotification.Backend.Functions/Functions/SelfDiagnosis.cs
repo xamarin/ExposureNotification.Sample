@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
@@ -25,7 +26,7 @@ namespace ExposureNotification.Backend.Functions
 		}
 
 		[FunctionName("UploadSelfDiagnosis")]
-		public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "selfdiagnosis")] HttpRequest req)
+		public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "selfdiagnosis")] HttpRequest req, ILogger log)
 		{
 			var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
 
@@ -44,7 +45,20 @@ namespace ExposureNotification.Backend.Functions
 						return new BadRequestResult();
 				}
 
-				await storage.SubmitPositiveDiagnosisAsync(diagnosis);
+				if (!diagnosis.Validate())
+				{
+					log.LogInformation("Invalid Submission Key data - Validate() failed");
+					return new OkResult();
+				}
+
+				try
+				{
+					await storage.SubmitPositiveDiagnosisAsync(diagnosis);
+				}
+				catch (InvalidOperationException)
+				{
+					log.LogInformation("Maximum keys for VerificationPayload reached, skipping key submission...");
+				}
 			}
 
 			return new OkResult();
