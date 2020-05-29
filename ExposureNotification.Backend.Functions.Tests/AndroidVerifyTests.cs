@@ -49,7 +49,7 @@ namespace ExposureNotification.Backend.Functions.Tests
 		[Fact]
 		public async Task VerifyTokenTest()
 		{
-			var app = new DbAuthorizedApp
+			var app = new AuthorizedAppConfig
 			{
 				PackageName = "com.xamarin.exposurenotification.sampleapp",
 				Platform = "android",

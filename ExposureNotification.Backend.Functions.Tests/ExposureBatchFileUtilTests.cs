@@ -135,10 +135,10 @@ namespace ExposureNotification.Backend.Functions.Tests
 		//	Utils.ValidateExportFileSignature(stream, TestPublicKey);
 		//}
 
-		static DbSignerInfo[] TestSignatures
-			=> new DbSignerInfo[]
+		static SignerInfoConfig[] TestSignatures
+			=> new SignerInfoConfig[]
 			{
-				new DbSignerInfo
+				new SignerInfoConfig
 				{
 					AndroidPackage = "com.xamarin.exposurenotificationsample.tests",
 					AppBundleId = "com.xamarin.exposurenotificationsample.tests",
