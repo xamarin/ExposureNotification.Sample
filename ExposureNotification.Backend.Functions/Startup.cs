@@ -7,7 +7,6 @@ using Microsoft.Azure.Services.AppAuthentication;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.AzureKeyVault;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -40,35 +39,8 @@ namespace ExposureNotification.Backend.Functions
 				.AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
 				.AddEnvironmentVariables();
 			var config = configBuilder.Build();
-
-			var vault = config["EN-KeyVaultName"];
-
-			logger.LogInformation("Loaded basic configuration.");
-
-			if (config.GetValue<bool>("EN-SkipKeyVault") == false)
-			{
-				logger.LogInformation("Adding KeyVault configurations...");
-
-				try
-				{
-					// use that to load the keyvault
-					var azureServiceTokenProvider = new AzureServiceTokenProvider();
-					var keyVaultClient = new KeyVaultClient(
-						new KeyVaultClient.AuthenticationCallback(
-							azureServiceTokenProvider.KeyVaultTokenCallback));
-					configBuilder.AddAzureKeyVault(
-						$"https://{config["EN-KeyVaultName"]}.vault.azure.net/",
-						keyVaultClient,
-						new DefaultKeyVaultSecretManager());
-					config = configBuilder.Build();
-				}
-				catch (Exception ex)
-				{
-					logger.LogError(ex, "Error adding KeyVault configurations.");
-				}
-			}
-
-			logger.LogInformation("Reading configuation...");
+			
+			logger.LogInformation("Loaded basic configuration.  Reading values...");
 
 			var conn = config["EN-DbConnectionString"];
 
