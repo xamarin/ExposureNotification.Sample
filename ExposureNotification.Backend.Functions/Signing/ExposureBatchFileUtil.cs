@@ -18,7 +18,7 @@ namespace ExposureNotification.Backend.Signing
 		public const string BinEntryName = "export.bin";
 		public const string SigEntryName = "export.sig";
 
-		public static async Task<Stream> CreateSignedFileAsync(TemporaryExposureKeyExport export, IEnumerable<DbSignerInfo> signerInfos)
+		public static async Task<Stream> CreateSignedFileAsync(TemporaryExposureKeyExport export, IEnumerable<SignerInfoConfig> signerInfos)
 		{
 			export.SignatureInfos.AddRange(signerInfos.Select(sigInfo => new SignatureInfo
 			{
@@ -71,7 +71,7 @@ namespace ExposureNotification.Backend.Signing
 			return stream;
 		}
 
-		public static async Task<MemoryStream> CreateSigAsync(TemporaryExposureKeyExport export, byte[] exportBytes, IEnumerable<DbSignerInfo> signerInfos)
+		public static async Task<MemoryStream> CreateSigAsync(TemporaryExposureKeyExport export, byte[] exportBytes, IEnumerable<SignerInfoConfig> signerInfos)
 		{
 			var stream = new MemoryStream();
 
@@ -107,7 +107,7 @@ namespace ExposureNotification.Backend.Signing
 			return stream;
 		}
 
-		public static Task<byte[]> GenerateSignatureAsync(byte[] contents, DbSignerInfo signerInfo)
+		public static Task<byte[]> GenerateSignatureAsync(byte[] contents, SignerInfoConfig signerInfo)
 		{
 			// This is actually am Elliptic Curve certificate (ECDSA) with a P-256 curve
 			// It's been encoded to a base64 string

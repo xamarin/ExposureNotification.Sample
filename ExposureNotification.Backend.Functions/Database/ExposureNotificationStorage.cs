@@ -26,6 +26,8 @@ namespace ExposureNotification.Backend.Database
 		{
 			this.context = context;
 			this.settings = settings.Value;
+
+			this.context.Database.SetCommandTimeout(900);
 		}
 
 		public ValueTask DisposeAsync() =>
@@ -126,12 +128,17 @@ namespace ExposureNotification.Backend.Database
 			using var transaction = context.Database.BeginTransaction();
 
 			var cutoffMsEpoch = DateTimeOffset.UtcNow.AddDays(-14).ToUnixTimeMilliseconds();
+			var nowEpochSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+			var twoHoursAgoEpochSeconds = nowEpochSeconds - 7200; // 2 hours ago
 
 			var keys = context.TemporaryExposureKeys
 				.Where(k => k.Region == region
 							&& !k.Processed
-							&& k.TimestampMsSinceEpoch >= cutoffMsEpoch)
-				.OrderBy(k => k.Id); // Randomize the order
+							// No keys older than 14 days
+							&& k.TimestampMsSinceEpoch >= cutoffMsEpoch
+							// Do not distribute temporary exposure key data until at least 2 hours after the end of the keyʼs expiration window
+							&& (k.RollingStartSecondsSinceEpoch + (k.RollingDuration * 10 * 60)) < twoHoursAgoEpochSeconds)
+				.OrderBy(k => k.Id); // Randomize the order in the export file
 
 			// How many keys do we need to put in batchfiles
 			var totalCount = await keys.CountAsync();
@@ -170,35 +177,33 @@ namespace ExposureNotification.Backend.Database
 			return batchFileCount;
 		}
 
-		// TODO: load this from a DB or config
-
-		public Task<List<DbSignerInfo>> GetAllSignerInfosAsync()
-			=> Task.FromResult(new List<DbSignerInfo> {
-				new DbSignerInfo
+		public Task<List<SignerInfoConfig>> GetAllSignerInfosAsync()
+			=> Task.FromResult(new List<SignerInfoConfig> {
+				new SignerInfoConfig
 				{
-					AndroidPackage = "com.xamarin.exposurenotification.sampleapp",
-					AppBundleId = "com.xamarin.exposurenotification.sampleapp",
-					VerificationKeyId = "ExampleServer_k1",
-					VerificationKeyVersion = "1",
+					AndroidPackage = settings.AndroidPackageName,
+					AppBundleId = settings.iOSBundleId,
+					VerificationKeyId = settings.VerificationKeyId,
+					VerificationKeyVersion = settings.VerificationKeyVersion,
 					SigningKeyBase64String = settings.SigningKeyBase64String
 				}
 			});
 
-		public DbAuthorizedApp GetAuthorizedApp(DbAuthorizedApp.DevicePlatform platform) =>
+		public AuthorizedAppConfig GetAuthorizedApp(AuthorizedAppConfig.DevicePlatform platform) =>
 			platform switch
 			{
-				DbAuthorizedApp.DevicePlatform.Android => new DbAuthorizedApp
+				AuthorizedAppConfig.DevicePlatform.Android => new AuthorizedAppConfig
 				{
-					PackageName = "com.xamarin.exposurenotification.sampleapp",
+					PackageName = settings.AndroidPackageName,
 					Platform = "android",
 				},
-				DbAuthorizedApp.DevicePlatform.iOS => new DbAuthorizedApp
+				AuthorizedAppConfig.DevicePlatform.iOS => new AuthorizedAppConfig
 				{
-					PackageName = "com.xamarin.exposurenotification.sampleapp",
+					PackageName = settings.iOSBundleId,
 					Platform = "ios",
-					DeviceCheckKeyId = "YOURKEYID",
-					DeviceCheckTeamId = "YOURTEAMID",
-					DeviceCheckPrivateKey = "CONTENTS-OF-P8-FILE-WITH-NO-LINE-BREAKS"
+					DeviceCheckKeyId = settings.iOSDeviceCheckKeyId,
+					DeviceCheckTeamId = settings.iOSDeviceCheckTeamId,
+					DeviceCheckPrivateKey = settings.iOSDeviceCheckPrivateKey
 				},
 				_ => throw new ArgumentOutOfRangeException(nameof(platform))
 			};

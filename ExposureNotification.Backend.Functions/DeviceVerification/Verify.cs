@@ -7,11 +7,11 @@ namespace ExposureNotification.Backend.DeviceVerification
 {
 	static class Verify
 	{
-		public static Task<bool> VerifyDevice(SelfDiagnosisSubmission submission, DateTimeOffset requestTime, DbAuthorizedApp.DevicePlatform platform, DbAuthorizedApp auth) =>
+		public static Task<bool> VerifyDevice(SelfDiagnosisSubmission submission, DateTimeOffset requestTime, AuthorizedAppConfig.DevicePlatform platform, AuthorizedAppConfig auth) =>
 			platform switch
 			{
-				DbAuthorizedApp.DevicePlatform.Android => AndroidVerify.VerifyToken(submission.DeviceVerificationPayload, submission.GetAndroidNonce(), requestTime, auth),
-				DbAuthorizedApp.DevicePlatform.iOS => AppleVerify.VerifyToken(submission.DeviceVerificationPayload, requestTime, auth),
+				AuthorizedAppConfig.DevicePlatform.Android => AndroidVerify.VerifyToken(submission.DeviceVerificationPayload, submission.GetAndroidNonce(), requestTime, auth),
+				AuthorizedAppConfig.DevicePlatform.iOS => AppleVerify.VerifyToken(submission.DeviceVerificationPayload, requestTime, auth),
 				_ => Task.FromResult(false),
 			};
 	}

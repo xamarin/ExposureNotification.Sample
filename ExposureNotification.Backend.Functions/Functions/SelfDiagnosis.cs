@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
@@ -25,7 +26,7 @@ namespace ExposureNotification.Backend.Functions
 		}
 
 		[FunctionName("UploadSelfDiagnosis")]
-		public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "selfdiagnosis")] HttpRequest req)
+		public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "selfdiagnosis")] HttpRequest req, ILogger log)
 		{
 			var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
 
@@ -36,15 +37,32 @@ namespace ExposureNotification.Backend.Functions
 				// Verification may be disabled for testing
 				if (!settings.Value.DisableDeviceVerification)
 				{
-					var platform = DbAuthorizedApp.ParsePlatform(diagnosis.Platform);
+					var platform = AuthorizedAppConfig.ParsePlatform(diagnosis.Platform);
 					var authApp = storage.GetAuthorizedApp(platform);
 
 					// Verify the device payload (safetynet attestation on android, or device check token on iOS)
 					if (!await Verify.VerifyDevice(diagnosis, DateTimeOffset.UtcNow, platform, authApp))
-						return new BadRequestResult();
+					{
+						log.LogInformation($"Device Failed {platform} Attestation/Verification, returning OK");
+						// The suggestion from Apple/Google is to return OK here to prevent abuse
+						return new OkResult();
+					}
 				}
 
-				await storage.SubmitPositiveDiagnosisAsync(diagnosis);
+				if (!diagnosis.Validate())
+				{
+					log.LogInformation("Invalid Submission Key data - Validate() failed");
+					return new OkResult();
+				}
+
+				try
+				{
+					await storage.SubmitPositiveDiagnosisAsync(diagnosis);
+				}
+				catch (InvalidOperationException)
+				{
+					log.LogInformation("Maximum keys for VerificationPayload reached, skipping key submission...");
+				}
 			}
 
 			return new OkResult();
