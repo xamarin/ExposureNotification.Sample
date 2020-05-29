@@ -16,7 +16,7 @@ namespace ExposureNotification.Backend.DeviceVerification
 	{
 		const string appleDeviceCheckUrl = "https://api.development.devicecheck.apple.com/v1/validate_device_token";
 
-		public static async Task<bool> VerifyToken(string token, DateTimeOffset requestTime, DbAuthorizedApp app)
+		public static async Task<bool> VerifyToken(string token, DateTimeOffset requestTime, AuthorizedAppConfig app)
 		{
 			var http = new HttpClient();
 

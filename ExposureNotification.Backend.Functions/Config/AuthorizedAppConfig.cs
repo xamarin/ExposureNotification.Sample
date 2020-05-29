@@ -4,11 +4,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ExposureNotification.Backend.Database
 {
-	public class DbAuthorizedApp
+	public class AuthorizedAppConfig
 	{
-		[Key, Column(Order = 0)]
-		public string Id { get; set; } = Guid.NewGuid().ToString();
-
 		public string PackageName { get; set; }
 
 		public string Platform { get; set; }

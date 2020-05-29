@@ -12,7 +12,7 @@ namespace ExposureNotification.Backend.DeviceVerification
 {
 	public static class AndroidVerify
 	{
-		public static async Task<bool> VerifyToken(string token, byte[] expectedNonce, DateTimeOffset requestTime, DbAuthorizedApp app)
+		public static async Task<bool> VerifyToken(string token, byte[] expectedNonce, DateTimeOffset requestTime, AuthorizedAppConfig app)
 		{
 			var claims = ParsePayload(token);
 

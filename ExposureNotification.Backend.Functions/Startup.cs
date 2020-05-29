@@ -53,7 +53,16 @@ namespace ExposureNotification.Backend.Functions
 				settings.DeleteKeysFromDbAfterBatching = config.GetValue<bool>("EN-DeleteKeysFromDbAfterBatching");
 				settings.DisableDeviceVerification = config.GetValue<bool>("EN-DisableDeviceVerification");
 				settings.SigningKeyBase64String = config["EN-SigningKey"];
+				settings.VerificationKeyId = config["EN-VerificationKey-Id"];
+				settings.VerificationKeyVersion = config["EN-VerificationKey-Version"];
 				settings.SupportedRegions = config["EN-SupportedRegions"]?.ToUpperInvariant()?.Split(separators) ?? new string[0];
+				settings.AndroidPackageName = config["EN-Android-PackageName"];
+				settings.iOSBundleId = config["EN-iOS-BundleId"];
+				settings.iOSDeviceCheckTeamId = config["EN-iOS-DeviceCheck-TeamId"];
+				settings.iOSDeviceCheckKeyId = config["EN-iOS-DeviceCheck-KeyId"];
+				settings.iOSDeviceCheckPrivateKey = config["EN-iOS-DeviceCheck-PrivateKey"];
+				
+				logger.LogInformation($"Configuration Values:\r\n{settings}");
 			});
 
 			logger.LogInformation("Setting up database...");
