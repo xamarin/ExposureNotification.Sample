@@ -496,6 +496,45 @@
         "properties": {
             "value": "[parameters('signingKeyValue')]"
         }
+    },
+    {
+        "name": "updateFunctionAppSettings",
+        "type": "Microsoft.Resources/deployments",
+        "apiVersion": "2019-10-01",
+        "dependsOn": [
+            "[variables('fullFunctionAppName')]",
+            "[variables('fullKeyVaultName')]"
+        ],
+        "properties": {
+            "mode": "Incremental",
+            "parameters": { },
+            "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {},
+                "variables": {},
+                "resources": [
+                    {
+                        "name": "[variables('fullFunctionAppName')]",
+                        "type": "Microsoft.Web/sites",
+                        "apiVersion": "2018-11-01",
+                        "location": "[resourceGroup().location]",
+                        "kind": "functionapp",
+                        "properties": {
+                            "siteConfig": {
+                                "appSettings": [
+                                    {
+                                        "name": "BRANDNEW",
+                                        "value": "IS ANYBODY HOME?"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                ],
+                "outputs": {}
+            }
+        }
     }
     ],
     "outputs": {}
