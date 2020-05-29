@@ -4,15 +4,19 @@
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
     "FUNCTIONS_WORKER_RUNTIME": "dotnet",
 
-    "EN-SkipKeyVault": true, // just use local config
-    "EN-KeyVaultName": "KEY_VAULT_NAME_HERE",
-
     "EN-BlobStorageConnectionString": "UseDevelopmentStorage=true",
     "EN-BlobStorageContainerNamePrefix": "region-",
     "EN-DbConnectionString": null, // use in-memory
     "EN-DeleteKeysFromDbAfterBatching": "true",
     "EN-DisableDeviceVerification": "true",
     "EN-SigningKey": null, // placeholder for KeyVault certificate
-    "EN-SupportedRegions": "ca;za"
+    "EN-VerificationKeyId": "ExampleServer_k1",
+    "EN-VerificationKeyVersion": "1",
+    "EN-SupportedRegions": "302;655", // MCC (Mobile Country Codes)
+    "EN-Android-PackageName": "com.xamarin.exposurenotification.sampleapp",
+    "EN-iOS-BundleId": "com.xamarin.exposurenotification.sampleapp",
+    "EN-iOS-DeviceCheck-KeyId": "YOURKEYID",
+    "EN-iOS-DeviceCheck-TeamId": "YOURTEAMID",
+    "EN-iOS-DeviceCheck-PrivateKey": "CONTENTS-OF-P8-FILE-WITH-NO-LINE-BREAKS"
   }
 }

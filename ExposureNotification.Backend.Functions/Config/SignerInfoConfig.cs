@@ -4,11 +4,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ExposureNotification.Backend.Database
 {
-	public class DbSignerInfo
+	public class SignerInfoConfig
 	{
-		[Key, Column(Order = 0)]
-		public string Id { get; set; } = Guid.NewGuid().ToString();
-
 		public string AndroidPackage { get; set; }
 
 		public string AppBundleId { get; set; }

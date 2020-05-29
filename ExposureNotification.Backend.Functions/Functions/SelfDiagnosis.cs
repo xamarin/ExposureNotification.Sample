@@ -36,7 +36,7 @@ namespace ExposureNotification.Backend.Functions
 				// Verification may be disabled for testing
 				if (!settings.Value.DisableDeviceVerification)
 				{
-					var platform = DbAuthorizedApp.ParsePlatform(diagnosis.Platform);
+					var platform = AuthorizedAppConfig.ParsePlatform(diagnosis.Platform);
 					var authApp = storage.GetAuthorizedApp(platform);
 
 					// Verify the device payload (safetynet attestation on android, or device check token on iOS)
