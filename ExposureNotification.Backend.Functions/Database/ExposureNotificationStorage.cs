@@ -26,6 +26,8 @@ namespace ExposureNotification.Backend.Database
 		{
 			this.context = context;
 			this.settings = settings.Value;
+
+			this.context.Database.SetCommandTimeout(900);
 		}
 
 		public ValueTask DisposeAsync() =>
