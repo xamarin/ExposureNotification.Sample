@@ -431,15 +431,15 @@
                                     },
                                     {
                                         "name": "AzureWebJobsDashboard",
-                                        "value": "[reference(resourceId('Microsoft.KeyVault/vaults/secrets', variables('fullKeyVaultName'), variables('configBlobStorageConnectionStringName'))).secretUriWithVersion]"
+                                        "value": "[concat(variables('keyVaultStart'),reference(resourceId('Microsoft.KeyVault/vaults/secrets', variables('fullKeyVaultName'), variables('configBlobStorageConnectionStringName'))).secretUriWithVersion, variables('keyVaultEnd'))]"
                                     },
                                     {
                                         "name": "AzureWebJobsStorage",
-                                        "value": "[reference(resourceId('Microsoft.KeyVault/vaults/secrets', variables('fullKeyVaultName'), variables('configBlobStorageConnectionStringName'))).secretUriWithVersion]"
+                                        "value": "[concat(variables('keyVaultStart'),reference(resourceId('Microsoft.KeyVault/vaults/secrets', variables('fullKeyVaultName'), variables('configBlobStorageConnectionStringName'))).secretUriWithVersions, variables('keyVaultEnd'))]"
                                     },
                                     {
                                         "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
-                                        "value": "[reference(resourceId('Microsoft.KeyVault/vaults/secrets', variables('fullKeyVaultName'), variables('configBlobStorageConnectionStringName'))).secretUriWithVersion]"
+                                        "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('fullStorageAccountName'), ';AccountKey=', listKeys(variables('fullStorageAccountName'),'2015-05-01-preview').key1)]"
                                     },
                                     {
                                         "name": "WEBSITE_CONTENTSHARE",
@@ -467,7 +467,7 @@
                                     },
                                     {
                                         "name": "[variables('configBlobStorageConnectionStringName')]",
-                                        "value": "[reference(resourceId('Microsoft.KeyVault/vaults/secrets', variables('fullKeyVaultName'), variables('configBlobStorageConnectionStringName'))).secretUriWithVersion]"
+                                        "value": "[concat(variables('keyVaultStart'), reference(resourceId('Microsoft.KeyVault/vaults/secrets', variables('fullKeyVaultName'), variables('configBlobStorageConnectionStringName'))).secretUriWithVersion, variables('keyVaultEnd'))]"
                                     },
                                     {
                                         "name": "[variables('configBlobStorageContainerPrefixName')]",
@@ -475,7 +475,7 @@
                                     },
                                     {
                                         "name": "[variables('configDBConnectionStringName')]",
-                                        "value": "[reference(resourceId('Microsoft.KeyVault/vaults/secrets', variables('fullKeyVaultName'), variables('configDBConnectionStringName'))).secretUriWithVersion]"
+                                        "value": "[concat(variables('keyVaultStart'), reference(resourceId('Microsoft.KeyVault/vaults/secrets', variables('fullKeyVaultName'), variables('configDBConnectionStringName'))).secretUriWithVersion, variables('keyVaultEnd'))]"
                                     },
                                     {
                                         "name": "[variables('configDeleteDBAfterBatchName')]",
@@ -487,7 +487,7 @@
                                     },
                                     {
                                         "name": "[variables('configSigningKeyName')]",
-                                        "value": "[reference(resourceId('Microsoft.KeyVault/vaults/secrets', variables('fullKeyVaultName'), variables('configSigningKeyName'))).secretUriWithVersion]"
+                                        "value": "[concat(variables('keyVaultStart'), reference(resourceId('Microsoft.KeyVault/vaults/secrets', variables('fullKeyVaultName'), variables('configSigningKeyName'))).secretUriWithVersion, variables('keyVaultEnd'))]"
                                     },
                                     {
                                         "name": "[variables('configSupportedRegionsNameName')]",
