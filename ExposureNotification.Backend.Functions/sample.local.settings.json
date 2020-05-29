@@ -10,8 +10,8 @@
     "EN-DeleteKeysFromDbAfterBatching": "true",
     "EN-DisableDeviceVerification": "true",
     "EN-SigningKey": null, // placeholder for KeyVault certificate
-    "EN-VerificationKeyId": "ExampleServer_k1",
-    "EN-VerificationKeyVersion": "1",
+    "EN-VerificationKey-Id": "ExampleServer_k1",
+    "EN-VerificationKey-Version": "1",
     "EN-SupportedRegions": "302;655", // MCC (Mobile Country Codes)
     "EN-Android-PackageName": "com.xamarin.exposurenotification.sampleapp",
     "EN-iOS-BundleId": "com.xamarin.exposurenotification.sampleapp",
