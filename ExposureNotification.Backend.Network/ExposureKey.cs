@@ -19,5 +19,13 @@ namespace ExposureNotification.Backend.Network
 		// Must be >= 0 and <= 8
 		[JsonProperty("transmissionRisk")]
 		public int TransmissionRisk { get; set; }
+
+		[JsonIgnore]
+		public long RollingDurationSeconds
+			=> RollingDuration * 10 * 60;
+
+		[JsonIgnore]
+		public long RollingEnd
+			=> RollingStart + RollingDurationSeconds;
 	}
 }

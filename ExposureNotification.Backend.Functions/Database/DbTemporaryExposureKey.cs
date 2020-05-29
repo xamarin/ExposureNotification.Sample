@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.Serialization;
 using ExposureNotification.Backend.Network;
 using ExposureNotification.Backend.Proto;
 using Google.Protobuf;
@@ -25,6 +26,14 @@ namespace ExposureNotification.Backend.Database
 		public int RollingDuration { get; set; }
 
 		public int TransmissionRiskLevel { get; set; }
+
+		[IgnoreDataMember]
+		public long RollingDurationSeconds
+			=> RollingDuration * 10 * 60;
+
+		[IgnoreDataMember]
+		public long RollingEndSecondsSinceEpoch
+			=> RollingStartSecondsSinceEpoch + RollingDurationSeconds;
 
 		public TemporaryExposureKey ToKey()
 			=> new TemporaryExposureKey()

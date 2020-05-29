@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json;
 
 namespace ExposureNotification.Backend.Network
@@ -16,10 +17,10 @@ namespace ExposureNotification.Backend.Network
 			{
 				var random = new Random();
 				var size = random.Next(1024, 2048);
-				
+
 				// Approximate the base64 blowup.
 				size = (int)(size * 0.75);
-				
+
 				var padding = new byte[size];
 				random.NextBytes(padding);
 				Padding = Convert.ToBase64String(padding);
@@ -52,5 +53,31 @@ namespace ExposureNotification.Backend.Network
 		// Random data to obscure the size of the request network packet sniffers.
 		[JsonProperty("padding")]
 		public string Padding { get; set; }
+
+		public bool Validate()
+		{
+			// Check for non-unique starts
+			if (Keys.Any(k => Keys.Where(k2 => k2.RollingStart == k.RollingStart).Count() > 1))
+				return false;
+
+			// Check for a window of keys > 14 days
+			var startEpoch = Keys.OrderBy(k => k.RollingStart).FirstOrDefault().RollingStart;
+			var endEpoch = Keys.Select(k => k.RollingStart + (k.RollingDuration * 10 * 60))
+					.OrderBy(k => k).LastOrDefault();
+
+			if ((TimeSpan.FromSeconds(endEpoch) - TimeSpan.FromSeconds(startEpoch)).TotalDays >= 15)
+				return false;
+
+			// Check for overlapping time windows
+			foreach (var k in Keys)
+			{
+				if (Keys.Any(k2 =>
+					(k2.RollingStart > k.RollingStart && k2.RollingStart < k.RollingEnd)
+					|| (k2.RollingEnd > k.RollingStart && k2.RollingEnd < k.RollingEnd)))
+					return false;
+			}
+
+			return true;
+		}
 	}
 }
