@@ -424,26 +424,22 @@
                         "kind": "functionapp",
                         "properties": {
                             "siteConfig": {
-                                "appSettings": [
-                                    {
-                                        "name": "BRANDNEW",
-                                        "value": "IS ANYBODY HOME?"
-                                    },
+                                "appSettings": [                                    
                                     {
                                         "name": "PROJECT",
                                         "value": "ExposureNotification.Backend.Functions"
                                     },
                                     {
                                         "name": "AzureWebJobsDashboard",
-                                        "value": "[reference(concat('Microsoft.KeyVault/vaults/secrets', '/', variables('fullKeyVaultName'), '/', variables('configBlobStorageConnectionStringName'))).secretUriWithVersion]"
+                                        "value": "[reference(resourceId('Microsoft.KeyVault/vaults/secrets', variables('fullKeyVaultName'), variables('configBlobStorageConnectionStringName'))).secretUriWithVersion]"
                                     },
                                     {
                                         "name": "AzureWebJobsStorage",
-                                        "value": "[reference(concat('Microsoft.KeyVault/vaults/secrets', '/', variables('fullKeyVaultName'), '/', variables('configBlobStorageConnectionStringName'))).secretUriWithVersion]"
+                                        "value": "[reference(resourceId('Microsoft.KeyVault/vaults/secrets', variables('fullKeyVaultName'), variables('configBlobStorageConnectionStringName'))).secretUriWithVersion]"
                                     },
                                     {
                                         "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
-                                        "value": "[reference(concat('Microsoft.KeyVault/vaults/secrets', '/', variables('fullKeyVaultName'), '/', variables('configBlobStorageConnectionStringName'))).secretUriWithVersion]"
+                                        "value": "[reference(resourceId('Microsoft.KeyVault/vaults/secrets', variables('fullKeyVaultName'), variables('configBlobStorageConnectionStringName'))).secretUriWithVersion]"
                                     },
                                     {
                                         "name": "WEBSITE_CONTENTSHARE",
@@ -471,7 +467,7 @@
                                     },
                                     {
                                         "name": "[variables('configBlobStorageConnectionStringName')]",
-                                        "value": "[reference(concat('Microsoft.KeyVault/vaults/secrets', '/', variables('fullKeyVaultName'), '/', variables('configBlobStorageConnectionStringName'))).secretUriWithVersion]"
+                                        "value": "[reference(resourceId('Microsoft.KeyVault/vaults/secrets', variables('fullKeyVaultName'), variables('configBlobStorageConnectionStringName'))).secretUriWithVersion]"
                                     },
                                     {
                                         "name": "[variables('configBlobStorageContainerPrefixName')]",
@@ -479,7 +475,7 @@
                                     },
                                     {
                                         "name": "[variables('configDBConnectionStringName')]",
-                                        "value": "[reference(concat('Microsoft.KeyVault/vaults/secrets', '/', variables('fullKeyVaultName'), '/', variables('configDBConnectionStringName'))).secretUriWithVersion]"
+                                        "value": "[reference(resourceId('Microsoft.KeyVault/vaults/secrets', variables('fullKeyVaultName'), variables('configDBConnectionStringName'))).secretUriWithVersion]"
                                     },
                                     {
                                         "name": "[variables('configDeleteDBAfterBatchName')]",
@@ -491,7 +487,7 @@
                                     },
                                     {
                                         "name": "[variables('configSigningKeyName')]",
-                                        "value": "[reference(concat('Microsoft.KeyVault/vaults/secrets', '/', variables('fullKeyVaultName'), '/', variables('configSigningKeyName'))).secretUriWithVersion]"
+                                        "value": "[reference(resourceId('Microsoft.KeyVault/vaults/secrets', variables('fullKeyVaultName'), variables('configSigningKeyName'))).secretUriWithVersion]"
                                     },
                                     {
                                         "name": "[variables('configSupportedRegionsNameName')]",
