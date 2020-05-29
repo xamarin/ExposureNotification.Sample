@@ -254,7 +254,7 @@
                     },
                     {
                         "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
-                        "value": "[concat(variables('keyVaultStart'), variables('keyVaultSecretsBaseUrl'), variables('configBlobStorageConnectionStringName'), variables('keyVaultEnd'))]"
+                        "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('fullStorageAccountName'), ';AccountKey=', listKeys(variables('fullStorageAccountName'),'2015-05-01-preview').key1)]"
                     },
                     {
                         "name": "WEBSITE_CONTENTSHARE",
