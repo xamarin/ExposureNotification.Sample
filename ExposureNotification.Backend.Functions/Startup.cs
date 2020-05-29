@@ -89,6 +89,8 @@ namespace ExposureNotification.Backend.Functions
 				settings.iOSDeviceCheckTeamId = config["EN-iOS-DeviceCheck-TeamId"];
 				settings.iOSDeviceCheckKeyId = config["EN-iOS-DeviceCheck-KeyId"];
 				settings.iOSDeviceCheckPrivateKey = config["EN-iOS-DeviceCheck-PrivateKey"];
+				
+				logger.LogInformation($"Configuration Values:\r\n{settings}");
 			});
 
 			logger.LogInformation("Setting up database...");

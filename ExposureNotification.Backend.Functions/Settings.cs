@@ -1,4 +1,6 @@
-﻿namespace ExposureNotification.Backend.Functions
+﻿using System.Text;
+
+namespace ExposureNotification.Backend.Functions
 {
 	public class Settings
 	{
@@ -24,5 +26,30 @@
 		public string iOSDeviceCheckTeamId { get; set; }
 		public string iOSDeviceCheckPrivateKey { get; set; }
 
+
+		public override string ToString()
+		{
+			string WriteSecret(string s)
+				=> string.IsNullOrEmpty(s) ? "NULL" : "<hidden>";
+
+			var sb = new StringBuilder();
+
+			sb.AppendLine($"DbConnectionString : {WriteSecret(DbConnectionString)}");
+			sb.AppendLine($"BlobStorageConnectionString : {WriteSecret(BlobStorageConnectionString)}");
+			sb.AppendLine($"BlobStorageContainerNamePrefix : {BlobStorageContainerNamePrefix}");
+			sb.AppendLine($"SupportedRegions: {string.Join(';', SupportedRegions)}");
+			sb.AppendLine($"SigningKeyBase64String : {WriteSecret(SigningKeyBase64String)}");
+			sb.AppendLine($"VerificationKeyId: {VerificationKeyId}");
+			sb.AppendLine($"VerificationKeyVersion : {VerificationKeyVersion}");
+			sb.AppendLine($"DeleteKeysFromDbAfterBatching : {DeleteKeysFromDbAfterBatching}");
+			sb.AppendLine($"DisableDeviceVerification : {DisableDeviceVerification}");
+			sb.AppendLine($"AndroidPackageName : {AndroidPackageName}");
+			sb.AppendLine($"iOSBundleId : {iOSBundleId}");
+			sb.AppendLine($"iOSDeviceCheckKeyId : {iOSDeviceCheckKeyId}");
+			sb.AppendLine($"iOSDeviceCheckPrivateKey : {WriteSecret(iOSDeviceCheckPrivateKey)}");
+			sb.AppendLine($"iOSDeviceCheckTeamId : {iOSDeviceCheckTeamId}");
+
+			return sb.ToString();
+		}
 	}
 }
