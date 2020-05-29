@@ -129,7 +129,7 @@ namespace ExposureNotification.Backend.Database
 
 			var cutoffMsEpoch = DateTimeOffset.UtcNow.AddDays(-14).ToUnixTimeMilliseconds();
 			var nowEpochSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-			var cutoffEpochSeconds = nowEpochSeconds - 7200;
+			var cutoffEpochSeconds = nowEpochSeconds - 7200; // 2 hours ago
 
 			var keys = context.TemporaryExposureKeys
 				.Where(k => k.Region == region
