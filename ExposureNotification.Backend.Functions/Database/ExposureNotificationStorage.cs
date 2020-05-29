@@ -129,6 +129,7 @@ namespace ExposureNotification.Backend.Database
 
 			var cutoffMsEpoch = DateTimeOffset.UtcNow.AddDays(-14).ToUnixTimeMilliseconds();
 			var nowEpochSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+			var cutoffEpochSeconds = nowEpochSeconds - 7200;
 
 			var keys = context.TemporaryExposureKeys
 				.Where(k => k.Region == region
@@ -136,7 +137,7 @@ namespace ExposureNotification.Backend.Database
 							// No keys older than 14 days
 							&& k.TimestampMsSinceEpoch >= cutoffMsEpoch
 							// Do not distribute temporary exposure key data until at least 2 hours after the end of the keyʼs expiration window
-							&& (k.RollingEndSecondsSinceEpoch + 7200) < nowEpochSeconds)
+							&& k.RollingEndSecondsSinceEpoch < cutoffEpochSeconds)
 				.OrderBy(k => k.Id); // Randomize the order in the export file
 
 			// How many keys do we need to put in batchfiles
