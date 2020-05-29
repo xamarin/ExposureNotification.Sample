@@ -34,8 +34,7 @@
             "type": "string",
             "metadata": {
                 "description": "Storage Account Name to hold Exposure Notifications data. Must be globally unique"
-            },      
-            "defaultValue":"soufuncstorexposure",               
+            },                                 
             "minLength": 3,
             "maxLength": 24      
         },
@@ -78,7 +77,7 @@
             "metadata": {
                 "description": "Base64 encoded bytes for your Elliptic curve P256 public/private key in PKCS12 (pfx) format."
             },
-            "defaultValue":" "
+            "defaultValue":""
         },
         "isDebug": {
             "type": "bool",
