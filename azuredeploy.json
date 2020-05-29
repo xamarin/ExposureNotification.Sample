@@ -393,28 +393,7 @@
                         "value": "[parameters('iOSDeviceCheckPrivateKey')]"
                     }
                 ]
-            },
-            "enabled": true,
-            "hostNameSslStates": [
-                {
-                    "name": "[concat(variables('fullFunctionAppName'), '.azurewebsites.net')]",
-                    "sslState": "Disabled",
-                    "hostType": "Standard"
-                },
-                {
-                    "name": "[concat(variables('fullFunctionAppName'), '.scm.azurewebsites.net')]",
-                    "sslState": "Disabled",
-                    "hostType": "Repository"
-                }
-            ],
-            "reserved": false,
-            "scmSiteAlsoStopped": false,
-            "clientAffinityEnabled": false,
-            "clientCertEnabled": false,
-            "hostNamesDisabled": false,
-            "containerSize": 1536,
-            "dailyMemoryTimeQuota": 0,
-            "httpsOnly": false
+            }
         },
         "resources": [
           {
@@ -526,8 +505,125 @@
                                     {
                                         "name": "BRANDNEW",
                                         "value": "IS ANYBODY HOME?"
+                                    },
+                                    {
+                                        "name": "PROJECT",
+                                        "value": "ExposureNotification.Backend.Functions"
+                                    },
+                                    {
+                                        "name": "AzureWebJobsDashboard",
+                                        "value": "[concat(variables('keyVaultStart'), variables('keyVaultSecretsBaseUrl'), variables('configBlobStorageConnectionStringName'), variables('keyVaultEnd'))]"
+                                    },
+                                    {
+                                        "name": "AzureWebJobsStorage",
+                                        "value": "[concat(variables('keyVaultStart'), variables('keyVaultSecretsBaseUrl'), variables('configBlobStorageConnectionStringName'), variables('keyVaultEnd'))]"
+                                    },
+                                    {
+                                        "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+                                        "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('fullStorageAccountName'), ';AccountKey=', listKeys(variables('fullStorageAccountName'),'2015-05-01-preview').key1)]"
+                                    },
+                                    {
+                                        "name": "WEBSITE_CONTENTSHARE",
+                                        "value": "[toLower(variables('fullFunctionAppName'))]"
+                                    },
+                                    {
+                                        "name": "FUNCTIONS_EXTENSION_VERSION",
+                                        "value": "~3"
+                                    },
+                                    {
+                                        "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                                        "value": "[reference(resourceId('microsoft.insights/components/', variables('appInsightsName')), '2015-05-01').InstrumentationKey]"
+                                    },
+                                    {
+                                        "name": "FUNCTIONS_WORKER_RUNTIME",
+                                        "value": "dotnet"
+                                    },
+                                    {
+                                        "name": "[variables('configSkipKeyVaultName')]",
+                                        "value": "[parameters('isDebug')]"
+                                    },
+                                    {
+                                        "name": "[variables('configKeyVaultNameName')]",
+                                        "value": "[variables('fullKeyVaultName')]"
+                                    },
+                                    {
+                                        "name": "[variables('configBlobStorageConnectionStringName')]",
+                                        "value": "[concat(variables('keyVaultStart'), variables('keyVaultSecretsBaseUrl'), variables('configBlobStorageConnectionStringName'), variables('keyVaultEnd'))]"
+                                    },
+                                    {
+                                        "name": "[variables('configBlobStorageContainerPrefixName')]",
+                                        "value": "[variables('containerPrefix')]"
+                                    },
+                                    {
+                                        "name": "[variables('configDBConnectionStringName')]",
+                                        "value": "[concat(variables('keyVaultSecretsBaseUrl'), variables('configDBConnectionStringName'))]"
+                                    },
+                                    {
+                                        "name": "[variables('configDeleteDBAfterBatchName')]",
+                                        "value": "[not(parameters('isDebug'))]"
+                                    },
+                                    {
+                                        "name": "[variables('configDisableDeviceVerificationName')]",
+                                        "value": "[parameters('isDebug')]"
+                                    },
+                                    {
+                                        "name": "[variables('configSigningKeyName')]",
+                                        "value": "[concat(variables('keyVaultStart'), variables('keyVaultSecretsBaseUrl'), variables('configSigningKeyName'), variables('keyVaultEnd'))]"
+                                    },
+                                    {
+                                        "name": "[variables('configSupportedRegionsNameName')]",
+                                        "value": "[parameters('supportedRegions')]"
+                                    },
+                                    {
+                                        "name": "[variables('configVerificationKeyId')]",
+                                        "value": "[parameters('verificationKeyId')]"
+                                    },
+                                    {
+                                        "name": "[variables('configVerificationKeyVersion')]",
+                                        "value": "[parameters('verificationKeyVersion')]"
+                                    },
+                                    {
+                                        "name": "[variables('configAndroidPackageName')]",
+                                        "value": "[parameters('androidPackageName')]"
+                                    },
+                                    {
+                                        "name": "[variables('configIOSBundleId')]",
+                                        "value": "[parameters('iOSBundleId')]"
+                                    },
+                                    {
+                                        "name": "[variables('configIOSDeviceCheckKeyId')]",
+                                        "value": "[parameters('iOSDeviceCheckKeyId')]"
+                                    },
+                                    {
+                                        "name": "[variables('configIOSDeviceCheckTeamId')]",
+                                        "value": "[parameters('iOSDeviceCheckTeamId')]"
+                                    },
+                                    {
+                                        "name": "[variables('configIOSDeviceCheckPrivateKey')]",
+                                        "value": "[parameters('iOSDeviceCheckPrivateKey')]"
                                     }
-                                ]
+                                ],                                
+                                "enabled": true,
+                                "hostNameSslStates": [
+                                    {
+                                        "name": "[concat(variables('fullFunctionAppName'), '.azurewebsites.net')]",
+                                        "sslState": "Disabled",
+                                        "hostType": "Standard"
+                                    },
+                                    {
+                                        "name": "[concat(variables('fullFunctionAppName'), '.scm.azurewebsites.net')]",
+                                        "sslState": "Disabled",
+                                        "hostType": "Repository"
+                                    }
+                                ],
+                                "reserved": false,
+                                "scmSiteAlsoStopped": false,
+                                "clientAffinityEnabled": false,
+                                "clientCertEnabled": false,
+                                "hostNamesDisabled": false,
+                                "containerSize": 1536,
+                                "dailyMemoryTimeQuota": 0,
+                                "httpsOnly": false
                             }
                         }
                     }
