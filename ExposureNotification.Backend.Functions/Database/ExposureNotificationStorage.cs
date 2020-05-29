@@ -137,7 +137,7 @@ namespace ExposureNotification.Backend.Database
 							// No keys older than 14 days
 							&& k.TimestampMsSinceEpoch >= cutoffMsEpoch
 							// Do not distribute temporary exposure key data until at least 2 hours after the end of the keyʼs expiration window
-							&& k.RollingEndSecondsSinceEpoch < twoHoursAgoEpochSeconds)
+							&& (k.RollingStartSecondsSinceEpoch + (k.RollingDuration * 10 * 60)) < twoHoursAgoEpochSeconds)
 				.OrderBy(k => k.Id); // Randomize the order in the export file
 
 			// How many keys do we need to put in batchfiles
