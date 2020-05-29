@@ -91,7 +91,56 @@
                 "description": "Branch of the repository where you want the Function App code to be built from."
             },
             "defaultValue": "master"
-        }
+        },
+        "verificationKeyId": {
+            "type": "string",
+            "metadata": {
+                "description": "This is the verification key"
+            },
+            "defaultValue": "ExampleServer_k1"
+        },
+        "verificationKeyVersion": {
+            "type": "string",
+            "defaultValue": "1",
+            "metadata": {
+                "description": "The verification key version"
+            }
+        },
+        "androidPackageName": {
+            "type": "string",
+            "defaultValue": "com.xamarin.exposurenotification.sampleapp",
+            "metadata": {
+                "description": "The package name of your Android app"
+            }
+        },
+        "iOSBundleId": {
+            "type": "string",
+            "defaultValue": "com.xamarin.exposurenotification.sampleapp",
+            "metadata": {
+                "description": "Your iOS app's bundle ID"
+            }
+        },
+        "iOSDeviceCheckKeyId": {
+            "type": "string",
+            "defaultValue": "YOURKEYID",
+            "metadata": {
+                "description": "Your iOS app's device check key  ID"
+            }
+        },
+        "iOSDeviceCheckTeamId": {
+            "type": "string",
+            "defaultValue": "YOURTEAMID",
+            "metadata": {
+                "description": "Your iOS app's device check key team's ID"
+            }
+        },
+        "iOSDeviceCheckPrivateKey": {
+            "type": "string",
+            "defaultValue": "CONTENTS-OF-P8-FILE-WITH-NO-LINE-BREAKS",
+            "metadata": {
+                "description": "The private key for iOS device check"
+            }
+        }        
     },
     "functions": [],
     "variables": {
@@ -117,7 +166,14 @@
         "configSupportedRegionsNameName": "EN-SupportedRegions",
         "keyVaultStart": "@Microsoft.Keyvault(SecretUri=",
         "keyVaultEnd": ")",
-        "keyVaultSecretsBaseUrl": "[concat('https://', variables('fullKeyVaultName'), '.vault.azure.net/secrets/')]"  
+        "keyVaultSecretsBaseUrl": "[concat('https://', variables('fullKeyVaultName'), '.vault.azure.net/secrets/')]",
+        "configVerificationKeyId": "EN-VerificationKeyId",
+        "configVerificationKeyVersion": "EN-VerificationKeyVersion",
+        "configAndroidPackageName": "EN-Android-PackageName",
+        "configIOSBundleId": "EN-iOS-BundleId",
+        "configIOSDeviceCheckKeyId": "EN-iOS-DeviceCheck-KeyId",
+        "configIOSDeviceCheckTeamId": "EN-iOS-DeviceCheck-TeamId",
+        "configIOSDeviceCheckPrivateKey": "EN-iOS-DeviceCheck-PrivateKey"  
     },
     "resources": [
     {
@@ -307,6 +363,34 @@
                     {
                         "name": "[variables('configSupportedRegionsNameName')]",
                         "value": "[parameters('supportedRegions')]"
+                    },
+                    {
+                        "name": "[variables('configVerificationKeyId')]",
+                        "value": "[parameters('verificationKeyId')]"
+                    },
+                    {
+                        "name": "[variables('configVerificationKeyVersion')]",
+                        "value": "[parameters('verificationKeyVersion')]"
+                    },
+                    {
+                        "name": "[variables('configAndroidPackageName')]",
+                        "value": "[parameters('androidPackageName')]"
+                    },
+                    {
+                        "name": "[variables('configIOSBundleId')]",
+                        "value": "[parameters('iOSBundleId')]"
+                    },
+                    {
+                        "name": "[variables('configIOSDeviceCheckKeyId')]",
+                        "value": "[parameters('iOSDeviceCheckKeyId')]"
+                    },
+                    {
+                        "name": "[variables('configIOSDeviceCheckTeamId')]",
+                        "value": "[parameters('iOSDeviceCheckTeamId')]"
+                    },
+                    {
+                        "name": "[variables('configIOSDeviceCheckPrivateKey')]",
+                        "value": "[parameters('iOSDeviceCheckPrivateKey')]"
                     }
                 ]
             },
