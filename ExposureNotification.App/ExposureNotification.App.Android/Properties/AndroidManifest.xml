@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1" android:versionName="1.0" package="com.xamarin.exposurenotification.sampleapp">
-	<uses-sdk android:minSdkVersion="21" android:targetSdkVersion="29" />
-	<application android:label="Exposure Notifications"></application>
-	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+  <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="29" />
+  <application android:label="Exposure Notifications">
+    <receiver  android:name=".nearby.ExposureNotificationBroadcastReceiver"  android:permission="com.google.android.gms.nearby.exposurenotification.EXPOSURE_CALLBACK"  android:exported="true">
+      <intent-filter>
+        <action android:name="com.google.android.gms.exposurenotification.ACTION_EXPOSURE_STATE_UPDATED" />
+      </intent-filter>
+    </receiver>
+  </application>
+  <uses-feature android:name="android.hardware.bluetooth_le" android:required="true" />
+  <uses-feature android:name="android.hardware.bluetooth" />
+  <uses-permission android:name="android.permission.BLUETOOTH" />
 </manifest>
