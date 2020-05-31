@@ -49,9 +49,13 @@ namespace Xamarin.ExposureNotifications
 				if (c.DurationAtAttenuationThresholds.Length < 2)
 					throw new ArgumentOutOfRangeException(nameof(c.DurationAtAttenuationThresholds), "Must be an array of length 2");
 
-				var nsArr = NSArray.FromObjects(2, c.DurationAtAttenuationThresholds[0], c.DurationAtAttenuationThresholds[1]);
-				nc.Metadata ??= new NSMutableDictionary();
-				nc.Metadata.SetValueForKey(nsArr, new NSString("attenuationDurationThresholds"));
+				var metadata = new NSMutableDictionary();
+
+				var attKey = new NSString("attenuationDurationThresholds");
+				var attValue = NSArray.FromObjects(2, c.DurationAtAttenuationThresholds[0], c.DurationAtAttenuationThresholds[1]);
+				metadata.SetValueForKey(attValue, attKey);
+
+				nc.Metadata = metadata;
 			}
 
 			return nc;
