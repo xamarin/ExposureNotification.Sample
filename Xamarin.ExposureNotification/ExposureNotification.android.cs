@@ -18,7 +18,7 @@ using Nearby = Android.Gms.Nearby.NearbyClass;
 [assembly: UsesFeature("android.hardware.bluetooth_le", Required=true)]
 [assembly: UsesFeature("android.hardware.bluetooth")]
 [assembly: UsesPermission(Android.Manifest.Permission.Bluetooth)]
-[assembly: UsesPermission(Android.Manifest.Permission.AccessNetworkState)]
+
 
 namespace Xamarin.ExposureNotifications
 {
