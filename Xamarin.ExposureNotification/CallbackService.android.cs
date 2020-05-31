@@ -6,7 +6,9 @@ using AndroidX.Core.App;
 
 namespace Xamarin.ExposureNotifications
 {
-	[BroadcastReceiver(Permission = "com.google.android.gms.nearby.exposurenotification.EXPOSURE_CALLBACK")]
+	[BroadcastReceiver(
+		Permission = "com.google.android.gms.nearby.exposurenotification.EXPOSURE_CALLBACK",
+		Exported = true)]
 	[IntentFilter(new[] { ExposureNotificationClient.ActionExposureStateUpdated })]
 	[Preserve]
 	class ExposureNotificationCallbackBroadcastReceiver : BroadcastReceiver
