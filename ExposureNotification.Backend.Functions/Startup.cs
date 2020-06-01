@@ -48,7 +48,7 @@ namespace ExposureNotification.Backend.Functions
 			builder.Services.Configure<Settings>(settings =>
 			{
 				settings.BlobStorageConnectionString = config["EN-BlobStorageConnectionString"];
-				settings.BlobStorageContainerNamePrefix = config["EN-BlobStorageContainerNamePrefix"] ?? "region-";
+				settings.BlobStorageContainerNamePrefix = config["EN-BlobStorageContainerNamePrefix"] ?? "region";
 				settings.DbConnectionString = conn;
 				settings.DeleteKeysFromDbAfterBatching = config.GetValue<bool>("EN-DeleteKeysFromDbAfterBatching");
 				settings.DisableDeviceVerification = config.GetValue<bool>("EN-DisableDeviceVerification");
