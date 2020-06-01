@@ -27,7 +27,8 @@ namespace ExposureNotification.Backend.Database
 			this.context = context;
 			this.settings = settings.Value;
 
-			this.context.Database.SetCommandTimeout(900);
+			if (!context.Database.IsInMemory() && this.settings.DbCommandTimeout > 0)
+				this.context.Database.SetCommandTimeout(this.settings.DbCommandTimeout);
 		}
 
 		public ValueTask DisposeAsync() =>
@@ -121,7 +122,7 @@ namespace ExposureNotification.Backend.Database
 				k.TimestampMsSinceEpoch >= cutoffMsEpoch);
 		}
 
-		public async Task<int> CreateBatchFilesAsync(string region, Func<TemporaryExposureKeyExport, Task> processExport)
+		public async Task<int> CreateBatchFilesAsync(string region, int maxFilesPerBatch, Func<TemporaryExposureKeyExport, Task> processExport)
 		{
 			region = region.ToUpperInvariant();
 
@@ -131,6 +132,8 @@ namespace ExposureNotification.Backend.Database
 			var nowEpochSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 			var twoHoursAgoEpochSeconds = nowEpochSeconds - 7200; // 2 hours ago
 
+			var maxKeysInBatch = maxFilesPerBatch * TemporaryExposureKeyExport.MaxKeysPerFile;
+
 			var keys = context.TemporaryExposureKeys
 				.Where(k => k.Region == region
 							&& !k.Processed
@@ -138,10 +141,15 @@ namespace ExposureNotification.Backend.Database
 							&& k.TimestampMsSinceEpoch >= cutoffMsEpoch
 							// Do not distribute temporary exposure key data until at least 2 hours after the end of the keyʼs expiration window
 							&& (k.RollingStartSecondsSinceEpoch + (k.RollingDuration * 10 * 60)) < twoHoursAgoEpochSeconds)
-				.OrderBy(k => k.Id); // Randomize the order in the export file
+				.OrderBy(k => k.Id) // Randomize the order in the export file
+				.Take(maxKeysInBatch);
 
 			// How many keys do we need to put in batchfiles
 			var totalCount = await keys.CountAsync();
+
+			// return 0 files created if we have no records left to batch up
+			if (totalCount <= 0)
+				return 0;
 
 			// How many files do we need to fit all the keys
 			var batchFileCount = (int)Math.Ceiling((double)totalCount / (double)TemporaryExposureKeyExport.MaxKeysPerFile);

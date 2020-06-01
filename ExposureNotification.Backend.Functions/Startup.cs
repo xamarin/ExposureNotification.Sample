@@ -61,7 +61,11 @@ namespace ExposureNotification.Backend.Functions
 				settings.iOSDeviceCheckTeamId = config["EN-iOS-DeviceCheck-TeamId"];
 				settings.iOSDeviceCheckKeyId = config["EN-iOS-DeviceCheck-KeyId"];
 				settings.iOSDeviceCheckPrivateKey = config["EN-iOS-DeviceCheck-PrivateKey"];
-				
+
+				// Currently apple only supports 1 file per batch
+				settings.MaxFilesPerBatch = config.GetValue<int>("EN-MaxFilesPerBatch", 1);
+				settings.DbCommandTimeout = config.GetValue<int>("EN-DbCommandTimeout", -1);
+
 				logger.LogInformation($"Configuration Values:\r\n{settings}");
 			});
 

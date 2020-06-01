@@ -5,6 +5,7 @@ namespace ExposureNotification.Backend.Functions
 	public class Settings
 	{
 		public string DbConnectionString { get; set; }
+		public int DbCommandTimeout { get; set; } = -1;
 
 		public string BlobStorageConnectionString { get; set; }
 
@@ -25,6 +26,8 @@ namespace ExposureNotification.Backend.Functions
 		public string iOSDeviceCheckKeyId { get; set; }
 		public string iOSDeviceCheckTeamId { get; set; }
 		public string iOSDeviceCheckPrivateKey { get; set; }
+
+		public int MaxFilesPerBatch { get; set; } = 1;		
 
 
 		public override string ToString()
