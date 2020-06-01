@@ -122,7 +122,7 @@ namespace ExposureNotification.Backend.Database
 				k.TimestampMsSinceEpoch >= cutoffMsEpoch);
 		}
 
-		public async Task<int> CreateBatchFilesAsync(string region, Func<TemporaryExposureKeyExport, Task> processExport)
+		public async Task<int> CreateBatchFilesAsync(string region, int maxFilesPerBatch, Func<TemporaryExposureKeyExport, Task> processExport)
 		{
 			region = region.ToUpperInvariant();
 
@@ -139,10 +139,15 @@ namespace ExposureNotification.Backend.Database
 							&& k.TimestampMsSinceEpoch >= cutoffMsEpoch
 							// Do not distribute temporary exposure key data until at least 2 hours after the end of the keyʼs expiration window
 							&& (k.RollingStartSecondsSinceEpoch + (k.RollingDuration * 10 * 60)) < twoHoursAgoEpochSeconds)
-				.OrderBy(k => k.Id); // Randomize the order in the export file
+				.OrderBy(k => k.Id) // Randomize the order in the export file
+				.Take(maxFilesPerBatch * TemporaryExposureKeyExport.MaxKeysPerFile);
 
 			// How many keys do we need to put in batchfiles
 			var totalCount = await keys.CountAsync();
+
+			// return 0 files created if we have no records left to batch up
+			if (totalCount <= 0)
+				return 0;
 
 			// How many files do we need to fit all the keys
 			var batchFileCount = (int)Math.Ceiling((double)totalCount / (double)TemporaryExposureKeyExport.MaxKeysPerFile);

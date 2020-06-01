@@ -27,6 +27,8 @@ namespace ExposureNotification.Backend.Functions
 		public string iOSDeviceCheckTeamId { get; set; }
 		public string iOSDeviceCheckPrivateKey { get; set; }
 
+		public int MaxFilesPerBatch { get; set; } = 1;		
+
 
 		public override string ToString()
 		{

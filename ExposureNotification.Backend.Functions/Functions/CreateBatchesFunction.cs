@@ -105,34 +105,52 @@ namespace ExposureNotification.Backend.Functions
 				// Load all signer infos
 				var signerInfos = await storage.GetAllSignerInfosAsync();
 
-				// Create batch files from all the keys in the database
-				var batchFileCount = await storage.CreateBatchFilesAsync(region, async export =>
+				var batchesCount = 0;
+				var batchFileCount = 0;
+
+				do
 				{
-					// Don't process a batch without keys
-					if (export == null || (export.Keys != null && export.Keys.Count() <= 0))
+					// Create batch files from all the keys in the database
+					batchFileCount = await storage.CreateBatchFilesAsync(region, settings.Value.MaxFilesPerBatch, async export =>
 					{
-						logger.LogWarning("For some reason, a batch was started when there were no keys to put in that batch...");
-						return;
+						// Don't process a batch without keys
+						if (export == null || (export.Keys != null && export.Keys.Count() <= 0))
+						{
+							logger.LogWarning("For some reason, a batch was started when there were no keys to put in that batch...");
+							return;
+						}
+
+						// Filename is inferable as batch number
+						var batchFileName = $"{nextDirNumber}/{export.BatchNum}.dat";
+
+						var blockBlob = cloudBlobContainer.GetBlockBlobReference(batchFileName);
+
+						// Write the proto buf to a memory stream
+						using var signedFileStream = await ExposureBatchFileUtil.CreateSignedFileAsync(export, signerInfos);
+
+						// Set the batch number and region as metadata
+						blockBlob.Metadata[dirNumberMetadataKey] = nextDirNumber.ToString();
+						blockBlob.Metadata[batchNumberMetadataKey] = export.BatchNum.ToString();
+						blockBlob.Metadata[batchRegionMetadataKey] = region;
+
+						await blockBlob.UploadFromStreamAsync(signedFileStream);
+						await blockBlob.SetMetadataAsync();
+
+						logger.LogInformation($"Saved batch file '{export.BatchNum}/{export.BatchSize}' to '{containerName}/{nextDirNumber}/{export.BatchNum}.dat'.");
+					});
+
+					logger.LogInformation($"Saved {batchFileCount} batch files to '{containerName}/{nextDirNumber}/'.");
+
+					if (batchFileCount > 0)
+					{
+						// Increment our dir number for the next batch to be created
+						nextDirNumber++;
+						batchesCount++;
 					}
 
-					// Filename is inferable as batch number
-					var batchFileName = $"{nextDirNumber}/{export.BatchNum}.dat";
+				} while (batchFileCount > 0);
 
-					var blockBlob = cloudBlobContainer.GetBlockBlobReference(batchFileName);
-
-					// Write the proto buf to a memory stream
-					using var signedFileStream = await ExposureBatchFileUtil.CreateSignedFileAsync(export, signerInfos);
-
-					// Set the batch number and region as metadata
-					blockBlob.Metadata[dirNumberMetadataKey] = nextDirNumber.ToString();
-					blockBlob.Metadata[batchNumberMetadataKey] = export.BatchNum.ToString();
-					blockBlob.Metadata[batchRegionMetadataKey] = region;
-
-					await blockBlob.UploadFromStreamAsync(signedFileStream);
-					await blockBlob.SetMetadataAsync();
-				});
-
-				logger.LogInformation("Saved {0} batch files of keys to '{1}/{2}'.", batchFileCount, containerName, nextDirNumber);
+				logger.LogInformation($"Saved {batchesCount} batches for {region}.");
 			}
 		}
 	}
