@@ -5,6 +5,7 @@ namespace ExposureNotification.Backend.Functions
 	public class Settings
 	{
 		public string DbConnectionString { get; set; }
+		public int DbCommandTimeout { get; set; } = -1;
 
 		public string BlobStorageConnectionString { get; set; }
 

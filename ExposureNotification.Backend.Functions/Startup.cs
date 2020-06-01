@@ -62,6 +62,7 @@ namespace ExposureNotification.Backend.Functions
 				settings.iOSDeviceCheckKeyId = config["EN-iOS-DeviceCheck-KeyId"];
 				settings.iOSDeviceCheckPrivateKey = config["EN-iOS-DeviceCheck-PrivateKey"];
 				
+				settings.DbCommandTimeout = config.GetValue<int>("EN-DbCommandTimeout", -1);
 				logger.LogInformation($"Configuration Values:\r\n{settings}");
 			});
 
