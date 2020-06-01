@@ -132,6 +132,8 @@ namespace ExposureNotification.Backend.Database
 			var nowEpochSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 			var twoHoursAgoEpochSeconds = nowEpochSeconds - 7200; // 2 hours ago
 
+			var maxKeysInBatch = maxFilesPerBatch * TemporaryExposureKeyExport.MaxKeysPerFile;
+
 			var keys = context.TemporaryExposureKeys
 				.Where(k => k.Region == region
 							&& !k.Processed
@@ -140,7 +142,7 @@ namespace ExposureNotification.Backend.Database
 							// Do not distribute temporary exposure key data until at least 2 hours after the end of the keyʼs expiration window
 							&& (k.RollingStartSecondsSinceEpoch + (k.RollingDuration * 10 * 60)) < twoHoursAgoEpochSeconds)
 				.OrderBy(k => k.Id) // Randomize the order in the export file
-				.Take(maxFilesPerBatch * TemporaryExposureKeyExport.MaxKeysPerFile);
+				.Take(maxKeysInBatch);
 
 			// How many keys do we need to put in batchfiles
 			var totalCount = await keys.CountAsync();
