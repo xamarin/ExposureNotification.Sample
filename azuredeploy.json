@@ -153,7 +153,7 @@
     "functions": [],
     "variables": {
         "appInsightsName": "functions-app-insights",
-        "containerPrefix": "[concat(parameters('blobContainerPrefix'),'-')]",
+        "containerPrefix": "[concat(parameters('blobContainerPrefix'))]",
         "sqlServerName": "[concat('sqlserver-', parameters('sqlDatabaseName'))]",
         "fullFunctionAppName": "[concat(parameters('functionAppName'))]",
         "fullHostingName": "[concat(parameters('hostingPlanName'))]",
