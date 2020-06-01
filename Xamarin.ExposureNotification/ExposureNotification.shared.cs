@@ -99,7 +99,7 @@ namespace Xamarin.ExposureNotifications
 					var hasMatches = (r.summary?.MatchedKeyCount ?? 0) > 0;
 
 					if (hasMatches)
-						await Handler.ExposureDetectedAsync(r.summary, r.info);
+						await Handler.ExposureDetectedAsync(r.summary, r.getInfo);
 				}
 				else
 				{

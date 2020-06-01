@@ -15,7 +15,7 @@ namespace Xamarin.ExposureNotifications
 		Task FetchExposureKeyBatchFilesFromServerAsync(Func<IEnumerable<string>, Task> submitBatches, CancellationToken cancellationToken);
 
 		// Might be exposed, check and alert user if necessary
-		Task ExposureDetectedAsync(ExposureDetectionSummary summary, IEnumerable<ExposureInfo> ExposureInfo);
+		Task ExposureDetectedAsync(ExposureDetectionSummary summary, Func<Task<IEnumerable<ExposureInfo>>> getExposureInfo);
 
 		Task UploadSelfExposureKeysToServerAsync(IEnumerable<TemporaryExposureKey> temporaryExposureKeys);
 	}
@@ -28,7 +28,7 @@ namespace Xamarin.ExposureNotifications
 
 		Task<bool> IsEnabledAsync();
 
-		Task<(ExposureDetectionSummary summary, IEnumerable<ExposureInfo> info)> DetectExposuresAsync(IEnumerable<string> files);
+		Task<(ExposureDetectionSummary summary, Func<Task<IEnumerable<ExposureInfo>>> getInfo)> DetectExposuresAsync(IEnumerable<string> files);
 
 		Task<IEnumerable<TemporaryExposureKey>> GetSelfTemporaryExposureKeysAsync();
 

@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using BackgroundTasks;
 using ExposureNotifications;
 using Foundation;
-using UIKit;
 using Xamarin.Essentials;
 
 namespace Xamarin.ExposureNotifications
@@ -155,7 +154,7 @@ namespace Xamarin.ExposureNotifications
 		}
 
 		// Tells the local API when new diagnosis keys have been obtained from the server
-		static async Task<(ExposureDetectionSummary, IEnumerable<ExposureInfo>)> PlatformDetectExposuresAsync(IEnumerable<string> keyFiles, CancellationToken cancellationToken)
+		static async Task<(ExposureDetectionSummary, Func<Task<IEnumerable<ExposureInfo>>>)> PlatformDetectExposuresAsync(IEnumerable<string> keyFiles, CancellationToken cancellationToken)
 		{
 			// Submit to the API
 			var c = await GetConfigurationAsync();
@@ -172,22 +171,26 @@ namespace Xamarin.ExposureNotifications
 				detectionSummary.MatchedKeyCount,
 				detectionSummary.MaximumRiskScore);
 
-			// Get the info
-			IEnumerable<ExposureInfo> info = Array.Empty<ExposureInfo>();
-			if (summary?.MatchedKeyCount > 0)
+			async Task<IEnumerable<ExposureInfo>> GetInfo()
 			{
-				var exposures = await m.GetExposureInfoAsync(detectionSummary, Handler.UserExplanation, out var exposuresProgress);
-				cancellationToken.Register(exposuresProgress.Cancel);
-				info = exposures.Select(i => new ExposureInfo(
-					((DateTime)i.Date).ToLocalTime(),
-					TimeSpan.FromMinutes(i.Duration),
-					i.AttenuationValue,
-					i.TotalRiskScore,
-					i.TransmissionRiskLevel.FromNative()));
+				// Get the info
+				IEnumerable<ExposureInfo> info = Array.Empty<ExposureInfo>();
+				if (summary?.MatchedKeyCount > 0)
+				{
+					var exposures = await m.GetExposureInfoAsync(detectionSummary, Handler.UserExplanation, out var exposuresProgress);
+					cancellationToken.Register(exposuresProgress.Cancel);
+					info = exposures.Select(i => new ExposureInfo(
+						((DateTime)i.Date).ToLocalTime(),
+						TimeSpan.FromMinutes(i.Duration),
+						i.AttenuationValue,
+						i.TotalRiskScore,
+						i.TransmissionRiskLevel.FromNative()));
+				}
+				return info;
 			}
 
 			// Return everything
-			return (summary, info);
+			return (summary, GetInfo);
 		}
 
 		static async Task<IEnumerable<TemporaryExposureKey>> PlatformGetTemporaryExposureKeys()

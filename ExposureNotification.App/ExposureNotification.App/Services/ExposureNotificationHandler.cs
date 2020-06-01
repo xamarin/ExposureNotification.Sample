@@ -29,9 +29,11 @@ namespace ExposureNotification.App
 			=> Task.FromResult(new Configuration());
 
 		// this will be called when a potential exposure has been detected
-		public async Task ExposureDetectedAsync(ExposureDetectionSummary summary, IEnumerable<ExposureInfo> exposureInfo)
+		public async Task ExposureDetectedAsync(ExposureDetectionSummary summary, Func<Task<IEnumerable<ExposureInfo>>> getExposureInfo)
 		{
 			LocalStateManager.Instance.ExposureSummary = summary;
+
+			var exposureInfo = await getExposureInfo();
 
 			// Add these on main thread in case the UI is visible so it can update
 			await Device.InvokeOnMainThreadAsync(() =>
@@ -42,8 +44,8 @@ namespace ExposureNotification.App
 
 			LocalStateManager.Save();
 			// If Enabled Local Notifications
-            if (LocalStateManager.Instance.EnableNotifications)
-            {
+			if (LocalStateManager.Instance.EnableNotifications)
+			{
 				var notification = new NotificationRequest
 				{
 					NotificationId = 100,

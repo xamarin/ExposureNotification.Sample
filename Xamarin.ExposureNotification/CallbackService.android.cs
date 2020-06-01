@@ -1,4 +1,6 @@
-﻿using Android.App;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Android.App;
 using Android.Content;
 using Android.Gms.Nearby.ExposureNotification;
 using Android.Runtime;
@@ -32,12 +34,15 @@ namespace Xamarin.ExposureNotifications
 
 			var summary = await ExposureNotification.PlatformGetExposureSummaryAsync(token);
 
+			Task<IEnumerable<ExposureInfo>> GetInfo()
+			{
+				return ExposureNotification.PlatformGetExposureInformationAsync(token);
+			}
+
 			// Invoke the custom implementation handler code with the summary info
 			if (summary?.MatchedKeyCount > 0)
 			{
-				var info = await ExposureNotification.PlatformGetExposureInformationAsync(token);
-
-				await ExposureNotification.Handler.ExposureDetectedAsync(summary, info);
+				await ExposureNotification.Handler.ExposureDetectedAsync(summary, GetInfo);
 			}
 		}
 	}
