@@ -1,0 +1,594 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "functionAppName": {
+            "type": "string",
+            "metadata": {
+                "description": "Function App Name. Must be globally unique."
+            },                                   
+            "maxLength": 24
+        },
+        "hostingPlanName": {
+            "type": "string",
+            "metadata": {
+                "description": "Hosting Service Name. Must be globally unique."
+            },                     
+            "minLength": 5
+        },
+        "storageAccountName": { 
+            "type": "string",
+            "metadata": {
+                "description": "Storage Account Name for the Azure Function's runtime. Must be globally unique"
+            },                               
+            "minLength": 3,
+            "maxLength": 24         
+        },        
+        "keyVaultName": {
+            "type": "string",
+            "metadata": {
+                "description": "Specify the name of the key vault. Must be globally unique."
+            }         
+        },
+        "exposureNotificationStorageName": {
+            "type": "string",
+            "metadata": {
+                "description": "Storage Account Name to hold Exposure Notifications data. Must be globally unique"
+            },                                 
+            "minLength": 3,
+            "maxLength": 24      
+        },
+        "blobContainerPrefix": {
+            "type":"string",
+            "metadata": {
+                "description": "The prefix that will be used in the naming of containers in Blob storage for each region your app/server supports. The default is 'region'"
+            },
+            "defaultValue":"region"
+        },
+        "supportedRegions": {
+            "type": "string",
+            "metadata": {
+                "description": "3 digit Mobile Country Codes (https://en.wikipedia.org/wiki/Mobile_country_code) for the regions the server supports. Semi-colon delimited."
+            },
+            "defaultValue": "302;310;311;312;313;314;315;316"            
+        },
+        "sqlDatabaseName": {
+            "type": "string",
+            "metadata": {
+                "description": "SQL database name"
+            },
+            "defaultValue":"exposure-db"
+        },
+        "sqlAdminLogin": {
+            "type": "string",
+            "metadata": {
+                "description": "SQL admin username"
+            },
+            "defaultValue": "sqladmin"
+        },
+        "sqlAdminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "SQL admin password. Please note the password policy: https://docs.microsoft.com/en-us/sql/relational-databases/security/password-policy"
+            }            
+        },        
+        "signingKeyValue": {
+            "type": "string",
+            "metadata": {
+                "description": "Base64 encoded bytes for your Elliptic curve P256 public/private key in PKCS12 (pfx) format."
+            },
+            "defaultValue":""
+        },
+        "isDebug": {
+            "type": "bool",
+            "metadata": {
+                "description": "Is this deployment currently meant for debugging?"
+            },
+            "defaultValue": true
+        },
+        "repoUrl": {
+            "type": "string",
+            "metadata": {
+                "description": "URL of the repository where the Function App code is located."
+            },
+            "defaultValue": "https://github.com/xamarin/xamarin.exposurenotification"
+        },
+        "branch": {
+            "type": "string",
+            "metadata": {
+                "description": "Branch of the repository where you want the Function App code to be built from."
+            },
+            "defaultValue": "master"
+        },
+        "verificationKeyId": {
+            "type": "string",
+            "metadata": {
+                "description": "This is the verification key"
+            },
+            "defaultValue": "ExampleServer_k1"
+        },
+        "verificationKeyVersion": {
+            "type": "string",
+            "defaultValue": "1",
+            "metadata": {
+                "description": "The verification key version"
+            }
+        },
+        "androidPackageName": {
+            "type": "string",
+            "defaultValue": "com.xamarin.exposurenotification.sampleapp",
+            "metadata": {
+                "description": "The package name of your Android app"
+            }
+        },
+        "iOSBundleId": {
+            "type": "string",
+            "defaultValue": "com.xamarin.exposurenotification.sampleapp",
+            "metadata": {
+                "description": "Your iOS app's bundle ID"
+            }
+        },
+        "iOSDeviceCheckKeyId": {
+            "type": "string",
+            "defaultValue": "YOURKEYID",
+            "metadata": {
+                "description": "Your iOS app's device check key  ID"
+            }
+        },
+        "iOSDeviceCheckTeamId": {
+            "type": "string",
+            "defaultValue": "YOURTEAMID",
+            "metadata": {
+                "description": "Your iOS app's device check key team's ID"
+            }
+        },
+        "iOSDeviceCheckPrivateKey": {
+            "type": "string",
+            "defaultValue": "CONTENTS-OF-P8-FILE-WITH-NO-LINE-BREAKS",
+            "metadata": {
+                "description": "The private key for iOS device check"
+            }
+        }        
+    },
+    "functions": [],
+    "variables": {
+        "appInsightsName": "functions-app-insights",
+        "containerPrefix": "[concat(parameters('blobContainerPrefix'),'-')]",
+        "sqlServerName": "[concat('sqlserver-', parameters('sqlDatabaseName'))]",
+        "fullFunctionAppName": "[concat(parameters('functionAppName'))]",
+        "fullHostingName": "[concat(parameters('hostingPlanName'))]",
+        "fullStorageAccountName": "[toLower(concat(parameters('storageAccountName')))]",
+        "fullExposureStorageAccountName": "[toLower(parameters('exposureNotificationStorageName'))]",
+        "fullKeyVaultName": "[concat(parameters('keyVaultName'))]",
+        "sqlDatabaseEdition": "Basic",
+        "sqlDatabaseCollation": "SQL_Latin1_General_CP1_CI_AS",
+        "sqlDatabaseObjectiveName": "Basic",
+        "supportedRegionArray": "[split(parameters('supportedRegions'), ';')]",
+        "configSkipKeyVaultName":"EN-SkipKeyVault",
+        "configBlobStorageConnectionStringName":"EN-BlobStorageConnectionString",
+        "configKeyVaultNameName":"EN-KeyVaultName",
+        "configBlobStorageContainerPrefixName":"EN-BlobStorageContainerNamePrefix",
+        "configDBConnectionStringName":"EN-DbConnectionString",
+        "configDeleteDBAfterBatchName": "EN-DeleteKeysFromDbAfterBatching",
+        "configDisableDeviceVerificationName": "EN-DisableDeviceVerification",
+        "configSigningKeyName": "EN-SigningKey",
+        "configSupportedRegionsNameName": "EN-SupportedRegions",
+        "keyVaultStart": "@Microsoft.Keyvault(SecretUri=",
+        "keyVaultEnd": ")",        
+        "configVerificationKeyId": "EN-VerificationKeyId",
+        "configVerificationKeyVersion": "EN-VerificationKeyVersion",
+        "configAndroidPackageName": "EN-Android-PackageName",
+        "configIOSBundleId": "EN-iOS-BundleId",
+        "configIOSDeviceCheckKeyId": "EN-iOS-DeviceCheck-KeyId",
+        "configIOSDeviceCheckTeamId": "EN-iOS-DeviceCheck-TeamId",
+        "configIOSDeviceCheckPrivateKey": "EN-iOS-DeviceCheck-PrivateKey"  
+    },
+    "resources": [
+    {
+        "name": "[variables('sqlServerName')]",
+        "type": "Microsoft.Sql/servers",
+        "apiVersion": "2019-06-01-preview",
+        "location": "[resourceGroup().location]",
+        "tags": {
+            "displayName": "SqlServer"
+        },
+        "properties": {
+            "administratorLogin": "[parameters('sqlAdminLogin')]",
+            "administratorLoginPassword": "[parameters('sqlAdminPassword')]",
+            "version": "12.0"
+        },
+        "resources": [
+            {
+                "type": "databases",
+                "name": "[parameters('sqlDatabaseName')]",
+                "apiVersion": "2019-06-01-preview",
+                "location": "[resourceGroup().location]",
+                "tags": {
+                    "displayName": "Database"
+                },
+                "properties": {
+                    "edition": "[variables('sqlDatabaseEdition')]",
+                    "collation": "[variables('sqlDatabaseCollation')]",
+                    "requestedServiceObjectiveName": "[variables('sqlDatabaseObjectiveName')]"
+                },
+                "dependsOn": [
+                    "[variables('sqlServerName')]"
+                ]                
+            },
+            {
+                "name": "AllowAzureIPs",
+                "type": "firewallRules",
+                "apiVersion": "2015-05-01-preview",
+                "location": "[resourceGroup().location]",
+                "properties": {
+                    "startIpAddress": "0.0.0.0",
+                    "endIpAddress": "0.0.0.0"
+                },
+                "dependsOn": [
+                    "[variables('sqlServerName')]"
+                ]
+            }
+        ]
+    },
+    {  
+        "type":"Microsoft.Web/serverfarms",
+        "apiVersion":"2016-09-01",
+        "name":"[variables('fullHostingName')]",
+        "location":"[resourceGroup().location]",
+        "properties":{  
+            "name":"[variables('fullHostingName')]",
+            "computeMode":"Dynamic"
+        },
+        "sku":{  
+            "name":"Y1",
+            "tier":"Dynamic",
+            "size":"Y1",
+            "family":"Y",
+            "capacity":0
+        }
+    },
+    {
+        "name": "[variables('appInsightsName')]",
+        "type": "Microsoft.Insights/components",
+        "apiVersion": "2015-05-01",
+        "location": "[resourceGroup().location]",
+        "kind": "web",
+        "tags": {
+            "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', variables('fullFunctionAppName'))]": "Resource"
+        },        
+        "properties": {
+            "applicationId": "[variables('appInsightsName')]",
+            "application_Type": "web"
+        }
+    },
+    {
+        "name": "[variables('fullStorageAccountName')]",
+        "type": "Microsoft.Storage/storageAccounts",
+        "apiVersion": "2019-06-01",
+        "tags": {
+            "displayName": "[variables('fullStorageAccountName')]"
+        },
+        "location": "[resourceGroup().location]",
+        "kind": "StorageV2",
+        "sku": {
+            "name": "Standard_LRS",
+            "tier": "Standard"
+        }
+    },
+    {
+        "name": "[variables('fullExposureStorageAccountName')]",
+        "type": "Microsoft.Storage/storageAccounts",
+        "apiVersion": "2019-06-01",
+        "tags": {
+            "displayName": "[variables('fullExposureStorageAccountName')]"
+        },
+        "location": "[resourceGroup().location]",
+        "kind": "StorageV2",
+        "sku": {
+            "name": "Standard_LRS",
+            "tier": "Standard"
+        }
+    },
+    {
+        "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+        "apiVersion": "2018-07-01",
+        "name":"[concat(variables('fullExposureStorageAccountName'), '/default/', variables('containerPrefix'), variables('supportedRegionArray')[copyIndex()])]",
+        "dependsOn": [
+            "[variables('fullExposureStorageAccountName')]"
+        ],
+        "copy": {
+            "name": "storageBlobCopy",
+            "count": "[length(variables('supportedRegionArray'))]"
+        }
+    },
+    {
+        "name": "[variables('fullFunctionAppName')]",
+        "type": "Microsoft.Web/sites",
+        "apiVersion": "2018-11-01",
+        "location": "[resourceGroup().location]",
+        "identity": {
+            "type": "SystemAssigned"
+        },
+        "kind": "functionapp",
+        "dependsOn": [
+            "[resourceId('Microsoft.Insights/components', variables('appInsightsName'))]",
+            "[resourceId('Microsoft.Storage/storageAccounts', variables('fullStorageAccountName'))]"            
+        ],
+        "properties": {     
+            "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('fullHostingName'))]",
+            "siteConfig": {
+                "appSettings": [
+                    {
+                        "name": "PROJECT",
+                        "value": "ExposureNotification.Backend.Functions"
+                    },
+                    {
+                        "name": "AzureWebJobsDashboard",
+                        "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('fullStorageAccountName'), ';AccountKey=', listKeys(variables('fullStorageAccountName'),'2015-05-01-preview').key1)]"
+                    },
+                    {
+                        "name": "AzureWebJobsStorage",
+                        "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('fullStorageAccountName'), ';AccountKey=', listKeys(variables('fullStorageAccountName'),'2015-05-01-preview').key1)]"
+                    },
+                    {
+                        "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+                        "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('fullStorageAccountName'), ';AccountKey=', listKeys(variables('fullStorageAccountName'),'2015-05-01-preview').key1)]"
+                    },
+                    {
+                        "name": "WEBSITE_CONTENTSHARE",
+                        "value": "[toLower(variables('fullFunctionAppName'))]"
+                    },
+                    {
+                        "name": "FUNCTIONS_EXTENSION_VERSION",
+                        "value": "~3"
+                    },
+                    {
+                        "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                        "value": "[reference(resourceId('microsoft.insights/components/', variables('appInsightsName')), '2015-05-01').InstrumentationKey]"
+                    },
+                    {
+                        "name": "FUNCTIONS_WORKER_RUNTIME",
+                        "value": "dotnet"
+                    }                    
+                ]
+            }
+        }    
+    },
+    {
+        "name": "[variables('fullKeyVaultName')]",
+        "type": "Microsoft.KeyVault/vaults",
+        "apiVersion": "2016-10-01",
+        "location": "[resourceGroup().location]",
+        "dependsOn": [
+            "[variables('fullFunctionAppName')]",
+            "[variables('sqlServerName')]",
+            "[parameters('sqlDatabaseName')]",
+            "[variables('fullExposureStorageAccountName')]"
+        ],
+        "properties": {
+            "enabledForDeployment": true,
+            "enabledForTemplateDeployment": true,
+            "tenantId": "[subscription().tenantId]",
+            "sku": {
+                "name": "Standard",
+                "family": "A"
+            },
+            "accessPolicies": [
+                {
+                    "objectId": "[reference(concat('Microsoft.Web/sites/', variables('fullFunctionAppName')), '2018-11-01', 'Full').identity.principalId]",
+                    "tenantId": "[subscription().tenantId]",
+                    "permissions": {
+                        "secrets": [
+                            "get","list","set"
+                        ]
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "type": "Microsoft.KeyVault/vaults/secrets",
+        "name": "[concat(variables('fullKeyVaultName'), '/', variables('configBlobStorageConnectionStringName'))]",
+        "apiVersion": "2016-10-01",
+        "location": "[resourceGroup().location]",
+        "dependsOn": [
+            "[variables('fullKeyVaultName')]"
+        ],
+        "properties": {
+            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('fullExposureStorageAccountName'), ';AccountKey=', listKeys(variables('fullExposureStorageAccountName'),'2015-05-01-preview').key1)]"
+        }
+    },
+    {
+        "type": "Microsoft.KeyVault/vaults/secrets",
+        "name": "[concat(variables('fullKeyVaultName'), '/', variables('configDBConnectionStringName'))]",
+        "apiVersion": "2016-10-01",
+        "location": "[resourceGroup().location]",
+        "dependsOn": [
+            "[variables('fullKeyVaultName')]"
+        ],
+        "properties": {
+            "value": "[concat('Server=tcp:',reference(variables('sqlServerName')).fullyQualifiedDomainName,',1433;Initial Catalog=',parameters('sqlDatabaseName'),';Persist Security Info=False;User ID=',parameters('sqlAdminLogin'),';Password=',parameters('sqlAdminPassword'),';MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;')]"
+        }
+    },
+    {
+        "type": "Microsoft.KeyVault/vaults/secrets",
+        "name": "[concat(variables('fullKeyVaultName'), '/', variables('configSigningKeyName'))]",
+        "apiVersion": "2016-10-01",
+        "location": "[resourceGroup().location]",
+        "dependsOn": [
+            "[variables('fullKeyVaultName')]"
+        ],
+        "properties": {
+            "value": "[parameters('signingKeyValue')]"
+        }
+    },
+    {
+        "name": "updateFunctionAppSettings",
+        "type": "Microsoft.Resources/deployments",
+        "apiVersion": "2019-10-01",
+        "dependsOn": [
+            "[variables('fullFunctionAppName')]",
+            "[variables('fullKeyVaultName')]"
+        ],
+        "properties": {
+            "mode": "Incremental",
+            "parameters": { },
+            "template": {
+                "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {},
+                "variables": {},
+                "resources": [
+                    {
+                        "name": "[variables('fullFunctionAppName')]",
+                        "type": "Microsoft.Web/sites",
+                        "apiVersion": "2018-11-01",
+                        "location": "[resourceGroup().location]",
+                        "kind": "functionapp",
+                        "properties": {
+                            "siteConfig": {
+                                "appSettings": [                                    
+                                    {
+                                        "name": "PROJECT",
+                                        "value": "ExposureNotification.Backend.Functions"
+                                    },
+                                    {
+                                        "name": "AzureWebJobsDashboard",
+                                        "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('fullStorageAccountName'), ';AccountKey=', listKeys(variables('fullStorageAccountName'),'2015-05-01-preview').key1)]"
+                                    },
+                                    {
+                                        "name": "AzureWebJobsStorage",
+                                        "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('fullStorageAccountName'), ';AccountKey=', listKeys(variables('fullStorageAccountName'),'2015-05-01-preview').key1)]"
+                                    },
+                                    {
+                                        "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+                                        "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('fullStorageAccountName'), ';AccountKey=', listKeys(variables('fullStorageAccountName'),'2015-05-01-preview').key1)]"
+                                    },
+                                    {
+                                        "name": "WEBSITE_CONTENTSHARE",
+                                        "value": "[toLower(variables('fullFunctionAppName'))]"
+                                    },
+                                    {
+                                        "name": "FUNCTIONS_EXTENSION_VERSION",
+                                        "value": "~3"
+                                    },
+                                    {
+                                        "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                                        "value": "[reference(resourceId('microsoft.insights/components/', variables('appInsightsName')), '2015-05-01').InstrumentationKey]"
+                                    },
+                                    {
+                                        "name": "FUNCTIONS_WORKER_RUNTIME",
+                                        "value": "dotnet"
+                                    },
+                                    {
+                                        "name": "[variables('configSkipKeyVaultName')]",
+                                        "value": "[parameters('isDebug')]"
+                                    },
+                                    {
+                                        "name": "[variables('configKeyVaultNameName')]",
+                                        "value": "[variables('fullKeyVaultName')]"
+                                    },
+                                    {
+                                        "name": "[variables('configBlobStorageConnectionStringName')]",
+                                        "value": "[concat(variables('keyVaultStart'), reference(resourceId('Microsoft.KeyVault/vaults/secrets', variables('fullKeyVaultName'), variables('configBlobStorageConnectionStringName'))).secretUriWithVersion, variables('keyVaultEnd'))]"
+                                    },
+                                    {
+                                        "name": "[variables('configBlobStorageContainerPrefixName')]",
+                                        "value": "[variables('containerPrefix')]"
+                                    },
+                                    {
+                                        "name": "[variables('configDBConnectionStringName')]",
+                                        "value": "[concat(variables('keyVaultStart'), reference(resourceId('Microsoft.KeyVault/vaults/secrets', variables('fullKeyVaultName'), variables('configDBConnectionStringName'))).secretUriWithVersion, variables('keyVaultEnd'))]"
+                                    },
+                                    {
+                                        "name": "[variables('configDeleteDBAfterBatchName')]",
+                                        "value": "[not(parameters('isDebug'))]"
+                                    },
+                                    {
+                                        "name": "[variables('configDisableDeviceVerificationName')]",
+                                        "value": "[parameters('isDebug')]"
+                                    },
+                                    {
+                                        "name": "[variables('configSigningKeyName')]",
+                                        "value": "[concat(variables('keyVaultStart'), reference(resourceId('Microsoft.KeyVault/vaults/secrets', variables('fullKeyVaultName'), variables('configSigningKeyName'))).secretUriWithVersion, variables('keyVaultEnd'))]"
+                                    },
+                                    {
+                                        "name": "[variables('configSupportedRegionsNameName')]",
+                                        "value": "[parameters('supportedRegions')]"
+                                    },
+                                    {
+                                        "name": "[variables('configVerificationKeyId')]",
+                                        "value": "[parameters('verificationKeyId')]"
+                                    },
+                                    {
+                                        "name": "[variables('configVerificationKeyVersion')]",
+                                        "value": "[parameters('verificationKeyVersion')]"
+                                    },
+                                    {
+                                        "name": "[variables('configAndroidPackageName')]",
+                                        "value": "[parameters('androidPackageName')]"
+                                    },
+                                    {
+                                        "name": "[variables('configIOSBundleId')]",
+                                        "value": "[parameters('iOSBundleId')]"
+                                    },
+                                    {
+                                        "name": "[variables('configIOSDeviceCheckKeyId')]",
+                                        "value": "[parameters('iOSDeviceCheckKeyId')]"
+                                    },
+                                    {
+                                        "name": "[variables('configIOSDeviceCheckTeamId')]",
+                                        "value": "[parameters('iOSDeviceCheckTeamId')]"
+                                    },
+                                    {
+                                        "name": "[variables('configIOSDeviceCheckPrivateKey')]",
+                                        "value": "[parameters('iOSDeviceCheckPrivateKey')]"
+                                    }
+                                ],                                
+                                "enabled": true,
+                                "hostNameSslStates": [
+                                    {
+                                        "name": "[concat(variables('fullFunctionAppName'), '.azurewebsites.net')]",
+                                        "sslState": "Disabled",
+                                        "hostType": "Standard"
+                                    },
+                                    {
+                                        "name": "[concat(variables('fullFunctionAppName'), '.scm.azurewebsites.net')]",
+                                        "sslState": "Disabled",
+                                        "hostType": "Repository"
+                                    }
+                                ],
+                                "reserved": false,
+                                "scmSiteAlsoStopped": false,
+                                "clientAffinityEnabled": false,
+                                "clientCertEnabled": false,
+                                "hostNamesDisabled": false,
+                                "containerSize": 1536,
+                                "dailyMemoryTimeQuota": 0,
+                                "httpsOnly": false
+                            }
+                        },                        
+                        "resources": [
+                            {
+                                "apiVersion": "2018-11-01",
+                                "name": "web",
+                                "type": "sourcecontrols",
+                                "dependsOn": [
+                                "[resourceId('Microsoft.Web/sites', variables('fullFunctionAppName'))]"
+                                ],
+                                "properties": {
+                                    "RepoUrl": "[parameters('repoUrl')]",
+                                    "branch": "[parameters('branch')]",
+                                    "IsManualIntegration": true
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "outputs": {}
+            }
+        }
+    }
+    ],
+    "outputs": {}
+}
