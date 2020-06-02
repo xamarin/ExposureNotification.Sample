@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -160,11 +161,54 @@ namespace Xamarin.ExposureNotifications
 			var c = await GetConfigurationAsync();
 			var m = await GetManagerAsync();
 
-			var detectionSummary = await m.DetectExposuresAsync(
+			// Extract all the files from the zips
+			var allFiles = new List<string>();
+			foreach (var file in keyFiles)
+			{
+				using var stream = File.OpenRead(file);
+				using var archive = new ZipArchive(stream, ZipArchiveMode.Read);
+
+				// .bin
+				var binTmp = Path.Combine(FileSystem.CacheDirectory, Guid.NewGuid().ToString() + ".bin");
+				using (var binWrite = File.Create(binTmp))
+				{
+					var bin = archive.GetEntry("export.bin");
+					using var binRead = bin.Open();
+					await binRead.CopyToAsync(binWrite);
+				}
+				allFiles.Add(binTmp);
+
+				// .sig
+				var sigTmp = Path.ChangeExtension(binTmp, ".sig");
+				using (var sigWrite = File.Create(sigTmp))
+				{
+					var sig = archive.GetEntry("export.sig");
+					using var sigRead = sig.Open();
+					await sigRead.CopyToAsync(sigWrite);
+				}
+				allFiles.Add(sigTmp);
+			}
+
+			// Start the detection
+			var detectionSummaryTask = m.DetectExposuresAsync(
 				c,
-				keyFiles.Select(k => new NSUrl(k, false)).ToArray(),
+				allFiles.Select(k => new NSUrl(k, false)).ToArray(),
 				out var detectProgress);
 			cancellationToken.Register(detectProgress.Cancel);
+			var detectionSummary = await detectionSummaryTask;
+
+			// Delete all the extracted files
+			foreach (var file in allFiles)
+			{
+				try
+				{
+					File.Delete(file);
+				}
+				catch
+				{
+					// no-op
+				}
+			}
 
 			var attDurTs = new List<TimeSpan>();
 			var dictKey = new NSString("attenuationDurations");
