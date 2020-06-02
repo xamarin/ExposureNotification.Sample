@@ -230,20 +230,14 @@ namespace Xamarin.ExposureNotifications
 		{
 			var m = await GetManagerAsync();
 
-			switch (m.ExposureNotificationStatus)
+			return m.ExposureNotificationStatus switch
 			{
-				case ENStatus.Active:
-					return Status.Active;
-				case ENStatus.BluetoothOff:
-					return Status.BluetoothOff;
-				case ENStatus.Disabled:
-					return Status.Disabled;
-				case ENStatus.Restricted:
-					return Status.Restricted;
-				case ENStatus.Unknown:
-				default:
-					return Status.Unknown;
-			}
+				ENStatus.Active => Status.Active,
+				ENStatus.BluetoothOff => Status.BluetoothOff,
+				ENStatus.Disabled => Status.Disabled,
+				ENStatus.Restricted => Status.Restricted,
+				_ => Status.Unknown,
+			};
 		}
 	}
 
