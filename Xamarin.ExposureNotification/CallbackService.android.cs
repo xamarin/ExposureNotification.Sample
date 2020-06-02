@@ -19,7 +19,8 @@ namespace Xamarin.ExposureNotifications
 			=> ExposureNotificationCallbackService.EnqueueWork(context, intent);
 	}
 
-	[Service]
+	[Service(
+		Permission = "android.permission.BIND_JOB_SERVICE")]
 	[Preserve]
 	class ExposureNotificationCallbackService : JobIntentService
 	{
