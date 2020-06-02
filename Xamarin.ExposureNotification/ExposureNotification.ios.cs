@@ -170,7 +170,7 @@ namespace Xamarin.ExposureNotifications
 			var dictKey = new NSString("attenuationDurations");
 			if (detectionSummary.Metadata.ContainsKey(dictKey))
 			{
-				var attDur = detectionSummary.Metadata.ObjectForKey(new NSString("attenuationDurations")) as NSArray;
+				var attDur = detectionSummary.Metadata.ObjectForKey(dictKey) as NSArray;
 
 				for (nuint i = 0; i < attDur.Count; i++)
 					attDurTs.Add(TimeSpan.FromSeconds(attDur.GetItem<NSNumber>(i).Int32Value));
