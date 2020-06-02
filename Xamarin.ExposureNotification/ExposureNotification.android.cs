@@ -206,7 +206,10 @@ namespace Xamarin.ExposureNotifications
 			return new ExposureDetectionSummary(
 				summary.DaysSinceLastExposure,
 				(ulong)summary.MatchedKeyCount,
-				(byte)summary.MaximumRiskScore);
+				(byte)summary.MaximumRiskScore,
+				summary.GetAttenuationDurationsInMinutes()
+					.Select(a => TimeSpan.FromMinutes(a)).ToArray(),
+				summary.SummationRiskScore);
 		}
 
 		static async Task<Status> PlatformGetStatusAsync()

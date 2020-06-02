@@ -33,10 +33,17 @@ namespace Xamarin.ExposureNotifications
 	public class ExposureDetectionSummary
 	{
 		public ExposureDetectionSummary(int daysSinceLastExposure, ulong matchedKeyCount, byte maximumRiskScore)
+			: this(daysSinceLastExposure, matchedKeyCount, maximumRiskScore, null, 0)
+		{
+		}
+
+		public ExposureDetectionSummary(int daysSinceLastExposure, ulong matchedKeyCount, byte maximumRiskScore, TimeSpan[] attenuationDurations, int summationRiskScore)
 		{
 			DaysSinceLastExposure = daysSinceLastExposure;
 			MatchedKeyCount = matchedKeyCount;
 			MaximumRiskScore = maximumRiskScore;
+			AttenuationDurations = attenuationDurations;
+			SummationRiskScore = summationRiskScore;
 		}
 
 		public int DaysSinceLastExposure { get; }
@@ -44,6 +51,10 @@ namespace Xamarin.ExposureNotifications
 		public ulong MatchedKeyCount { get; }
 
 		public byte MaximumRiskScore { get; }
+
+		public TimeSpan[] AttenuationDurations { get; }
+
+		public int SummationRiskScore { get; }
 	}
 
 	public enum RiskLevel

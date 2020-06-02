@@ -166,10 +166,31 @@ namespace Xamarin.ExposureNotifications
 				out var detectProgress);
 			cancellationToken.Register(detectProgress.Cancel);
 
+			var attDurTs = new List<TimeSpan>();
+			var dictKey = new NSString("attenuationDurations");
+			if (detectionSummary.Metadata.ContainsKey(dictKey))
+			{
+				var attDur = detectionSummary.Metadata.ObjectForKey(dictKey) as NSArray;
+
+				for (nuint i = 0; i < attDur.Count; i++)
+					attDurTs.Add(TimeSpan.FromSeconds(attDur.GetItem<NSNumber>(i).Int32Value));
+			}
+
+			var sumRisk = 0;
+			dictKey = new NSString("riskScoreSumFullRange");
+			if (detectionSummary.Metadata.ContainsKey(dictKey))
+			{
+				var sro = detectionSummary.Metadata.ObjectForKey(dictKey);
+				if (sro is NSNumber sron)
+					sumRisk = sron.Int32Value;
+			}
+
 			var summary = new ExposureDetectionSummary(
 				(int)detectionSummary.DaysSinceLastExposure,
 				detectionSummary.MatchedKeyCount,
-				detectionSummary.MaximumRiskScore);
+				detectionSummary.MaximumRiskScore,
+				attDurTs.ToArray(),
+				sumRisk);
 
 			async Task<IEnumerable<ExposureInfo>> GetInfo()
 			{
