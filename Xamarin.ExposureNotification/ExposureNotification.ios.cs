@@ -179,7 +179,7 @@ namespace Xamarin.ExposureNotifications
 				allFiles.Add(binTmp);
 
 				// .sig
-				var sigTmp = Path.Combine(FileSystem.CacheDirectory, Guid.NewGuid().ToString() + ".sig");
+				var sigTmp = Path.ChangeExtension(binTmp, ".sig");
 				using (var sigWrite = File.Create(sigTmp))
 				{
 					var sig = archive.GetEntry("export.sig");
