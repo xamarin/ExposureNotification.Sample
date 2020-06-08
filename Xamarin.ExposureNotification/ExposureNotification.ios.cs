@@ -237,10 +237,10 @@ namespace Xamarin.ExposureNotifications
 				if (sro is NSNumber sron)
 					maxRisk = sron.Int32Value;
 			}
-            else
-            {
-                maxRisk = detectionSummary.MaximumRiskScore;
-            }
+			else
+			{
+				maxRisk = detectionSummary.MaximumRiskScore;
+			}
 
 			var summary = new ExposureDetectionSummary(
 				(int)detectionSummary.DaysSinceLastExposure,
