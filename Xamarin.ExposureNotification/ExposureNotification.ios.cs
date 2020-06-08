@@ -229,10 +229,23 @@ namespace Xamarin.ExposureNotifications
 					sumRisk = sron.Int32Value;
 			}
 
+			var maxRisk = 0;
+			dictKey = new NSString("maximumRiskScoreFullRange");
+			if (detectionSummary.Metadata.ContainsKey(dictKey))
+			{
+				var sro = detectionSummary.Metadata.ObjectForKey(dictKey);
+				if (sro is NSNumber sron)
+					maxRisk = sron.Int32Value;
+			}
+            else
+            {
+                maxRisk = detectionSummary.MaximumRiskScore;
+            }
+
 			var summary = new ExposureDetectionSummary(
 				(int)detectionSummary.DaysSinceLastExposure,
 				detectionSummary.MatchedKeyCount,
-				detectionSummary.MaximumRiskScore,
+				maxRisk,
 				attDurTs.ToArray(),
 				sumRisk);
 
