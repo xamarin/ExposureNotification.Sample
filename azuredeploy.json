@@ -98,7 +98,7 @@
             "metadata": {
                 "description": "Branch of the repository where you want the Function App code to be built from."
             },
-            "defaultValue": "master"
+            "defaultValue": "main"
         },
         "verificationKeyId": {
             "type": "string",
