@@ -1,13 +1,13 @@
 
 # Xamarin Exposure Notification
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fxamarin%2Fxamarin.exposurenotification%2Fmaster%2Fazuredeploy.json)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fxamarin%2Fxamarin.exposurenotification%2Fmain%2Fazuredeploy.json)
 
 ![Nuget](https://img.shields.io/nuget/v/Xamarin.ExposureNotification?label=Cross-Platform)
 ![Nuget](https://img.shields.io/nuget/v/Xamarin.GooglePlayServices.Nearby.ExposureNotification?label=Android)
 ![Nuget](https://img.shields.io/nuget/v/Xamarin.iOS.ExposureNotification?label=iOS)
 
-[Read our Planning Document with more details about how Exposure Notifications work](https://github.com/xamarin/xamarin.exposurenotification/blob/master/Exposure%20Notification%20Planning.pdf)
+[Read our Planning Document with more details about how Exposure Notifications work](https://github.com/xamarin/xamarin.exposurenotification/blob/main/Exposure%20Notification%20Planning.pdf)
 
 Apple and Google are both creating API’s for a compatible BLE based Contact Tracing implementation which relies heavily on generating and storing rolling unique identifiers on a device, which are broadcast to nearby devices.  Devices which detect nearby identifiers then store these identifiers as they come into range (or contact) with for up to 14 days.
 
@@ -29,7 +29,7 @@ We also have NuGet packages available with bindings to the native Android and iO
 
 # Sample
 
-![Sample App Animated Overview](https://github.com/xamarin/xamarin.exposurenotification/raw/master/exposure-notifications.gif)
+![Sample App Animated Overview](https://github.com/xamarin/xamarin.exposurenotification/raw/main/exposure-notifications.gif)
 
 ## Mobile App
 
