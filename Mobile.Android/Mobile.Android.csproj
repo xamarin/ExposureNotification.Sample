@@ -56,7 +56,7 @@
 	<ItemGroup>
 		<PackageReference Include="Xamarin.AndroidX.Work.Runtime" Version="2.3.4.1" />
 		<PackageReference Include="Xamarin.Essentials" Version="1.5.3.1" />
-		<PackageReference Include="Xamarin.ExposureNotification" Version="0.8.0-preview" />
+		<PackageReference Include="Xamarin.ExposureNotification" Version="0.9.0-preview" />
 		<PackageReference Include="Xamarin.Forms" Version="4.6.0.726" />
 		<PackageReference Include="Xamarin.Forms.Visual.Material" Version="4.6.0.726" />
 		<PackageReference Include="Xamarin.GooglePlayServices.SafetyNet" Version="117.0.0-preview02" />
