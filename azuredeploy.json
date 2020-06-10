@@ -320,7 +320,7 @@
                 "appSettings": [
                     {
                         "name": "PROJECT",
-                        "value": "ExposureNotification.Backend.Functions"
+                        "value": "Functions"
                     },
                     {
                         "name": "AzureWebJobsDashboard",
@@ -450,7 +450,7 @@
                                 "appSettings": [                                    
                                     {
                                         "name": "PROJECT",
-                                        "value": "ExposureNotification.Backend.Functions"
+                                        "value": "Functions"
                                     },
                                     {
                                         "name": "AzureWebJobsDashboard",

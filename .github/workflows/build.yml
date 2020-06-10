@@ -3,22 +3,18 @@ name: Build
 on:
   pull_request:
   push:
-    branches: 
+    branches:
       - main
-  release:
-    types: [ published ]
 
 jobs:
     build:
       name: Build
-      env:
-        NUPKG_MAJOR: 0.1.0
       runs-on: macos-latest
       steps:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build
-        run: msbuild /restore ./ExposureNotification.sln
+        run: msbuild /restore ./ExposureNotifications.sln
 
     test:
       name: Run Tests
@@ -27,4 +23,4 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Run Tests
-        run: dotnet test ./ExposureNotification.Backend.Functions.Tests/ExposureNotification.Backend.Functions.Tests.csproj
+        run: dotnet test ./Functions.Tests/Functions.Tests.csproj
