@@ -34,4 +34,12 @@
 			<CopyToPublishDirectory>Never</CopyToPublishDirectory>
 		</None>
 	</ItemGroup>
+	<Target Name="GenerateProtoCodeFiles" BeforeTargets="PreBuildEvent" Inputs="Proto\TemporaryExposureKeyBatch.proto" Outputs="Proto\TemporaryExposureKeyBatch.proto.cs">
+		<PropertyGroup>
+			<ProtocCompiler Condition="'$(OS)' == 'Windows_NT'">$(protoc_windows64)</ProtocCompiler>
+			<ProtocCompiler Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))'">$(protoc_macosx64)</ProtocCompiler>
+			<ProtocCompiler Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))'">$(protoc_linux64)</ProtocCompiler>
+		</PropertyGroup>
+		<Exec Command="&quot;$(ProtocCompiler)&quot; --proto_path=&quot;Proto&quot; --csharp_out=&quot;Proto&quot; --csharp_opt=file_extension=.proto.cs &quot;Proto\TemporaryExposureKeyBatch.proto&quot;" Outputs="Proto\TemporaryExposureKeyBatch.proto.cs" />
+	</Target>
 </Project>
