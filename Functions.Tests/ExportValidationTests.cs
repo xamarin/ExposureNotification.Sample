@@ -126,7 +126,7 @@ namespace Functions.Tests
 			Assert.Equal(110, export.Keys.Count);
 
 			var info = Assert.Single(export.SignatureInfos);
-			Assert.Equal("com.google.android.apps.exposurenotification", info.AndroidPackage);
+			Assert.NotNull(info);
 		}
 	}
 }

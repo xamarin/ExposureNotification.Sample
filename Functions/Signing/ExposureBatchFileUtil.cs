@@ -22,8 +22,6 @@ namespace Functions.Signing
 		{
 			export.SignatureInfos.AddRange(signerInfos.Select(sigInfo => new SignatureInfo
 			{
-				AndroidPackage = sigInfo.AndroidPackage,
-				AppBundleId = sigInfo.AppBundleId,
 				SignatureAlgorithm = SignatureAlgorithm,
 				VerificationKeyId = sigInfo.VerificationKeyId,
 				VerificationKeyVersion = sigInfo.VerificationKeyVersion,
@@ -88,8 +86,6 @@ namespace Functions.Signing
 					BatchSize = export.BatchSize,
 					SignatureInfo = new SignatureInfo
 					{
-						AndroidPackage = sigInfo.AndroidPackage,
-						AppBundleId = sigInfo.AppBundleId,
 						SignatureAlgorithm = SignatureAlgorithm,
 						VerificationKeyId = sigInfo.VerificationKeyId,
 						VerificationKeyVersion = sigInfo.VerificationKeyVersion,
