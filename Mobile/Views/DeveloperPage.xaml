@@ -26,6 +26,14 @@
                                 Text="{Binding NativeImplementationName}" />
                         </StackLayout>
 
+                        <StackLayout HorizontalOptions="Center" Orientation="Vertical">
+                            <Label Style="{DynamicResource SmallLabelStyle}" Text="System Implementation Version: " />
+                            <Label
+                                FontAttributes="Bold"
+                                Style="{DynamicResource SmallLabelStyle}"
+                                Text="{Binding SystemImplementationVersion}" />
+                        </StackLayout>
+
                         <Button
                             Command="{Binding ResetWelcome}"
                             HorizontalOptions="CenterAndExpand"

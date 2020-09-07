@@ -206,7 +206,7 @@ namespace Mobile
 
 				// See if we can add the device verification
 				if (DependencyService.Get<IDeviceVerifier>() is IDeviceVerifier verifier)
-					submission.DeviceVerificationPayload = await verifier?.VerifyAsync(submission);
+					submission.DeviceVerificationPayload = await verifier.VerifyAsync(submission);
 
 				return submission;
 			}

@@ -4,7 +4,8 @@
 		<TargetFramework>netstandard2.1</TargetFramework>
 		<RootNamespace>Mobile</RootNamespace>
 		<ProduceReferenceAssembly>true</ProduceReferenceAssembly>
-		<LangVersion>latest</LangVersion>
+		<LangVersion>8.0</LangVersion>
+		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
@@ -22,7 +23,10 @@
 
 	<ItemGroup>
 		<PackageReference Include="Xamarin.Essentials" Version="1.5.3.2" />
-		<PackageReference Include="Xamarin.ExposureNotification" Version="0.11.0-preview" />
+		<ProjectReference Include="..\..\XamarinComponents\XPlat\ExposureNotification\source\Xamarin.ExposureNotification\Xamarin.ExposureNotification.csproj">
+		  <Project>{c264c0f9-3181-406e-992a-39a0302c9dd2}</Project>
+		  <Name>Xamarin.ExposureNotification</Name>
+		</ProjectReference>
 		<PackageReference Include="Xamarin.Forms" Version="4.6.0.847" />
 		<PackageReference Include="Xamarin.Forms.Visual.Material" Version="4.6.0.847" />
 		<PackageReference Include="Acr.UserDialogs" Version="7.1.0.442" />

@@ -39,5 +39,7 @@
 		<string>fetch</string>
 		<string>processing</string>
 	</array>
+	<key>ENAPIVersion</key>
+	<integer>2</integer>
 </dict>
 </plist>
