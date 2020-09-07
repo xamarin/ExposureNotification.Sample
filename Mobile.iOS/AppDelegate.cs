@@ -19,8 +19,6 @@ namespace Mobile.iOS
 		{
 			Xamarin.Forms.Forms.Init();
 
-			var issss = Xamarin.ExposureNotifications.ExposureNotification.IsDailySummaries;
-
 			Plugin.LocalNotification.NotificationCenter.AskPermission();
 
 			LoadApplication(new App());
