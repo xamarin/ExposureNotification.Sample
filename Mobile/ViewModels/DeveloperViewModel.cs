@@ -18,6 +18,9 @@ namespace Mobile.ViewModels
 			=> Xamarin.ExposureNotifications.ExposureNotification.OverridesNativeImplementation
 				? "TEST" : "LIVE";
 
+		public string SystemImplementationVersion
+			=> DependencyService.Get<ISystemImplementationVersion>()?.GetVersion() ?? "NOT AVAILABLE";
+
 		public string CurrentBatchFileIndex
 			=> string.Join(", ", LocalStateManager.Instance.ServerBatchNumbers.Select(p => $"{p.Key}={p.Value}"));
 

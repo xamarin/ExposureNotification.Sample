@@ -12,12 +12,12 @@ namespace Mobile
 		{
 			InitializeComponent();
 
-#if DEBUG
-			// For debug mode, set the mock api provider to interact
-			// with some fake data
-			Xamarin.ExposureNotifications.ExposureNotification.OverrideNativeImplementation(
-				new Services.TestNativeImplementation());
-#endif
+//#if DEBUG
+//			// For debug mode, set the mock api provider to interact
+//			// with some fake data
+//			Xamarin.ExposureNotifications.ExposureNotification.OverrideNativeImplementation(
+//				new Services.TestNativeImplementation());
+//#endif
 
 			// Local Notification tap event listener
 			NotificationCenter.Current.NotificationTapped += OnNotificationTapped;

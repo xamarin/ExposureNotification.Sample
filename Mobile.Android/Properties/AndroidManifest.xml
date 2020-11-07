@@ -1,5 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1" android:versionName="1.0" package="com.xamarin.exposurenotification.sampleapp">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1" android:versionName="1.0" package="com.google.android.apps.exposurenotification" android:installLocation="auto">
+	<!--
+		NOTE: The package name of "com.google.android.apps.exposurenotification" is 
+		used because Google requires that other package names be whitelisted.
+	-->
 	<uses-sdk android:minSdkVersion="21" android:targetSdkVersion="29" />
 	<application android:label="Exposure Notifications"></application>
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />

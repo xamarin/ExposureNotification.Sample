@@ -29,23 +29,23 @@ namespace Functions.Proto {
             "FQoNZW5kX3RpbWVzdGFtcBgCIAEoBhIOCgZyZWdpb24YAyABKAkSEQoJYmF0",
             "Y2hfbnVtGAQgASgFEhIKCmJhdGNoX3NpemUYBSABKAUSJwoPc2lnbmF0dXJl",
             "X2luZm9zGAYgAygLMg4uU2lnbmF0dXJlSW5mbxIjCgRrZXlzGAcgAygLMhUu",
-            "VGVtcG9yYXJ5RXhwb3N1cmVLZXkimwEKDVNpZ25hdHVyZUluZm8SFQoNYXBw",
-            "X2J1bmRsZV9pZBgBIAEoCRIXCg9hbmRyb2lkX3BhY2thZ2UYAiABKAkSIAoY",
-            "dmVyaWZpY2F0aW9uX2tleV92ZXJzaW9uGAMgASgJEhsKE3ZlcmlmaWNhdGlv",
-            "bl9rZXlfaWQYBCABKAkSGwoTc2lnbmF0dXJlX2FsZ29yaXRobRgFIAEoCSKN",
-            "AQoUVGVtcG9yYXJ5RXhwb3N1cmVLZXkSEAoIa2V5X2RhdGEYASABKAwSHwoX",
-            "dHJhbnNtaXNzaW9uX3Jpc2tfbGV2ZWwYAiABKAUSJQodcm9sbGluZ19zdGFy",
-            "dF9pbnRlcnZhbF9udW1iZXIYAyABKAUSGwoOcm9sbGluZ19wZXJpb2QYBCAB",
-            "KAU6AzE0NCI1ChBURUtTaWduYXR1cmVMaXN0EiEKCnNpZ25hdHVyZXMYASAD",
-            "KAsyDS5URUtTaWduYXR1cmUicAoMVEVLU2lnbmF0dXJlEiYKDnNpZ25hdHVy",
-            "ZV9pbmZvGAEgASgLMg4uU2lnbmF0dXJlSW5mbxIRCgliYXRjaF9udW0YAiAB",
-            "KAUSEgoKYmF0Y2hfc2l6ZRgDIAEoBRIRCglzaWduYXR1cmUYBCABKAxCKaoC",
-            "JkV4cG9zdXJlTm90aWZpY2F0aW9uLkJhY2tlbmQuRnVuY3Rpb25z"));
+            "VGVtcG9yYXJ5RXhwb3N1cmVLZXkilwEKDVNpZ25hdHVyZUluZm8SIAoYdmVy",
+            "aWZpY2F0aW9uX2tleV92ZXJzaW9uGAMgASgJEhsKE3ZlcmlmaWNhdGlvbl9r",
+            "ZXlfaWQYBCABKAkSGwoTc2lnbmF0dXJlX2FsZ29yaXRobRgFIAEoCUoECAEQ",
+            "AkoECAIQA1INYXBwX2J1bmRsZV9pZFIPYW5kcm9pZF9wYWNrYWdlIo0BChRU",
+            "ZW1wb3JhcnlFeHBvc3VyZUtleRIQCghrZXlfZGF0YRgBIAEoDBIfChd0cmFu",
+            "c21pc3Npb25fcmlza19sZXZlbBgCIAEoBRIlCh1yb2xsaW5nX3N0YXJ0X2lu",
+            "dGVydmFsX251bWJlchgDIAEoBRIbCg5yb2xsaW5nX3BlcmlvZBgEIAEoBToD",
+            "MTQ0IjUKEFRFS1NpZ25hdHVyZUxpc3QSIQoKc2lnbmF0dXJlcxgBIAMoCzIN",
+            "LlRFS1NpZ25hdHVyZSJwCgxURUtTaWduYXR1cmUSJgoOc2lnbmF0dXJlX2lu",
+            "Zm8YASABKAsyDi5TaWduYXR1cmVJbmZvEhEKCWJhdGNoX251bRgCIAEoBRIS",
+            "CgpiYXRjaF9zaXplGAMgASgFEhEKCXNpZ25hdHVyZRgEIAEoDEISqgIPRnVu",
+            "Y3Rpb25zLlByb3Rv"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Functions.Proto.TemporaryExposureKeyExport), global::Functions.Proto.TemporaryExposureKeyExport.Parser, new[]{ "StartTimestamp", "EndTimestamp", "Region", "BatchNum", "BatchSize", "SignatureInfos", "Keys" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Functions.Proto.SignatureInfo), global::Functions.Proto.SignatureInfo.Parser, new[]{ "AppBundleId", "AndroidPackage", "VerificationKeyVersion", "VerificationKeyId", "SignatureAlgorithm" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Functions.Proto.SignatureInfo), global::Functions.Proto.SignatureInfo.Parser, new[]{ "VerificationKeyVersion", "VerificationKeyId", "SignatureAlgorithm" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Functions.Proto.TemporaryExposureKey), global::Functions.Proto.TemporaryExposureKey.Parser, new[]{ "KeyData", "TransmissionRiskLevel", "RollingStartIntervalNumber", "RollingPeriod" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Functions.Proto.TEKSignatureList), global::Functions.Proto.TEKSignatureList.Parser, new[]{ "Signatures" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Functions.Proto.TEKSignature), global::Functions.Proto.TEKSignature.Parser, new[]{ "SignatureInfo", "BatchNum", "BatchSize", "Signature" }, null, null, null, null)
@@ -58,12 +58,11 @@ namespace Functions.Proto {
   /// <summary>
   /// Protobuf definition for exports of confirmed temporary exposure keys.
   ///
-  /// The full file format is documented under "Exposure Key Export File Format
-  /// and Verification" at https://www.google.com/covid19/exposurenotifications/
-  ///
-  /// These files have a 16-byte, space-padded header before the protobuf data
+  /// These files have a 16-byte, zero-padded header before the protobuf data
   /// starts. They will be contained in a zip archive, alongside a signature
   /// file verifying the contents.
+  ///
+  /// See https://static.googleusercontent.com/media/www.google.com/en//covid19/exposurenotifications/pdfs/Exposure-Key-File-Format-and-Verification.pdf
   /// </summary>
   public sealed partial class TemporaryExposureKeyExport : pb::IMessage<TemporaryExposureKeyExport> {
     private static readonly pb::MessageParser<TemporaryExposureKeyExport> _parser = new pb::MessageParser<TemporaryExposureKeyExport>(() => new TemporaryExposureKeyExport());
@@ -192,6 +191,7 @@ namespace Functions.Proto {
     private int batchNum_;
     /// <summary>
     /// E.g., Batch 2 of 10. Ordinal, 1-based numbering.
+    /// Note: Not yet supported on iOS. Use values of 1 for both.
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int BatchNum {
@@ -453,8 +453,6 @@ namespace Functions.Proto {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public SignatureInfo(SignatureInfo other) : this() {
-      appBundleId_ = other.appBundleId_;
-      androidPackage_ = other.androidPackage_;
       verificationKeyVersion_ = other.verificationKeyVersion_;
       verificationKeyId_ = other.verificationKeyId_;
       signatureAlgorithm_ = other.signatureAlgorithm_;
@@ -466,58 +464,6 @@ namespace Functions.Proto {
       return new SignatureInfo(this);
     }
 
-    /// <summary>Field number for the "app_bundle_id" field.</summary>
-    public const int AppBundleIdFieldNumber = 1;
-    private readonly static string AppBundleIdDefaultValue = "";
-
-    private string appBundleId_;
-    /// <summary>
-    /// Apple App Store Application Bundle ID
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public string AppBundleId {
-      get { return appBundleId_ ?? AppBundleIdDefaultValue; }
-      set {
-        appBundleId_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
-      }
-    }
-    /// <summary>Gets whether the "app_bundle_id" field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool HasAppBundleId {
-      get { return appBundleId_ != null; }
-    }
-    /// <summary>Clears the value of the "app_bundle_id" field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void ClearAppBundleId() {
-      appBundleId_ = null;
-    }
-
-    /// <summary>Field number for the "android_package" field.</summary>
-    public const int AndroidPackageFieldNumber = 2;
-    private readonly static string AndroidPackageDefaultValue = "";
-
-    private string androidPackage_;
-    /// <summary>
-    /// Android App package name
-    /// </summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public string AndroidPackage {
-      get { return androidPackage_ ?? AndroidPackageDefaultValue; }
-      set {
-        androidPackage_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
-      }
-    }
-    /// <summary>Gets whether the "android_package" field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool HasAndroidPackage {
-      get { return androidPackage_ != null; }
-    }
-    /// <summary>Clears the value of the "android_package" field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void ClearAndroidPackage() {
-      androidPackage_ = null;
-    }
-
     /// <summary>Field number for the "verification_key_version" field.</summary>
     public const int VerificationKeyVersionFieldNumber = 3;
     private readonly static string VerificationKeyVersionDefaultValue = "";
@@ -525,6 +471,7 @@ namespace Functions.Proto {
     private string verificationKeyVersion_;
     /// <summary>
     /// Key version for rollovers
+    /// Must be in character class [a-zA-Z0-9_]. E.g., 'v1'
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public string VerificationKeyVersion {
@@ -550,8 +497,9 @@ namespace Functions.Proto {
 
     private string verificationKeyId_;
     /// <summary>
-    /// Alias with which to identify public key to be used for verification
+    /// Additional identifying information
     /// Must be in character class [a-zA-Z0-9_]
+    /// For cross-compatibility with Apple, use MCC (https://en.wikipedia.org/wiki/Mobile_country_code)
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public string VerificationKeyId {
@@ -577,8 +525,8 @@ namespace Functions.Proto {
 
     private string signatureAlgorithm_;
     /// <summary>
-    /// ASN.1 OID for Algorithm Identifier. Supported algorithms are
-    /// either 1.2.840.10045.4.3.2 or 1.2.840.10045.4.3.4
+    /// ASN.1 OID for Algorithm Identifier.
+    /// For cross-compatibility with Apple, use '1.2.840.10045.4.3.2'
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public string SignatureAlgorithm {
@@ -611,8 +559,6 @@ namespace Functions.Proto {
       if (ReferenceEquals(other, this)) {
         return true;
       }
-      if (AppBundleId != other.AppBundleId) return false;
-      if (AndroidPackage != other.AndroidPackage) return false;
       if (VerificationKeyVersion != other.VerificationKeyVersion) return false;
       if (VerificationKeyId != other.VerificationKeyId) return false;
       if (SignatureAlgorithm != other.SignatureAlgorithm) return false;
@@ -622,8 +568,6 @@ namespace Functions.Proto {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override int GetHashCode() {
       int hash = 1;
-      if (HasAppBundleId) hash ^= AppBundleId.GetHashCode();
-      if (HasAndroidPackage) hash ^= AndroidPackage.GetHashCode();
       if (HasVerificationKeyVersion) hash ^= VerificationKeyVersion.GetHashCode();
       if (HasVerificationKeyId) hash ^= VerificationKeyId.GetHashCode();
       if (HasSignatureAlgorithm) hash ^= SignatureAlgorithm.GetHashCode();
@@ -640,14 +584,6 @@ namespace Functions.Proto {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void WriteTo(pb::CodedOutputStream output) {
-      if (HasAppBundleId) {
-        output.WriteRawTag(10);
-        output.WriteString(AppBundleId);
-      }
-      if (HasAndroidPackage) {
-        output.WriteRawTag(18);
-        output.WriteString(AndroidPackage);
-      }
       if (HasVerificationKeyVersion) {
         output.WriteRawTag(26);
         output.WriteString(VerificationKeyVersion);
@@ -668,12 +604,6 @@ namespace Functions.Proto {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int CalculateSize() {
       int size = 0;
-      if (HasAppBundleId) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(AppBundleId);
-      }
-      if (HasAndroidPackage) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(AndroidPackage);
-      }
       if (HasVerificationKeyVersion) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(VerificationKeyVersion);
       }
@@ -693,12 +623,6 @@ namespace Functions.Proto {
     public void MergeFrom(SignatureInfo other) {
       if (other == null) {
         return;
-      }
-      if (other.HasAppBundleId) {
-        AppBundleId = other.AppBundleId;
-      }
-      if (other.HasAndroidPackage) {
-        AndroidPackage = other.AndroidPackage;
       }
       if (other.HasVerificationKeyVersion) {
         VerificationKeyVersion = other.VerificationKeyVersion;
@@ -720,14 +644,6 @@ namespace Functions.Proto {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
-          case 10: {
-            AppBundleId = input.ReadString();
-            break;
-          }
-          case 18: {
-            AndroidPackage = input.ReadString();
-            break;
-          }
           case 26: {
             VerificationKeyVersion = input.ReadString();
             break;

@@ -16,19 +16,19 @@ using Xamarin.Forms;
 namespace Mobile
 {
 	[Xamarin.Forms.Internals.Preserve] // Ensure this isn't linked out
-	public class ExposureNotificationHandler : IExposureNotificationHandler
+	public class ExposureNotificationHandler : IExposureNotificationHandler, IExposureNotificationDailySummaryHandler
 	{
 		static readonly HttpClient http = new HttpClient();
 
-		// this string should be localized
+		// [v1] this string should be localized
 		public string UserExplanation
 			=> "We need to make use of the keys to keep you healthy.";
 
-		// this configuration should be obtained from a server and it should be cached locally/in memory as it may be called multiple times
+		// [v1] this configuration should be obtained from a server and it should be cached locally/in memory as it may be called multiple times
 		public Task<Configuration> GetConfigurationAsync()
 			=> Task.FromResult(new Configuration());
 
-		// this will be called when a potential exposure has been detected
+		// [v1] this will be called when a potential exposure has been detected
 		public async Task ExposureDetectedAsync(ExposureDetectionSummary summary, Func<Task<IEnumerable<ExposureInfo>>> getExposureInfo)
 		{
 			LocalStateManager.Instance.ExposureSummary = summary;
@@ -43,21 +43,40 @@ namespace Mobile
 			});
 
 			LocalStateManager.Save();
-			// If Enabled Local Notifications
-			if (LocalStateManager.Instance.EnableNotifications)
-			{
-				var notification = new NotificationRequest
-				{
-					NotificationId = 100,
-					Title = "Possible COVID-19 Exposure",
-					Description = "It is possible you have been exposed to someone who was a confirmed diagnosis of COVID-19.  Tap for more details."
-				};
 
-				NotificationCenter.Current.Show(notification);
-			}
+			ShowExposureNotification();
 		}
 
-		// this will be called when they keys need to be collected from the server
+		// [v2] this configuration should be obtained from a server and it should be cached locally/in memory as it may be called multiple times
+		public Task<DailySummaryConfiguration> GetDailySummaryConfigurationAsync() =>
+			Task.FromResult(new DailySummaryConfiguration());
+
+		// [v2] this will be called when a potential exposure has been detected
+		public async Task ExposureStateUpdatedAsync(IEnumerable<ExposureWindow> windows, IEnumerable<DailySummary>? summaries)
+		{
+			// TODO: save exposure
+
+			ShowExposureNotification();
+
+		}
+
+		// [common] show local notifications
+		static void ShowExposureNotification()
+		{
+			if (!LocalStateManager.Instance.EnableNotifications)
+				return;
+
+			var notification = new NotificationRequest
+			{
+				NotificationId = 100,
+				Title = "Possible COVID-19 Exposure",
+				Description = "It is possible you have been exposed to someone who was a confirmed diagnosis of COVID-19. Tap for more details."
+			};
+
+			NotificationCenter.Current.Show(notification);
+		}
+
+		// [common] this will be called when they keys need to be collected from the server
 		public async Task FetchExposureKeyBatchFilesFromServerAsync(Func<IEnumerable<string>, Task> submitBatches, CancellationToken cancellationToken)
 		{
 			// This is "default" by default
@@ -159,7 +178,7 @@ namespace Mobile
 			}
 		}
 
-		// this will be called when the user is submitting a diagnosis and the local keys need to go to the server
+		// [common] this will be called when the user is submitting a diagnosis and the local keys need to go to the server
 		public async Task UploadSelfExposureKeysToServerAsync(IEnumerable<TemporaryExposureKey> temporaryExposureKeys)
 		{
 			var pendingDiagnosis = LocalStateManager.Instance.PendingDiagnosis;
@@ -206,7 +225,7 @@ namespace Mobile
 
 				// See if we can add the device verification
 				if (DependencyService.Get<IDeviceVerifier>() is IDeviceVerifier verifier)
-					submission.DeviceVerificationPayload = await verifier?.VerifyAsync(submission);
+					submission.DeviceVerificationPayload = await verifier.VerifyAsync(submission);
 
 				return submission;
 			}
